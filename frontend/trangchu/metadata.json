@@ -1,6 +1,0 @@
-{
-  "name": "AgriConnect - B2B Agricultural Marketplace",
-  "description": "Nền tảng thương mại nông nghiệp B2B thông minh kết nối nông dân, doanh nghiệp thu mua và đơn vị vận tải với công nghệ QR, Escrow & IoT.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}
