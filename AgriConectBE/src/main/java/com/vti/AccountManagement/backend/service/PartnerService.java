@@ -1,4 +1,4 @@
-package com.vti.AccountManagerment.backend.service;
+package com.vti.AccountManagement.backend.service;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -6,9 +6,9 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.vti.AccountManagerment.backend.repository.IPartnerRepository;
-import com.vti.AccountManagerment.dto.PartnerDTO;
-import com.vti.AccountManagerment.entity.Partner;
+import com.vti.AccountManagement.backend.repository.IPartnerRepository;
+import com.vti.AccountManagement.dto.PartnerDTO;
+import com.vti.AccountManagement.entity.Partner;
 
 @Service
 public class PartnerService implements IPartnerService {

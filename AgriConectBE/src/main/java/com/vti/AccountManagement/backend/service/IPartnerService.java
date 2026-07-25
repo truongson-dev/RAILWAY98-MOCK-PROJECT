@@ -1,8 +1,8 @@
-package com.vti.AccountManagerment.backend.service;
+package com.vti.AccountManagement.backend.service;
 
 import java.util.List;
 
-import com.vti.AccountManagerment.dto.PartnerDTO;
+import com.vti.AccountManagement.dto.PartnerDTO;
 
 public interface IPartnerService {
 

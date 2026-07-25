@@ -1,4 +1,4 @@
-package com.vti.AccountManagerment.backend.service;
+package com.vti.AccountManagement.backend.service;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -6,9 +6,9 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.vti.AccountManagerment.backend.repository.ISupplierRepository;
-import com.vti.AccountManagerment.dto.SupplierDTO;
-import com.vti.AccountManagerment.entity.Supplier;
+import com.vti.AccountManagement.backend.repository.ISupplierRepository;
+import com.vti.AccountManagement.dto.SupplierDTO;
+import com.vti.AccountManagement.entity.Supplier;
 
 @Service
 public class SupplierService implements ISupplierService {

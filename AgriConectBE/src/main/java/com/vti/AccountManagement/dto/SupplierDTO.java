@@ -1,4 +1,4 @@
-package com.vti.AccountManagerment.dto;
+package com.vti.AccountManagement.dto;
 
 import java.math.BigDecimal;
 

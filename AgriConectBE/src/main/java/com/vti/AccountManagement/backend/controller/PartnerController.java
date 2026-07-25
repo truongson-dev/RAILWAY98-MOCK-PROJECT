@@ -1,4 +1,4 @@
-package com.vti.AccountManagerment.backend.controller;
+package com.vti.AccountManagement.backend.controller;
 
 import java.util.List;
 
@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.vti.AccountManagerment.backend.service.IPartnerService;
-import com.vti.AccountManagerment.dto.PartnerDTO;
+import com.vti.AccountManagement.backend.service.IPartnerService;
+import com.vti.AccountManagement.dto.PartnerDTO;
 
 @RestController
 @RequestMapping("/api/v1/partners")

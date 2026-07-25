@@ -1,4 +1,4 @@
-package com.vti.AccountManagerment.backend.service;
+package com.vti.AccountManagement.backend.service;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -6,9 +6,9 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.vti.AccountManagerment.backend.repository.IShipperRepository;
-import com.vti.AccountManagerment.dto.ShipperDTO;
-import com.vti.AccountManagerment.entity.Shipper;
+import com.vti.AccountManagement.backend.repository.IShipperRepository;
+import com.vti.AccountManagement.dto.ShipperDTO;
+import com.vti.AccountManagement.entity.Shipper;
 
 @Service
 public class ShipperService implements IShipperService {
