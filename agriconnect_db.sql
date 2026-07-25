@@ -2,23 +2,41 @@
 CREATE DATABASE IF NOT EXISTS agriconnect_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE agriconnect_db;
 
--- 1. Role (Phân quyền)
-CREATE TABLE IF NOT EXISTS `role` (
-    `id` INT AUTO_INCREMENT PRIMARY KEY,
-    `name` ENUM('Supplier', 'Partner', 'Shipper', 'Admin') NOT NULL UNIQUE,
-    `description` VARCHAR(255)
-);
-
--- 2. Account (Tài khoản)
+-- 1. Account (Tài khoản)
 CREATE TABLE IF NOT EXISTS `account` (
     `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
     `username` VARCHAR(50) NOT NULL UNIQUE,
     `password` VARCHAR(255) NOT NULL,
-    `role_id` INT NOT NULL,
-    `status` VARCHAR(20) DEFAULT 'ACTIVE',
-    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (`role_id`) REFERENCES `role`(`id`)
+    `role` ENUM('SUPPLIER', 'PARTNER', 'SHIPPER', 'ADMIN') NOT NULL,
+    `status` VARCHAR(20) DEFAULT 'ACTIVE'
+);
+
+-- 2.1 Supplier
+CREATE TABLE IF NOT EXISTS `supplier` (
+    `account_id` BIGINT PRIMARY KEY,
+    `farm_name` VARCHAR(255),
+    `farm_area` DECIMAL(15, 2),
+    `certificate` VARCHAR(255),
+    `production_capacity` DECIMAL(15, 2),
+    FOREIGN KEY (`account_id`) REFERENCES `account`(`id`) ON DELETE CASCADE
+);
+
+-- 2.2 Partner
+CREATE TABLE IF NOT EXISTS `partner` (
+    `account_id` BIGINT PRIMARY KEY,
+    `company_name` VARCHAR(255),
+    `tax_code` VARCHAR(50),
+    `business_type` VARCHAR(100),
+    FOREIGN KEY (`account_id`) REFERENCES `account`(`id`) ON DELETE CASCADE
+);
+
+-- 2.3 Shipper
+CREATE TABLE IF NOT EXISTS `shipper` (
+    `account_id` BIGINT PRIMARY KEY,
+    `vehicle_type` VARCHAR(50),
+    `license_number` VARCHAR(50),
+    `operating_area` VARCHAR(255),
+    FOREIGN KEY (`account_id`) REFERENCES `account`(`id`) ON DELETE CASCADE
 );
 
 -- 3. Profile (Hồ sơ người dùng)
