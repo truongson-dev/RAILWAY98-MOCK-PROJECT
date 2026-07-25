@@ -1,19 +1,14 @@
 package com.vti.AccountManagement.backend.service;
 
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
-import com.vti.AccountManagement.dto.PartnerDTO;
+import com.vti.AccountManagement.entity.Partner;
 
 public interface IPartnerService {
 
-	List<PartnerDTO> getAll();
+	Page<Partner> getAllPartner(Pageable pageable, String search);
 
-	PartnerDTO getById(Long id);
-
-	PartnerDTO create(PartnerDTO dto);
-
-	PartnerDTO update(Long id, PartnerDTO dto);
-
-	void delete(Long id);
+	Partner getById(Long id);
 
 }

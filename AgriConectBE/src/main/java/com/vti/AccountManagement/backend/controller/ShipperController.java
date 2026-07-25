@@ -1,56 +1,66 @@
 package com.vti.AccountManagement.backend.controller;
 
-import java.util.List;
+import java.util.function.Function;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.vti.AccountManagement.backend.service.IShipperService;
 import com.vti.AccountManagement.dto.ShipperDTO;
+import com.vti.AccountManagement.entity.Shipper;
 
 @RestController
 @RequestMapping("/api/v1/shippers")
-@CrossOrigin("*")
+@CrossOrigin(origins = "*")
 public class ShipperController {
 
 	@Autowired
 	private IShipperService shipperService;
 
 	@GetMapping
-	public ResponseEntity<List<ShipperDTO>> getAll() {
-		return ResponseEntity.ok(shipperService.getAll());
+	public ResponseEntity<?> getAllShipper(Pageable pageable, @RequestParam(required = false) String search) {
+		Page<Shipper> pageShippers = shipperService.getAllShipper(pageable, search);
+
+		Page<ShipperDTO> pageShipperDtos = pageShippers.map(new Function<Shipper, ShipperDTO>() {
+			@Override
+			public ShipperDTO apply(Shipper shipper) {
+				ShipperDTO shipperDto = new ShipperDTO();
+				shipperDto.setUsername(shipper.getUsername());
+				shipperDto.setRole(shipper.getRole());
+				shipperDto.setStatus(shipper.getStatus());
+
+				shipperDto.setVehicleType(shipper.getVehicleType());
+				shipperDto.setLicenseNumber(shipper.getLicenseNumber());
+				shipperDto.setOperatingArea(shipper.getOperatingArea());
+				return shipperDto;
+			}
+		});
+
+		return new ResponseEntity<>(pageShipperDtos, HttpStatus.OK);
 	}
 
 	@GetMapping("/{id}")
-	public ResponseEntity<ShipperDTO> getById(@PathVariable Long id) {
-		return ResponseEntity.ok(shipperService.getById(id));
-	}
+	public ResponseEntity<?> getById(@PathVariable(name = "id") Long id) {
+		Shipper shipper = shipperService.getById(id);
 
-	@PostMapping
-	public ResponseEntity<ShipperDTO> create(@RequestBody ShipperDTO dto) {
-		ShipperDTO created = shipperService.create(dto);
-		return ResponseEntity.status(HttpStatus.CREATED).body(created);
-	}
+		ShipperDTO shipperDto = new ShipperDTO();
+		shipperDto.setUsername(shipper.getUsername());
+		shipperDto.setRole(shipper.getRole());
+		shipperDto.setStatus(shipper.getStatus());
+		shipperDto.setVehicleType(shipper.getVehicleType());
+		shipperDto.setLicenseNumber(shipper.getLicenseNumber());
+		shipperDto.setOperatingArea(shipper.getOperatingArea());
 
-	@PutMapping("/{id}")
-	public ResponseEntity<ShipperDTO> update(@PathVariable Long id, @RequestBody ShipperDTO dto) {
-		return ResponseEntity.ok(shipperService.update(id, dto));
-	}
-
-	@DeleteMapping("/{id}")
-	public ResponseEntity<Void> delete(@PathVariable Long id) {
-		shipperService.delete(id);
-		return ResponseEntity.noContent().build();
+		return new ResponseEntity<>(shipperDto, HttpStatus.OK);
 	}
 
 }

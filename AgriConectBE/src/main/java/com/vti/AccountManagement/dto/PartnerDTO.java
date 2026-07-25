@@ -2,7 +2,6 @@ package com.vti.AccountManagement.dto;
 
 public class PartnerDTO {
 
-	private Long id;
 	private String username;
 	private String role;
 	private String status;
@@ -16,24 +15,15 @@ public class PartnerDTO {
 		// TODO Auto-generated constructor stub
 	}
 
-	public PartnerDTO(Long id, String username, String role, String status, String companyName, String taxCode,
+	public PartnerDTO(String username, String role, String status, String companyName, String taxCode,
 			String businessType) {
 		super();
-		this.id = id;
 		this.username = username;
 		this.role = role;
 		this.status = status;
 		this.companyName = companyName;
 		this.taxCode = taxCode;
 		this.businessType = businessType;
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
 	}
 
 	public String getUsername() {

@@ -1,19 +1,14 @@
 package com.vti.AccountManagement.backend.service;
 
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
-import com.vti.AccountManagement.dto.ShipperDTO;
+import com.vti.AccountManagement.entity.Shipper;
 
 public interface IShipperService {
 
-	List<ShipperDTO> getAll();
+	Page<Shipper> getAllShipper(Pageable pageable, String search);
 
-	ShipperDTO getById(Long id);
-
-	ShipperDTO create(ShipperDTO dto);
-
-	ShipperDTO update(Long id, ShipperDTO dto);
-
-	void delete(Long id);
+	Shipper getById(Long id);
 
 }

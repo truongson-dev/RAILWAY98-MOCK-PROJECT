@@ -60,7 +60,6 @@ CREATE TABLE IF NOT EXISTS `profile` (
 CREATE TABLE IF NOT EXISTS `category` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
     `name` VARCHAR(100) NOT NULL,
-    `description` TEXT,
     `parent_id` INT,
     FOREIGN KEY (`parent_id`) REFERENCES `category`(`id`)
 );
@@ -78,7 +77,7 @@ CREATE TABLE IF NOT EXISTS `product` (
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (`category_id`) REFERENCES `category`(`id`),
-    FOREIGN KEY (`seller_id`) REFERENCES `account`(`id`)
+    FOREIGN KEY (`seller_id`) REFERENCES `supplier`(`supplier_id`)
 );
 
 -- 6. Product_Image (Hình ảnh sản phẩm)
