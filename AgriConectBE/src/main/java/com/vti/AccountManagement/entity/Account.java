@@ -3,6 +3,8 @@ package com.vti.AccountManagement.entity;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorColumn;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -29,8 +31,9 @@ public abstract class Account {
 	@Column(name = "role", insertable = false, updatable = false, length = 20)
 	private String role;
 
+	@Enumerated(EnumType.STRING)
 	@Column(length = 20)
-	private String status = "ACTIVE";
+	private AccountStatus status = AccountStatus.PENDING;
 
 	public Account() {
 		super();
@@ -69,11 +72,11 @@ public abstract class Account {
 		this.role = role;
 	}
 
-	public String getStatus() {
+	public AccountStatus getStatus() {
 		return status;
 	}
 
-	public void setStatus(String status) {
+	public void setStatus(AccountStatus status) {
 		this.status = status;
 	}
 

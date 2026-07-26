@@ -36,7 +36,7 @@ public class AccountController {
 				accountDto.setId(account.getId());
 				accountDto.setUsername(account.getUsername());
 				accountDto.setRole(account.getRole());
-				accountDto.setStatus(account.getStatus());
+				accountDto.setStatus(account.getStatus().name());
 				return accountDto;
 			}
 		});

@@ -12,6 +12,14 @@ public class AccountDTO {
 		// TODO Auto-generated constructor stub
 	}
 
+	public AccountDTO(Long id, String username, String role, String status) {
+		super();
+		this.id = id;
+		this.username = username;
+		this.role = role;
+		this.status = status;
+	}
+
 	public Long getId() {
 		return id;
 	}

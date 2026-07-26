@@ -9,6 +9,4 @@ public interface IShipperService {
 
 	Page<Shipper> getAllShipper(Pageable pageable, String search);
 
-	Shipper getById(Long id);
-
 }

@@ -26,10 +26,4 @@ public class PartnerService implements IPartnerService {
 		return partnerRepository.findAll(where, pageable);
 	}
 
-	@Override
-	public Partner getById(Long id) {
-		return partnerRepository.findById(id)
-				.orElseThrow(() -> new RuntimeException("Partner not found with id: " + id));
-	}
-
 }

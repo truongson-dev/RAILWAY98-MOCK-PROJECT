@@ -9,6 +9,4 @@ public interface IPartnerService {
 
 	Page<Partner> getAllPartner(Pageable pageable, String search);
 
-	Partner getById(Long id);
-
 }

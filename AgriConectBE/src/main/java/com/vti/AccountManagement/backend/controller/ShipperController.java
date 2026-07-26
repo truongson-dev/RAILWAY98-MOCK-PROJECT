@@ -9,7 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -36,7 +35,7 @@ public class ShipperController {
 				ShipperDTO shipperDto = new ShipperDTO();
 				shipperDto.setUsername(shipper.getUsername());
 				shipperDto.setRole(shipper.getRole());
-				shipperDto.setStatus(shipper.getStatus());
+				shipperDto.setStatus(shipper.getStatus().name());
 
 				shipperDto.setVehicleType(shipper.getVehicleType());
 				shipperDto.setLicenseNumber(shipper.getLicenseNumber());
@@ -46,21 +45,6 @@ public class ShipperController {
 		});
 
 		return new ResponseEntity<>(pageShipperDtos, HttpStatus.OK);
-	}
-
-	@GetMapping("/{id}")
-	public ResponseEntity<?> getById(@PathVariable(name = "id") Long id) {
-		Shipper shipper = shipperService.getById(id);
-
-		ShipperDTO shipperDto = new ShipperDTO();
-		shipperDto.setUsername(shipper.getUsername());
-		shipperDto.setRole(shipper.getRole());
-		shipperDto.setStatus(shipper.getStatus());
-		shipperDto.setVehicleType(shipper.getVehicleType());
-		shipperDto.setLicenseNumber(shipper.getLicenseNumber());
-		shipperDto.setOperatingArea(shipper.getOperatingArea());
-
-		return new ResponseEntity<>(shipperDto, HttpStatus.OK);
 	}
 
 }

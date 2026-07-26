@@ -35,7 +35,7 @@ public class SupplierController {
 				SupplierDTO supplierDto = new SupplierDTO();
 				supplierDto.setUsername(supplier.getUsername());
 				supplierDto.setRole(supplier.getRole());
-				supplierDto.setStatus(supplier.getStatus());
+				supplierDto.setStatus(supplier.getStatus().name());
 
 				supplierDto.setFarmName(supplier.getFarmName());
 				supplierDto.setFarmArea(supplier.getFarmArea());

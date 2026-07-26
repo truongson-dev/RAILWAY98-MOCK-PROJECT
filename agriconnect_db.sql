@@ -235,21 +235,21 @@ CREATE TABLE IF NOT EXISTS `review` (
 
 INSERT INTO `account` (`id`, `username`, `password`, `role`, `status`) VALUES
 (1, 'supplier01', '123456', 'SUPPLIER', 'ACTIVE'),
-(2, 'supplier02', '123456', 'SUPPLIER', 'ACTIVE'),
+(2, 'supplier02', '123456', 'SUPPLIER', 'PENDING'),
 (3, 'supplier03', '123456', 'SUPPLIER', 'ACTIVE'),
-(4, 'supplier04', '123456', 'SUPPLIER', 'INACTIVE'),
-(5, 'supplier05', '123456', 'SUPPLIER', 'ACTIVE'),
+(4, 'supplier04', '123456', 'SUPPLIER', 'LOCKED'),
+(5, 'supplier05', '123456', 'SUPPLIER', 'PENDING'),
 
 (6, 'partner01', '123456', 'PARTNER', 'ACTIVE'),
-(7, 'partner02', '123456', 'PARTNER', 'ACTIVE'),
+(7, 'partner02', '123456', 'PARTNER', 'PENDING'),
 (8, 'partner03', '123456', 'PARTNER', 'ACTIVE'),
-(9, 'partner04', '123456', 'PARTNER', 'INACTIVE'),
-(10, 'partner05', '123456', 'PARTNER', 'ACTIVE'),
+(9, 'partner04', '123456', 'PARTNER', 'LOCKED'),
+(10, 'partner05', '123456', 'PARTNER', 'REJECTED'),
 
 (11, 'shipper01', '123456', 'SHIPPER', 'ACTIVE'),
 (12, 'shipper02', '123456', 'SHIPPER', 'ACTIVE'),
-(13, 'shipper03', '123456', 'SHIPPER', 'ACTIVE'),
-(14, 'shipper04', '123456', 'SHIPPER', 'INACTIVE'),
+(13, 'shipper03', '123456', 'SHIPPER', 'PENDING'),
+(14, 'shipper04', '123456', 'SHIPPER', 'LOCKED'),
 (15, 'shipper05', '123456', 'SHIPPER', 'ACTIVE');
 
 -- ============================

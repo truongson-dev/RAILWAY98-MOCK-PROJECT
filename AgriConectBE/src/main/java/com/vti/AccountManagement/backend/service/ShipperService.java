@@ -26,10 +26,4 @@ public class ShipperService implements IShipperService {
 		return shipperRepository.findAll(where, pageable);
 	}
 
-	@Override
-	public Shipper getById(Long id) {
-		return shipperRepository.findById(id)
-				.orElseThrow(() -> new RuntimeException("Shipper not found with id: " + id));
-	}
-
 }
