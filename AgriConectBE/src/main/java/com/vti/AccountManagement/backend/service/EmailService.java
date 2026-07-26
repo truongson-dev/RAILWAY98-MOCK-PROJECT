@@ -21,4 +21,26 @@ public class EmailService {
 		mailSender.send(message);
 	}
 
+	public void sendRejectionEmail(String toEmail, String username) {
+		SimpleMailMessage message = new SimpleMailMessage();
+		message.setTo(toEmail);
+		message.setSubject("Tài khoản của bạn đã bị từ chối duyệt");
+		message.setText("Xin chào " + username + ",\n\n"
+				+ "Rất tiếc, yêu cầu đăng ký tài khoản của bạn trên hệ thống AgriConnect đã bị từ chối. "
+				+ "Nếu bạn cho rằng đây là nhầm lẫn, vui lòng liên hệ bộ phận hỗ trợ để được giải đáp.\n\n"
+				+ "Trân trọng,\nĐội ngũ AgriConnect");
+		mailSender.send(message);
+	}
+
+	public void sendLockEmail(String toEmail, String username) {
+		SimpleMailMessage message = new SimpleMailMessage();
+		message.setTo(toEmail);
+		message.setSubject("Tài khoản của bạn đã bị khoá");
+		message.setText(
+				"Xin chào " + username + ",\n\n" + "Tài khoản của bạn trên hệ thống AgriConnect đã bị tạm khoá. "
+						+ "Nếu bạn cho rằng đây là nhầm lẫn, vui lòng liên hệ bộ phận hỗ trợ để được giải đáp.\n\n"
+						+ "Trân trọng,\nĐội ngũ AgriConnect");
+		mailSender.send(message);
+	}
+
 }

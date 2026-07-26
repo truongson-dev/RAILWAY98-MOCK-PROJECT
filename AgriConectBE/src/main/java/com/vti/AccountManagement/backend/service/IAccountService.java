@@ -11,4 +11,8 @@ public interface IAccountService {
 
 	Account approveUserEmail(Long id);
 
+	Account rejectUserEmail(Long id);
+
+	Account lockUserEmail(Long id);
+
 }

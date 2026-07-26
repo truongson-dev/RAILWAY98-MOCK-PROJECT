@@ -48,10 +48,26 @@ public class AccountController {
 		return new ResponseEntity<>(pageAccountDtos, HttpStatus.OK);
 	}
 
-	@PutMapping("/{id}/approve")
+	@PutMapping("/{id}/active")
 	public ResponseEntity<AccountDTO> approve(@PathVariable Long id) {
 		Account account = accountService.approveUserEmail(id);
 
+		return ResponseEntity.ok(toAccountDto(account));
+	}
+
+	@PutMapping("/{id}/rejected")
+	public ResponseEntity<AccountDTO> reject(@PathVariable Long id) {
+		Account account = accountService.rejectUserEmail(id);
+		return ResponseEntity.ok(toAccountDto(account));
+	}
+
+	@PutMapping("/{id}/locked")
+	public ResponseEntity<AccountDTO> lock(@PathVariable Long id) {
+		Account account = accountService.lockUserEmail(id);
+		return ResponseEntity.ok(toAccountDto(account));
+	}
+
+	private AccountDTO toAccountDto(Account account) {
 		AccountDTO accountDto = new AccountDTO();
 		accountDto.setId(account.getId());
 		accountDto.setUsername(account.getUsername());
@@ -59,8 +75,7 @@ public class AccountController {
 		accountDto.setPhoneNumber(account.getPhoneNumber());
 		accountDto.setRole(account.getRole());
 		accountDto.setStatus(account.getStatus().name());
-
-		return ResponseEntity.ok(accountDto);
+		return accountDto;
 	}
 
 }

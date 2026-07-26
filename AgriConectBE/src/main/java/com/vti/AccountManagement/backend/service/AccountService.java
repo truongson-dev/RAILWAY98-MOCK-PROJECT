@@ -48,4 +48,38 @@ public class AccountService implements IAccountService {
 		return updated;
 	}
 
+	@Override
+	public Account rejectUserEmail(Long id) {
+		Account account = accountRepository.findById(id)
+				.orElseThrow(() -> new RuntimeException("Account not found with id: " + id));
+
+		if (account.getStatus() != AccountStatus.PENDING) {
+			throw new RuntimeException("Chỉ có thể từ chối tài khoản đang ở trạng thái PENDING");
+		}
+
+		account.setStatus(AccountStatus.REJECTED);
+		Account updated = accountRepository.save(account);
+
+		emailService.sendRejectionEmail(updated.getEmail(), updated.getUsername());
+
+		return updated;
+	}
+
+	@Override
+	public Account lockUserEmail(Long id) {
+		Account account = accountRepository.findById(id)
+				.orElseThrow(() -> new RuntimeException("Account not found with id: " + id));
+
+		if (account.getStatus() != AccountStatus.ACTIVE) {
+			throw new RuntimeException("Chỉ có thể khoá tài khoản đang ở trạng thái ACTIVE");
+		}
+
+		account.setStatus(AccountStatus.LOCKED);
+		Account updated = accountRepository.save(account);
+
+		emailService.sendLockEmail(updated.getEmail(), updated.getUsername());
+
+		return updated;
+	}
+
 }
