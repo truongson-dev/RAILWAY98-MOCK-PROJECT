@@ -9,7 +9,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
 import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
 
 @Entity
 @Table(name = "account", catalog = "agriconnect_db")
@@ -27,17 +26,8 @@ public abstract class Account {
 	@Column(nullable = false, length = 255)
 	private String password;
 
-	@Transient
-	public String getRole() {
-		if (this instanceof Supplier) {
-			return "SUPPLIER";
-		} else if (this instanceof Partner) {
-			return "PARTNER";
-		} else if (this instanceof Shipper) {
-			return "SHIPPER";
-		}
-		return "ADMIN";
-	}
+	@Column(name = "role", insertable = false, updatable = false, length = 20)
+	private String role;
 
 	@Column(length = 20)
 	private String status = "ACTIVE";
@@ -69,6 +59,14 @@ public abstract class Account {
 
 	public void setPassword(String password) {
 		this.password = password;
+	}
+
+	public String getRole() {
+		return role;
+	}
+
+	public void setRole(String role) {
+		this.role = role;
 	}
 
 	public String getStatus() {

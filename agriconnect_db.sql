@@ -7,10 +7,13 @@ USE agriconnect_db;
 DROP TABLE IF EXISTS `account`;
 CREATE TABLE `account` (
     `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
-    `username` VARCHAR(50) NOT NULL UNIQUE,
+    `username` VARCHAR(50) NOT NULL UNIQUE,	
     `password` VARCHAR(255) NOT NULL,
     `role` ENUM('SUPPLIER', 'PARTNER', 'SHIPPER', 'ADMIN') NOT NULL,
-    `status` VARCHAR(20) DEFAULT 'ACTIVE'
+    `status` ENUM('PENDING', 'ACTIVE', 'LOCKED', 'REJECTED') DEFAULT 'PENDING' COMMENT "PENDING: Vừa đăng ký, chờ admin duyệt
+																						ACTIVE: Đã duyệt, hoạt động bình thường 
+                                                                                        LOCKED: Bị khoá (do vi phạm, hoặc admin chủ động khoá)
+                                                                                        REJECTED: Bị từ chối duyệt (tuỳ chọn — hoặc dùng LOCKED luôn cho gọn, tuỳ bạn)"
 );
 
 -- 2.1 Supplier

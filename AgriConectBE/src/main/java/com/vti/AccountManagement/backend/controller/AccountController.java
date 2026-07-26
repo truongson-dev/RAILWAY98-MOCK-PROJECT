@@ -1,0 +1,47 @@
+package com.vti.AccountManagement.backend.controller;
+
+import java.util.function.Function;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.vti.AccountManagement.backend.service.IAccountService;
+import com.vti.AccountManagement.dto.AccountDTO;
+import com.vti.AccountManagement.entity.Account;
+
+@RestController
+@RequestMapping("/api/v1/accounts")
+@CrossOrigin(origins = "*")
+public class AccountController {
+
+	@Autowired
+	private IAccountService accountService;
+
+	@GetMapping
+	public ResponseEntity<?> getAllAccount(Pageable pageable, @RequestParam(required = false) String search) {
+		Page<Account> pageAccounts = accountService.getAllAccount(pageable, search);
+
+		Page<AccountDTO> pageAccountDtos = pageAccounts.map(new Function<Account, AccountDTO>() {
+			@Override
+			public AccountDTO apply(Account account) {
+				AccountDTO accountDto = new AccountDTO();
+				accountDto.setId(account.getId());
+				accountDto.setUsername(account.getUsername());
+				accountDto.setRole(account.getRole());
+				accountDto.setStatus(account.getStatus());
+				return accountDto;
+			}
+		});
+
+		return new ResponseEntity<>(pageAccountDtos, HttpStatus.OK);
+	}
+
+}
