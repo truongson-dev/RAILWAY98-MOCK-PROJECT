@@ -9,4 +9,6 @@ public interface IAccountService {
 
 	Page<Account> getAllAccount(Pageable pageable, String search);
 
+	Account approveUserEmail(Long id);
+
 }

@@ -33,6 +33,9 @@ public class PartnerController {
 			@Override
 			public PartnerDTO apply(Partner partner) {
 				PartnerDTO partnerDto = new PartnerDTO();
+				partnerDto.setId(partner.getId());
+				partnerDto.setPhoneNumber(partner.getPhoneNumber());
+				partnerDto.setEmail(partner.getEmail());
 				partnerDto.setUsername(partner.getUsername());
 				partnerDto.setRole(partner.getRole());
 				partnerDto.setStatus(partner.getStatus().name());

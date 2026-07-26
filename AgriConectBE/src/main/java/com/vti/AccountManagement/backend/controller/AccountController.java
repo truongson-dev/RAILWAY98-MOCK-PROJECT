@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -34,6 +36,8 @@ public class AccountController {
 			public AccountDTO apply(Account account) {
 				AccountDTO accountDto = new AccountDTO();
 				accountDto.setId(account.getId());
+				accountDto.setPhoneNumber(account.getPhoneNumber());
+				accountDto.setEmail(account.getEmail());
 				accountDto.setUsername(account.getUsername());
 				accountDto.setRole(account.getRole());
 				accountDto.setStatus(account.getStatus().name());
@@ -42,6 +46,21 @@ public class AccountController {
 		});
 
 		return new ResponseEntity<>(pageAccountDtos, HttpStatus.OK);
+	}
+
+	@PutMapping("/{id}/approve")
+	public ResponseEntity<AccountDTO> approve(@PathVariable Long id) {
+		Account account = accountService.approveUserEmail(id);
+
+		AccountDTO accountDto = new AccountDTO();
+		accountDto.setId(account.getId());
+		accountDto.setUsername(account.getUsername());
+		accountDto.setEmail(account.getEmail());
+		accountDto.setPhoneNumber(account.getPhoneNumber());
+		accountDto.setRole(account.getRole());
+		accountDto.setStatus(account.getStatus().name());
+
+		return ResponseEntity.ok(accountDto);
 	}
 
 }

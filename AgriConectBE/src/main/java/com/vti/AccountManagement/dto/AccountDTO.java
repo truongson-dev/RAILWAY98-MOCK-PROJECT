@@ -3,6 +3,8 @@ package com.vti.AccountManagement.dto;
 public class AccountDTO {
 
 	private Long id;
+	private String email;
+	private String phoneNumber;
 	private String username;
 	private String role;
 	private String status;
@@ -12,9 +14,11 @@ public class AccountDTO {
 		// TODO Auto-generated constructor stub
 	}
 
-	public AccountDTO(Long id, String username, String role, String status) {
+	public AccountDTO(Long id, String email, String phoneNumber, String username, String role, String status) {
 		super();
 		this.id = id;
+		this.email = email;
+		this.phoneNumber = phoneNumber;
 		this.username = username;
 		this.role = role;
 		this.status = status;
@@ -26,6 +30,22 @@ public class AccountDTO {
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	public String getPhoneNumber() {
+		return phoneNumber;
+	}
+
+	public void setPhoneNumber(String phoneNumber) {
+		this.phoneNumber = phoneNumber;
 	}
 
 	public String getUsername() {

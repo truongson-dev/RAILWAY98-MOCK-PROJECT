@@ -7,6 +7,8 @@ USE agriconnect_db;
 DROP TABLE IF EXISTS `account`;
 CREATE TABLE `account` (
     `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `email` VARCHAR(100) NOT NULL UNIQUE,
+    `phone_number` NVARCHAR(13) NOT NULL UNIQUE,
     `username` VARCHAR(50) NOT NULL UNIQUE,	
     `password` VARCHAR(255) NOT NULL,
     `role` ENUM('SUPPLIER', 'PARTNER', 'SHIPPER', 'ADMIN') NOT NULL,
@@ -20,9 +22,9 @@ CREATE TABLE `account` (
 DROP TABLE IF EXISTS `supplier`;
 CREATE TABLE `supplier` (
     `supplier_id` BIGINT PRIMARY KEY,
-    `farm_name` VARCHAR(255),
-    `farm_area` DECIMAL(15, 2),
-    `certificate` VARCHAR(255),
+    `farm_name` VARCHAR(255) NOT NULL,
+    `farm_area` DECIMAL(15, 2) NOT NULL,
+    `certificate` VARCHAR(255) NOT NULL UNIQUE,
     `production_capacity` DECIMAL(15, 2),
     FOREIGN KEY (`supplier_id`) REFERENCES `account`(`id`) ON DELETE CASCADE
 );
@@ -31,9 +33,9 @@ CREATE TABLE `supplier` (
 DROP TABLE IF EXISTS `partner`;
 CREATE TABLE `partner` (
     `partner_id` BIGINT PRIMARY KEY,
-    `company_name` VARCHAR(255),
-    `tax_code` VARCHAR(50),
-    `business_type` VARCHAR(100),
+    `company_name` VARCHAR(255) NOT NULL,
+    `tax_code` VARCHAR(50) NOT NULL,
+    `business_type` VARCHAR(100) NOT NULL,
     FOREIGN KEY (`partner_id`) REFERENCES `account`(`id`) ON DELETE CASCADE
 );
 
@@ -41,9 +43,9 @@ CREATE TABLE `partner` (
 DROP TABLE IF EXISTS `shipper`;
 CREATE TABLE `shipper` (
     `shipper_id` BIGINT PRIMARY KEY,
-    `vehicle_type` VARCHAR(50),
-    `license_number` VARCHAR(50),
-    `operating_area` VARCHAR(255),
+    `vehicle_type` VARCHAR(50) NOT NULL,
+    `license_number` VARCHAR(50) NOT NULL UNIQUE,
+    `operating_area` VARCHAR(255) NOT NULL,
     FOREIGN KEY (`shipper_id`) REFERENCES `account`(`id`) ON DELETE CASCADE
 );
 
@@ -233,24 +235,27 @@ CREATE TABLE IF NOT EXISTS `review` (
     FOREIGN KEY (`reviewer_id`) REFERENCES `account`(`id`)
 );
 
-INSERT INTO `account` (`id`, `username`, `password`, `role`, `status`) VALUES
-(1, 'supplier01', '123456', 'SUPPLIER', 'ACTIVE'),
-(2, 'supplier02', '123456', 'SUPPLIER', 'PENDING'),
-(3, 'supplier03', '123456', 'SUPPLIER', 'ACTIVE'),
-(4, 'supplier04', '123456', 'SUPPLIER', 'LOCKED'),
-(5, 'supplier05', '123456', 'SUPPLIER', 'PENDING'),
+-- ============================
+-- 1. ACCOUNT (15 dòng: 5 Supplier + 5 Partner + 5 Shipper)
+-- ============================
+INSERT INTO `account` (`id`, `email`, `phone_number`, `username`, `password`, `role`, `status`) VALUES
+(1, 'supplier01@agriconnect.vn', '0912345001', 'supplier01', '123456', 'SUPPLIER', 'ACTIVE'),
+(2, 'nguyenthanhsonyb2002@gmail.com', '0912345002', 'supplier02', '123456', 'SUPPLIER', 'PENDING'),
+(3, 'supplier03@agriconnect.vn', '0912345003', 'supplier03', '123456', 'SUPPLIER', 'ACTIVE'),
+(4, 'supplier04@agriconnect.vn', '0912345004', 'supplier04', '123456', 'SUPPLIER', 'LOCKED'),
+(5, 'supplier05@agriconnect.vn', '0912345005', 'supplier05', '123456', 'SUPPLIER', 'PENDING'),
 
-(6, 'partner01', '123456', 'PARTNER', 'ACTIVE'),
-(7, 'partner02', '123456', 'PARTNER', 'PENDING'),
-(8, 'partner03', '123456', 'PARTNER', 'ACTIVE'),
-(9, 'partner04', '123456', 'PARTNER', 'LOCKED'),
-(10, 'partner05', '123456', 'PARTNER', 'REJECTED'),
+(6, 'partner01@agriconnect.vn', '0923456001', 'partner01', '123456', 'PARTNER', 'ACTIVE'),
+(7, 'partner02@agriconnect.vn', '0923456002', 'partner02', '123456', 'PARTNER', 'PENDING'),
+(8, 'partner03@agriconnect.vn', '0923456003', 'partner03', '123456', 'PARTNER', 'ACTIVE'),
+(9, 'partner04@agriconnect.vn', '0923456004', 'partner04', '123456', 'PARTNER', 'LOCKED'),
+(10, 'partner05@agriconnect.vn', '0923456005', 'partner05', '123456', 'PARTNER', 'REJECTED'),
 
-(11, 'shipper01', '123456', 'SHIPPER', 'ACTIVE'),
-(12, 'shipper02', '123456', 'SHIPPER', 'ACTIVE'),
-(13, 'shipper03', '123456', 'SHIPPER', 'PENDING'),
-(14, 'shipper04', '123456', 'SHIPPER', 'LOCKED'),
-(15, 'shipper05', '123456', 'SHIPPER', 'ACTIVE');
+(11, 'shipper01@agriconnect.vn', '0934567001', 'shipper01', '123456', 'SHIPPER', 'ACTIVE'),
+(12, 'shipper02@agriconnect.vn', '0934567002', 'shipper02', '123456', 'SHIPPER', 'ACTIVE'),
+(13, 'shipper03@agriconnect.vn', '0934567003', 'shipper03', '123456', 'SHIPPER', 'PENDING'),
+(14, 'shipper04@agriconnect.vn', '0934567004', 'shipper04', '123456', 'SHIPPER', 'LOCKED'),
+(15, 'shipper05@agriconnect.vn', '0934567005', 'shipper05', '123456', 'SHIPPER', 'ACTIVE');
 
 -- ============================
 -- 2. SUPPLIER (account_id 1 -> 5)
@@ -259,7 +264,7 @@ INSERT INTO `supplier` (`supplier_id`, `farm_name`, `farm_area`, `certificate`, 
 (1, 'Nông trại Xanh Sạch', 12.50, 'VietGAP-2023-001', 500.00),
 (2, 'Trang trại Hữu Cơ Đà Lạt', 8.75, 'Organic-VN-2022', 320.50),
 (3, 'HTX Nông sản Miền Tây', 25.00, 'GlobalGAP-2024-045', 1200.00),
-(4, 'Nông trại Ba Vì', 15.20, NULL, 450.00),
+(4, 'Nông trại Ba Vì', 15.20, 'VietGAP-2020-077', 450.00),
 (5, 'Trang trại Rau Sạch Mộc Châu', 6.30, 'VietGAP-2021-089', 210.00);
 
 -- ============================

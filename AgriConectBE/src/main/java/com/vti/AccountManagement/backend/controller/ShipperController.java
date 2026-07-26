@@ -33,6 +33,8 @@ public class ShipperController {
 			@Override
 			public ShipperDTO apply(Shipper shipper) {
 				ShipperDTO shipperDto = new ShipperDTO();
+				shipperDto.setPhoneNumber(shipper.getPhoneNumber());
+				shipperDto.setEmail(shipper.getEmail());
 				shipperDto.setUsername(shipper.getUsername());
 				shipperDto.setRole(shipper.getRole());
 				shipperDto.setStatus(shipper.getStatus().name());

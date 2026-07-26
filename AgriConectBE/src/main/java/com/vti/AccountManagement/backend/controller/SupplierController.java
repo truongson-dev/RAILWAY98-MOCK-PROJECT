@@ -33,6 +33,8 @@ public class SupplierController {
 			@Override
 			public SupplierDTO apply(Supplier supplier) {
 				SupplierDTO supplierDto = new SupplierDTO();
+				supplierDto.setPhoneNumber(supplier.getPhoneNumber());
+				supplierDto.setEmail(supplier.getEmail());
 				supplierDto.setUsername(supplier.getUsername());
 				supplierDto.setRole(supplier.getRole());
 				supplierDto.setStatus(supplier.getStatus().name());

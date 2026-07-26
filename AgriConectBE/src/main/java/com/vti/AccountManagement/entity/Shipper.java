@@ -12,13 +12,13 @@ import jakarta.persistence.Table;
 @DiscriminatorValue("SHIPPER")
 public class Shipper extends Account {
 
-	@Column(name = "vehicle_type", length = 50)
+	@Column(name = "vehicle_type", nullable = false, length = 50)
 	private String vehicleType;
 
-	@Column(name = "license_number", length = 50)
+	@Column(name = "license_number", nullable = false, unique = true, length = 50)
 	private String licenseNumber;
 
-	@Column(name = "operating_area", length = 255)
+	@Column(name = "operating_area", nullable = false, length = 255)
 	private String operatingArea;
 
 	public Shipper() {
