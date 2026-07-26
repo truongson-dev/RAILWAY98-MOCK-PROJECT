@@ -1,0 +1,22 @@
+# Build artifacts
+target/
+**/target/
+.next/
+**/.next/
+node_modules/
+**/node_modules/
+
+# Logs
+*.log
+**/*.log
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Local untracked duplicate folder & local documentation
+backend/
+docs.md
