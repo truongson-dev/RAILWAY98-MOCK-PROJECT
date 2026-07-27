@@ -1,4 +1,4 @@
-package com.vti.AccountManagement.backend.service;
+﻿package com.vti.AccountManagerment.backend.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;

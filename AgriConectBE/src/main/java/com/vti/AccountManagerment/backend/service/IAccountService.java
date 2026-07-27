@@ -1,9 +1,9 @@
-package com.vti.AccountManagement.backend.service;
+﻿package com.vti.AccountManagerment.backend.service;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import com.vti.AccountManagement.entity.Account;
+import com.vti.AccountManagerment.entity.Account;
 
 public interface IAccountService {
 

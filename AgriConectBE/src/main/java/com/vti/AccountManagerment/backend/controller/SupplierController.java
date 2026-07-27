@@ -1,4 +1,4 @@
-package com.vti.AccountManagement.backend.controller;
+﻿package com.vti.AccountManagerment.backend.controller;
 
 import java.util.function.Function;
 
@@ -13,9 +13,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.vti.AccountManagement.backend.service.ISupplierService;
-import com.vti.AccountManagement.dto.SupplierDTO;
-import com.vti.AccountManagement.entity.Supplier;
+import com.vti.AccountManagerment.backend.service.ISupplierService;
+import com.vti.AccountManagerment.dto.SupplierDTO;
+import com.vti.AccountManagerment.entity.Supplier;
 
 @RestController
 @RequestMapping("/api/v1/suppliers")

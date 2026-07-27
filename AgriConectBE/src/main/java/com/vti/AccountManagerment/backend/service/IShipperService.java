@@ -1,9 +1,9 @@
-package com.vti.AccountManagement.backend.service;
+﻿package com.vti.AccountManagerment.backend.service;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import com.vti.AccountManagement.entity.Shipper;
+import com.vti.AccountManagerment.entity.Shipper;
 
 public interface IShipperService {
 

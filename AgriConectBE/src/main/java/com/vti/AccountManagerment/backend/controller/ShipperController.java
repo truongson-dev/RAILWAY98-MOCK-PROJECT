@@ -1,4 +1,4 @@
-package com.vti.AccountManagement.backend.controller;
+﻿package com.vti.AccountManagerment.backend.controller;
 
 import java.util.function.Function;
 
@@ -13,9 +13,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.vti.AccountManagement.backend.service.IShipperService;
-import com.vti.AccountManagement.dto.ShipperDTO;
-import com.vti.AccountManagement.entity.Shipper;
+import com.vti.AccountManagerment.backend.service.IShipperService;
+import com.vti.AccountManagerment.dto.ShipperDTO;
+import com.vti.AccountManagerment.entity.Shipper;
 
 @RestController
 @RequestMapping("/api/v1/shippers")

@@ -1,4 +1,4 @@
-package com.vti.AccountManagement.dto;
+﻿package com.vti.AccountManagerment.dto;
 
 public class AccountDTO {
 

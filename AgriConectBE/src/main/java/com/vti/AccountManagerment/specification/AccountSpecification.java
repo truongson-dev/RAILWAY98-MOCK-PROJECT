@@ -1,9 +1,9 @@
-package com.vti.AccountManagement.specification;
+﻿package com.vti.AccountManagerment.specification;
 
 import org.jspecify.annotations.Nullable;
 import org.springframework.data.jpa.domain.Specification;
 
-import com.vti.AccountManagement.entity.Account;
+import com.vti.AccountManagerment.entity.Account;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
