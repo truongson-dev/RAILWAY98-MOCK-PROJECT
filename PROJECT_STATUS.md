@@ -105,5 +105,52 @@ src/
 5. **[FE]** Khi ấn "Duyệt", gọi API `PATCH /api/admin/accounts/{id}/approve`.
 6. **[BE]** Đổi trạng thái tài khoản thành `ACTIVE`, gửi email thông báo tài khoản đã được kích hoạt thành công.
 
+## 4. HƯỚNG DẪN CÀI ĐẶT & CHẠY DỰ ÁN
+
+### 4.1. Yêu cầu hệ thống (Prerequisites)
+- **Java 17+** (Dùng JDK 17 cho Backend).
+- **Node.js 18+** (Khuyên dùng v20 cho Frontend Next.js).
+- **MySQL 8.0+** (Database).
+
+### 4.2. Khởi tạo Database
+1. Mở MySQL/phpMyAdmin (XAMPP) hoặc bất kỳ MySQL Client nào (như DBeaver).
+2. Chạy lệnh: `CREATE DATABASE agriconnect_db DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`
+3. Nhập (Import) file `agriconnect_db.sql` từ thư mục gốc vào database `agriconnect_db`.
+
+### 4.3. Chạy Backend (Spring Boot)
+1. Mở terminal, di chuyển vào thư mục `AgriConectBE`:
+   ```bash
+   cd AgriConectBE
+   ```
+2. Cấu hình Database & Mail:
+   Mở file `src/main/resources/application.properties` và đảm bảo thông tin kết nối MySQL (username, password) đúng với máy tính của bạn.
+3. Khởi động server (sử dụng Maven Wrapper):
+   ```bash
+   # Windows
+   .\mvnw.cmd spring-boot:run
+   
+   # Linux / macOS
+   ./mvnw spring-boot:run
+   ```
+4. Backend sẽ chạy ở cổng `8080`.
+   - Test API Swagger: `http://localhost:8080/swagger-ui.html`
+
+### 4.4. Chạy Frontend (Next.js)
+1. Mở một terminal khác, di chuyển vào thư mục `AgriConectFE`:
+   ```bash
+   cd AgriConectFE
+   ```
+2. Cài đặt các dependencies (chỉ cần chạy lần đầu hoặc khi có thay đổi package):
+   ```bash
+   npm install
+   ```
+3. Chạy ứng dụng ở chế độ dev:
+   ```bash
+   npm run dev
+   ```
+4. Frontend sẽ chạy ở cổng `3000`. 
+   - Truy cập trang chủ: `http://localhost:3000`
+   - Tài khoản Admin mặc định (để test): Email: `admin@demo.com` / Pass: `123456` (hoặc test tài khoản partner/supplier).
+
 ---
 *Văn bản này được tạo ra nhằm đồng bộ thông tin cho toàn bộ nhóm phát triển. Mọi người lưu ý pull code mới nhất trên nhánh `main` trước khi làm việc.*
