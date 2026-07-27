@@ -1,4 +1,4 @@
-﻿package com.vti.AccountManagerment.specification;
+package com.vti.AccountManagerment.specification;
 
 import org.jspecify.annotations.Nullable;
 import org.springframework.data.jpa.domain.Specification;

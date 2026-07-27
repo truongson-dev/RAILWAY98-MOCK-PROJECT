@@ -3,7 +3,7 @@ package com.vti.ProductManagement.entity;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-import com.vti.AccountManagement.entity.Account;
+import com.vti.AccountManagerment.entity.Account;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

@@ -1,4 +1,4 @@
-﻿package com.vti.AccountManagerment.backend.controller;
+package com.vti.AccountManagerment.backend.controller;
 
 import java.util.function.Function;
 

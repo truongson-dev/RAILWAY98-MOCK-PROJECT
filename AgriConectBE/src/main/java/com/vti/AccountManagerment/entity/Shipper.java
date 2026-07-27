@@ -1,4 +1,4 @@
-﻿package com.vti.AccountManagerment.entity;
+package com.vti.AccountManagerment.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
