@@ -118,21 +118,20 @@ src/
 3. Nhập (Import) file `agriconnect_db.sql` từ thư mục gốc vào database `agriconnect_db`.
 
 ### 4.3. Chạy Backend (Spring Boot)
-1. Mở terminal, di chuyển vào thư mục `AgriConectBE`:
-   ```bash
-   cd AgriConectBE
-   ```
-2. Cấu hình Database & Mail:
-   Mở file `src/main/resources/application.properties` và đảm bảo thông tin kết nối MySQL (username, password) đúng với máy tính của bạn.
-3. Khởi động server (sử dụng Maven Wrapper):
-   ```bash
-   # Windows
-   .\mvnw.cmd spring-boot:run
+1. Cấu hình Database & Mail:
+   Mở file `AgriConectBE/src/main/resources/application.properties` và đảm bảo thông tin kết nối MySQL (username, password) đúng với máy tính của bạn.
+2. Khởi động server:
+   **Cách 1: Sử dụng IDE (Khuyên dùng)**
+   - Mở thư mục `AgriConectBE` bằng IntelliJ IDEA hoặc Eclipse.
+   - Chờ IDE tải xong các thư viện Maven.
+   - Tìm file `AgriConectBeApplication.java` (nằm trong `src/main/java/com/vti/`).
+   - Click chuột phải vào file này và chọn **Run 'AgriConectBeApplication.main()'**.
    
-   # Linux / macOS
-   ./mvnw spring-boot:run
-   ```
-4. Backend sẽ chạy ở cổng `8080`.
+   **Cách 2: Sử dụng Terminal (Maven Wrapper)**
+   - Mở terminal, di chuyển vào thư mục `AgriConectBE` và chạy lệnh:
+     - Trên Windows: `.\mvnw.cmd spring-boot:run`
+     - Trên Mac/Linux: `./mvnw spring-boot:run`
+3. Backend sẽ chạy ở cổng `8080`.
    - Test API Swagger: `http://localhost:8080/swagger-ui.html`
 
 ### 4.4. Chạy Frontend (Next.js)
