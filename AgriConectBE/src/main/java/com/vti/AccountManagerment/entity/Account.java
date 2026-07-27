@@ -11,11 +11,14 @@ import jakarta.persistence.InheritanceType;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 
+import jakarta.persistence.DiscriminatorValue;
+
 @Entity
 @Table(name = "account", catalog = "agriconnect_db")
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn(name = "role")
-public abstract class Account {
+@DiscriminatorValue("ADMIN")
+public class Account {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
