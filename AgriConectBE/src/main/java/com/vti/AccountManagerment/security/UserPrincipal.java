@@ -48,7 +48,8 @@ public class UserPrincipal implements UserDetails {
 
 	@Override
 	public boolean isAccountNonLocked() {
-		return !"INACTIVE".equalsIgnoreCase(account.getStatus());
+		// LOCKED: tài khoản bị khoá bởi admin
+		return !"LOCKED".equalsIgnoreCase(account.getStatus());
 	}
 
 	@Override
@@ -58,6 +59,7 @@ public class UserPrincipal implements UserDetails {
 
 	@Override
 	public boolean isEnabled() {
-		return !"INACTIVE".equalsIgnoreCase(account.getStatus());
+		// Chỉ ACTIVE mới được phép đăng nhập (PENDING chờ duyệt, REJECTED/LOCKED bị từ chối)
+		return "ACTIVE".equalsIgnoreCase(account.getStatus());
 	}
 }
