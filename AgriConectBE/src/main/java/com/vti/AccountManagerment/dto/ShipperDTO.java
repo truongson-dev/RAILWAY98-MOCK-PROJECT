@@ -1,8 +1,10 @@
-package com.vti.AccountManagerment.dto;
+﻿package com.vti.AccountManagerment.dto;
 
 public class ShipperDTO {
 
 	private Long id;
+	private String email;
+	private String phoneNumber;
 	private String username;
 	private String role;
 	private String status;
@@ -16,10 +18,12 @@ public class ShipperDTO {
 		// TODO Auto-generated constructor stub
 	}
 
-	public ShipperDTO(Long id, String username, String role, String status, String vehicleType, String licenseNumber,
-			String operatingArea) {
+	public ShipperDTO(Long id, String email, String phoneNumber, String username, String role, String status,
+			String vehicleType, String licenseNumber, String operatingArea) {
 		super();
 		this.id = id;
+		this.email = email;
+		this.phoneNumber = phoneNumber;
 		this.username = username;
 		this.role = role;
 		this.status = status;
@@ -34,6 +38,22 @@ public class ShipperDTO {
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	public String getPhoneNumber() {
+		return phoneNumber;
+	}
+
+	public void setPhoneNumber(String phoneNumber) {
+		this.phoneNumber = phoneNumber;
 	}
 
 	public String getUsername() {

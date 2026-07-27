@@ -1,6 +1,6 @@
 ﻿package com.vti.AccountManagerment.dto;
 
-public class PartnerDTO {
+public class AccountDTO {
 
 	private Long id;
 	private String email;
@@ -9,17 +9,12 @@ public class PartnerDTO {
 	private String role;
 	private String status;
 
-	private String companyName;
-	private String taxCode;
-	private String businessType;
-
-	public PartnerDTO() {
+	public AccountDTO() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
 
-	public PartnerDTO(Long id, String email, String phoneNumber, String username, String role, String status,
-			String companyName, String taxCode, String businessType) {
+	public AccountDTO(Long id, String email, String phoneNumber, String username, String role, String status) {
 		super();
 		this.id = id;
 		this.email = email;
@@ -27,9 +22,6 @@ public class PartnerDTO {
 		this.username = username;
 		this.role = role;
 		this.status = status;
-		this.companyName = companyName;
-		this.taxCode = taxCode;
-		this.businessType = businessType;
 	}
 
 	public Long getId() {
@@ -78,30 +70,6 @@ public class PartnerDTO {
 
 	public void setStatus(String status) {
 		this.status = status;
-	}
-
-	public String getCompanyName() {
-		return companyName;
-	}
-
-	public void setCompanyName(String companyName) {
-		this.companyName = companyName;
-	}
-
-	public String getTaxCode() {
-		return taxCode;
-	}
-
-	public void setTaxCode(String taxCode) {
-		this.taxCode = taxCode;
-	}
-
-	public String getBusinessType() {
-		return businessType;
-	}
-
-	public void setBusinessType(String businessType) {
-		this.businessType = businessType;
 	}
 
 }

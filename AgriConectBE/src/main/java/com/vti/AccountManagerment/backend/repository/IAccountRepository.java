@@ -3,8 +3,8 @@
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-import com.vti.AccountManagerment.entity.Shipper;
+import com.vti.AccountManagerment.entity.Account;
 
-public interface IShipperRepository extends JpaRepository<Shipper, Long>, JpaSpecificationExecutor<Shipper> {
+public interface IAccountRepository extends JpaRepository<Account, Long>, JpaSpecificationExecutor<Account> {
 
 }

@@ -1,4 +1,4 @@
-package com.vti.AccountManagerment.entity;
+﻿package com.vti.AccountManagerment.entity;
 
 import java.math.BigDecimal;
 
@@ -14,16 +14,16 @@ import jakarta.persistence.Table;
 @DiscriminatorValue("SUPPLIER")
 public class Supplier extends Account {
 
-	@Column(name = "farm_name", length = 255)
+	@Column(name = "farm_name", nullable = false, length = 255)
 	private String farmName;
 
-	@Column(name = "farm_area", precision = 15, scale = 2)
+	@Column(name = "farm_area", nullable = false, precision = 15, scale = 2)
 	private BigDecimal farmArea;
 
 	@Column(length = 255)
 	private String certificate;
 
-	@Column(name = "production_capacity", precision = 15, scale = 2)
+	@Column(name = "production_capacity", nullable = false, unique = true, precision = 15, scale = 2)
 	private BigDecimal productionCapacity;
 
 	public Supplier() {

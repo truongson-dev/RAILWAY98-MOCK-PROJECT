@@ -1,56 +1,54 @@
-package com.vti.AccountManagerment.backend.controller;
+﻿package com.vti.AccountManagerment.backend.controller;
 
-import java.util.List;
+import java.util.function.Function;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.vti.AccountManagerment.backend.service.ISupplierService;
 import com.vti.AccountManagerment.dto.SupplierDTO;
+import com.vti.AccountManagerment.entity.Supplier;
 
 @RestController
 @RequestMapping("/api/v1/suppliers")
-@CrossOrigin("*")
+@CrossOrigin(origins = "*")
 public class SupplierController {
 
 	@Autowired
 	private ISupplierService supplierService;
 
 	@GetMapping
-	public ResponseEntity<List<SupplierDTO>> getAll() {
-		return ResponseEntity.ok(supplierService.getAll());
-	}
+	public ResponseEntity<?> getAllSupplier(Pageable pageable, @RequestParam(required = false) String search) {
+		Page<Supplier> pageSuppliers = supplierService.getAllSupplier(pageable, search);
 
-	@GetMapping("/{id}")
-	public ResponseEntity<SupplierDTO> getById(@PathVariable Long id) {
-		return ResponseEntity.ok(supplierService.getById(id));
-	}
+		Page<SupplierDTO> pageSupplierDtos = pageSuppliers.map(new Function<Supplier, SupplierDTO>() {
+			@Override
+			public SupplierDTO apply(Supplier supplier) {
+				SupplierDTO supplierDto = new SupplierDTO();
+				supplierDto.setPhoneNumber(supplier.getPhoneNumber());
+				supplierDto.setEmail(supplier.getEmail());
+				supplierDto.setUsername(supplier.getUsername());
+				supplierDto.setRole(supplier.getRole());
+				supplierDto.setStatus(supplier.getStatus().name());
 
-	@PostMapping
-	public ResponseEntity<SupplierDTO> create(@RequestBody SupplierDTO dto) {
-		SupplierDTO created = supplierService.create(dto);
-		return ResponseEntity.status(HttpStatus.CREATED).body(created);
-	}
+				supplierDto.setFarmName(supplier.getFarmName());
+				supplierDto.setFarmArea(supplier.getFarmArea());
+				supplierDto.setCertificate(supplier.getCertificate());
+				supplierDto.setProductionCapacity(supplier.getProductionCapacity());
 
-	@PutMapping("/{id}")
-	public ResponseEntity<SupplierDTO> update(@PathVariable Long id, @RequestBody SupplierDTO dto) {
-		return ResponseEntity.ok(supplierService.update(id, dto));
-	}
+				return supplierDto;
+			}
+		});
 
-	@DeleteMapping("/{id}")
-	public ResponseEntity<Void> delete(@PathVariable Long id) {
-		supplierService.delete(id);
-		return ResponseEntity.noContent().build();
+		return new ResponseEntity<>(pageSupplierDtos, HttpStatus.OK);
 	}
 
 }

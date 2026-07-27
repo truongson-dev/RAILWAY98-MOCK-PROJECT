@@ -1,19 +1,12 @@
-package com.vti.AccountManagerment.backend.service;
+﻿package com.vti.AccountManagerment.backend.service;
 
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
-import com.vti.AccountManagerment.dto.SupplierDTO;
+import com.vti.AccountManagerment.entity.Supplier;
 
 public interface ISupplierService {
 
-	List<SupplierDTO> getAll();
-
-	SupplierDTO getById(Long id);
-
-	SupplierDTO create(SupplierDTO dto);
-
-	SupplierDTO update(Long id, SupplierDTO dto);
-
-	void delete(Long id);
+	Page<Supplier> getAllSupplier(Pageable pageable, String search);
 
 }

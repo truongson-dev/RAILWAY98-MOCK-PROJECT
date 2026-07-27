@@ -1,9 +1,10 @@
-package com.vti.AccountManagerment.backend.repository;
+﻿package com.vti.AccountManagerment.backend.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 import com.vti.AccountManagerment.entity.Supplier;
 
-public interface ISupplierRepository extends JpaRepository<Supplier, Long> {
+public interface ISupplierRepository extends JpaRepository<Supplier, Long>, JpaSpecificationExecutor<Supplier> {
 
 }
