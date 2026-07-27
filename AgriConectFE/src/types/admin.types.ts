@@ -9,6 +9,7 @@ export type NavTab =
   | 'users-partners'
   | 'users-logistics'
   | 'users-permissions'
+  | 'users-pending'
   | 'kyc'
   | 'products'
   | 'products-categories'

@@ -1,75 +1,114 @@
-// ─── Mock Data ────────────────────────────────────────────────────────────────
-// Dữ liệu giả lập dùng cho landing page demo và preview trong modal.
+// ─── Mock Data — Chỉ dùng cho Landing Page ────────────────────────────────────
+// File này chứa dữ liệu tĩnh phục vụ trang giới thiệu (Landing Page).
 //
-// ⚠️  QUAN TRỌNG CHO TEAM:
-//   File này CHỈ dùng trong giai đoạn phát triển khi backend chưa sẵn sàng.
-//   Khi backend có API thật, hãy:
-//     1. Xóa các import MOCK_* trong component
-//     2. Thay bằng gọi hàm từ src/services/ (getProducts, getBatchTrace, ...)
-//     3. Giữ nguyên file này để dùng trong unit test / Storybook
+// ⚠️  LƯU Ý:
+//   - Dữ liệu này KHÔNG phải dữ liệu thật của hệ thống.
+//   - Chỉ dùng để minh họa tính năng trên trang chủ cho khách tham quan.
+//   - Dashboard Partner/Admin/Supplier đều dùng API thật từ Backend.
 //
-// Cấu trúc dữ liệu ánh xạ 1-1 với interface trong src/types/
+// Cấu trúc dữ liệu khớp với interface trong src/types/
 
 import type { AgProduct, TraceBatch } from '@/types/product.type';
 import type { EscrowContract } from '@/types/escrow.type';
 
+// ─── Sản phẩm minh họa cho Landing Page ──────────────────────────────────────
 export const MOCK_PRODUCTS: AgProduct[] = [
   {
-    id: 'p1', name: 'Thanh Long Ruột Red GlobalGAP',
-    category: 'Trái cây xuất khẩu', origin: 'Chợ Gạo, Tiền Giang',
+    id: 'p1',
+    name: 'Thanh Long Ruột Đỏ GlobalGAP',
+    category: 'Trái cây xuất khẩu',
+    origin: 'Chợ Gạo, Tiền Giang',
     seller: 'HTX Nông Nghiệp Tiền Giang',
-    certifications: ['GlobalGAP', 'VietGAP'], pricePerKg: 25000,
-    availableQuantityTons: 45, minOrderTons: 5,
+    certifications: ['GlobalGAP', 'VietGAP'],
+    pricePerKg: 25000,
+    availableQuantityTons: 45,
+    minOrderTons: 5,
     image: 'https://images.unsplash.com/photo-1527133256227-cf37781c6325?auto=format&fit=crop&q=80&w=800',
-    harvestDate: '2026-07-20', qrBatchCode: 'LOT-TL-2026-009', rating: 4.9, featured: true,
+    harvestDate: '2026-07-20',
+    qrBatchCode: 'LOT-TL-2026-009',
+    rating: 4.9,
+    featured: true,
   },
   {
-    id: 'p2', name: 'Sầu Riêng Ri6 Hạt Lép Đắk Lắk',
-    category: 'Trái cây xuất khẩu', origin: 'Krông Pắc, Đắk Lắk',
+    id: 'p2',
+    name: 'Sầu Riêng Ri6 Hạt Lép Đắk Lắk',
+    category: 'Trái cây xuất khẩu',
+    origin: 'Krông Pắc, Đắk Lắk',
     seller: 'Công ty Nông Sản Tây Nguyên Bio',
-    certifications: ['VietGAP', 'HACCP'], pricePerKg: 78000,
-    availableQuantityTons: 120, minOrderTons: 10,
+    certifications: ['VietGAP', 'HACCP'],
+    pricePerKg: 78000,
+    availableQuantityTons: 120,
+    minOrderTons: 10,
     image: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800',
-    harvestDate: '2026-07-18', qrBatchCode: 'LOT-SR-2026-014', rating: 4.95, featured: true,
+    harvestDate: '2026-07-18',
+    qrBatchCode: 'LOT-SR-2026-014',
+    rating: 4.95,
+    featured: true,
   },
   {
-    id: 'p3', name: 'Bưởi Da Xanh Bến Tre Loại 1',
-    category: 'Trái cây', origin: 'Châu Thành, Bến Tre',
+    id: 'p3',
+    name: 'Bưởi Da Xanh Bến Tre Loại 1',
+    category: 'Trái cây',
+    origin: 'Châu Thành, Bến Tre',
     seller: 'HTX Bưởi Da Xanh Mỏ Cày',
-    certifications: ['GlobalGAP'], pricePerKg: 42000,
-    availableQuantityTons: 30, minOrderTons: 3,
+    certifications: ['GlobalGAP'],
+    pricePerKg: 42000,
+    availableQuantityTons: 30,
+    minOrderTons: 3,
     image: 'https://images.unsplash.com/photo-1557800636-894a64c1696f?auto=format&fit=crop&q=80&w=800',
-    harvestDate: '2026-07-21', qrBatchCode: 'LOT-BDX-2026-003', rating: 4.85,
+    harvestDate: '2026-07-21',
+    qrBatchCode: 'LOT-BDX-2026-003',
+    rating: 4.85,
   },
   {
-    id: 'p4', name: 'Cà Phê Arabica Cầu Đất Lâm Đồng',
-    category: 'Nông sản chế biến', origin: 'Cầu Đất, Đà Lạt',
+    id: 'p4',
+    name: 'Cà Phê Arabica Cầu Đất Lâm Đồng',
+    category: 'Nông sản chế biến',
+    origin: 'Cầu Đất, Đà Lạt',
     seller: 'Nông Trường Cà Phê Cầu Đất',
-    certifications: ['Organic', 'HACCP'], pricePerKg: 110000,
-    availableQuantityTons: 80, minOrderTons: 2,
+    certifications: ['Organic', 'HACCP'],
+    pricePerKg: 110000,
+    availableQuantityTons: 80,
+    minOrderTons: 2,
     image: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&q=80&w=800',
-    harvestDate: '2026-07-15', qrBatchCode: 'LOT-CF-2026-088', rating: 5.0, featured: true,
+    harvestDate: '2026-07-15',
+    qrBatchCode: 'LOT-CF-2026-088',
+    rating: 5.0,
+    featured: true,
   },
   {
-    id: 'p5', name: 'Xoài Cát Hòa Lộc Tiêu Chuẩn Xuất Mỹ',
-    category: 'Trái cây xuất khẩu', origin: 'Cái Bè, Tiền Giang',
+    id: 'p5',
+    name: 'Xoài Cát Hòa Lộc Tiêu Chuẩn Xuất Mỹ',
+    category: 'Trái cây xuất khẩu',
+    origin: 'Cái Bè, Tiền Giang',
     seller: 'HTX Xoài Cát Hòa Lộc',
-    certifications: ['GlobalGAP'], pricePerKg: 65000,
-    availableQuantityTons: 25, minOrderTons: 2,
+    certifications: ['GlobalGAP'],
+    pricePerKg: 65000,
+    availableQuantityTons: 25,
+    minOrderTons: 2,
     image: 'https://images.unsplash.com/photo-1553279768-865429fa0078?auto=format&fit=crop&q=80&w=800',
-    harvestDate: '2026-07-19', qrBatchCode: 'LOT-XHL-2026-021', rating: 4.8,
+    harvestDate: '2026-07-19',
+    qrBatchCode: 'LOT-XHL-2026-021',
+    rating: 4.8,
   },
   {
-    id: 'p6', name: 'Hồ Tiêu Đen Chư Sê Chất Lượng Cao',
-    category: 'Gia vị & Nông sản khô', origin: 'Chư Sê, Gia Lai',
+    id: 'p6',
+    name: 'Hồ Tiêu Đen Chư Sê Chất Lượng Cao',
+    category: 'Gia vị & Nông sản khô',
+    origin: 'Chư Sê, Gia Lai',
     seller: 'Gia Lai Pepper Exporters Co.',
-    certifications: ['VietGAP', 'HACCP'], pricePerKg: 95000,
-    availableQuantityTons: 200, minOrderTons: 10,
+    certifications: ['VietGAP', 'HACCP'],
+    pricePerKg: 95000,
+    availableQuantityTons: 200,
+    minOrderTons: 10,
     image: 'https://images.unsplash.com/photo-1599940824399-b87987ceb72a?auto=format&fit=crop&q=80&w=800',
-    harvestDate: '2026-07-10', qrBatchCode: 'LOT-HT-2026-005', rating: 4.9,
+    harvestDate: '2026-07-10',
+    qrBatchCode: 'LOT-HT-2026-005',
+    rating: 4.9,
   },
 ];
 
+// ─── Lô hàng mẫu cho tính năng QR Trace trên Landing Page ───────────────────
 export const MOCK_TRACE_BATCH: TraceBatch = {
   batchCode: 'LOT-TL-2026-009',
   productName: 'Thanh Long Ruột Đỏ GlobalGAP Exporter Grade',
@@ -93,6 +132,7 @@ export const MOCK_TRACE_BATCH: TraceBatch = {
   status: 'Xác thực',
 };
 
+// ─── Hợp đồng Escrow mẫu cho demo trên Landing Page ─────────────────────────
 export const MOCK_ESCROW: EscrowContract = {
   id: 'ESC-2026-8842',
   buyerName: 'Công ty CP Tập Đoàn Chế Biến Thực Phẩm VinAgri',

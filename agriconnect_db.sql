@@ -1,288 +1,322 @@
--- Tạo database cho dự án AgriConnect
-DROP DATABASE IF EXISTS agriconnect_db;
-CREATE DATABASE agriconnect_db;
+-- ============================================================
+-- AGRICONNECT DATABASE SCHEMA
+-- Version: 2.0 — Tương ứng với Spring Boot Backend đầy đủ
+-- Engine: MySQL 8.0+
+-- Charset: utf8mb4 (hỗ trợ tiếng Việt + emoji)
+-- ============================================================
+
+CREATE DATABASE IF NOT EXISTS agriconnect_db
+    CHARACTER SET utf8mb4
+    COLLATE utf8mb4_unicode_ci;
+
 USE agriconnect_db;
 
--- 1. Account (Tài khoản)
-DROP TABLE IF EXISTS `account`;
-CREATE TABLE `account` (
-    `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
-    `email` VARCHAR(100) NOT NULL UNIQUE,
-    `phone_number` NVARCHAR(13) NOT NULL UNIQUE,
-    `username` VARCHAR(50) NOT NULL UNIQUE,	
-    `password` VARCHAR(255) NOT NULL,
-    `role` ENUM('SUPPLIER', 'PARTNER', 'SHIPPER', 'ADMIN') NOT NULL,
-    `status` ENUM('PENDING', 'ACTIVE', 'LOCKED', 'REJECTED') DEFAULT 'PENDING' COMMENT "PENDING: Vừa đăng ký, chờ admin duyệt
-																						ACTIVE: Đã duyệt, hoạt động bình thường 
-                                                                                        LOCKED: Bị khoá (do vi phạm, hoặc admin chủ động khoá)
-                                                                                        REJECTED: Bị từ chối duyệt (tuỳ chọn — hoặc dùng LOCKED luôn cho gọn, tuỳ bạn)"
-);
+-- ============================================================
+-- BẢNG 1: account — Tài khoản người dùng (Joined Inheritance)
+-- Bảng cha dùng cho tất cả loại user
+-- discriminator: role (ADMIN, PARTNER, SUPPLIER, SHIPPER)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS account (
+    id           BIGINT          NOT NULL AUTO_INCREMENT,
+    username     VARCHAR(100)    NOT NULL UNIQUE COMMENT 'Email/username đăng nhập',
+    password     VARCHAR(255)    NOT NULL COMMENT 'BCrypt hashed password',
+    role         VARCHAR(50)     NOT NULL COMMENT 'Discriminator: ADMIN|PARTNER|SUPPLIER|SHIPPER',
+    status       VARCHAR(20)     NOT NULL DEFAULT 'ACTIVE' COMMENT 'ACTIVE|PENDING|SUSPENDED',
+    full_name    VARCHAR(100)    COMMENT 'Họ và tên',
+    phone        VARCHAR(20)     COMMENT 'Số điện thoại',
+    email        VARCHAR(100)    COMMENT 'Email liên hệ (có thể khác username)',
+    address      VARCHAR(255)    COMMENT 'Địa chỉ cụ thể',
+    province     VARCHAR(100)    COMMENT 'Tỉnh/thành phố',
+    avatar       VARCHAR(500)    COMMENT 'URL ảnh đại diện',
+    PRIMARY KEY (id),
+    INDEX idx_account_username (username),
+    INDEX idx_account_role (role),
+    INDEX idx_account_status (status)
+) ENGINE=InnoDB COMMENT='Tài khoản người dùng — Joined Inheritance Strategy';
 
--- 2.1 Supplier
-DROP TABLE IF EXISTS `supplier`;
-CREATE TABLE `supplier` (
-    `supplier_id` BIGINT PRIMARY KEY,
-    `farm_name` VARCHAR(255) NOT NULL,
-    `farm_area` DECIMAL(15, 2) NOT NULL,
-    `certificate` VARCHAR(255) NOT NULL UNIQUE,
-    `production_capacity` DECIMAL(15, 2),
-    FOREIGN KEY (`supplier_id`) REFERENCES `account`(`id`) ON DELETE CASCADE
-);
+-- ============================================================
+-- BẢNG 2: partner — Đối tác thu mua B2B (con của account)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS partner (
+    account_id    BIGINT          NOT NULL,
+    company_name  VARCHAR(255)    COMMENT 'Tên công ty / doanh nghiệp',
+    tax_code      VARCHAR(50)     COMMENT 'Mã số thuế',
+    business_type VARCHAR(100)    COMMENT 'Loại hình: Bán sỉ, Xuất nhập khẩu...',
+    PRIMARY KEY (account_id),
+    FOREIGN KEY (account_id) REFERENCES account(id) ON DELETE CASCADE
+) ENGINE=InnoDB COMMENT='Đối tác thu mua B2B';
 
--- 2.2 Partner
-DROP TABLE IF EXISTS `partner`;
-CREATE TABLE `partner` (
-    `partner_id` BIGINT PRIMARY KEY,
-    `company_name` VARCHAR(255) NOT NULL,
-    `tax_code` VARCHAR(50) NOT NULL,
-    `business_type` VARCHAR(100) NOT NULL,
-    FOREIGN KEY (`partner_id`) REFERENCES `account`(`id`) ON DELETE CASCADE
-);
+-- ============================================================
+-- BẢNG 3: supplier — Nhà cung cấp / Nông trại (con của account)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS supplier (
+    account_id          BIGINT          NOT NULL,
+    farm_name           VARCHAR(255)    COMMENT 'Tên trang trại / HTX',
+    farm_area           DECIMAL(15,2)   COMMENT 'Diện tích canh tác (ha)',
+    certificate         VARCHAR(255)    COMMENT 'Chứng nhận: VietGAP, GlobalGAP...',
+    production_capacity DECIMAL(15,2)   COMMENT 'Năng lực sản xuất (tấn/năm)',
+    PRIMARY KEY (account_id),
+    FOREIGN KEY (account_id) REFERENCES account(id) ON DELETE CASCADE
+) ENGINE=InnoDB COMMENT='Nhà cung cấp nông sản';
 
--- 2.3 Shipper
-DROP TABLE IF EXISTS `shipper`;
-CREATE TABLE `shipper` (
-    `shipper_id` BIGINT PRIMARY KEY,
-    `vehicle_type` VARCHAR(50) NOT NULL,
-    `license_number` VARCHAR(50) NOT NULL UNIQUE,
-    `operating_area` VARCHAR(255) NOT NULL,
-    FOREIGN KEY (`shipper_id`) REFERENCES `account`(`id`) ON DELETE CASCADE
-);
+-- ============================================================
+-- BẢNG 4: shipper — Đơn vị vận chuyển (con của account)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS shipper (
+    account_id      BIGINT          NOT NULL,
+    vehicle_type    VARCHAR(50)     COMMENT 'Loại xe: Xe tải lạnh, Container...',
+    license_number  VARCHAR(50)     COMMENT 'Biển số xe',
+    operating_area  VARCHAR(255)    COMMENT 'Khu vực hoạt động: Miền Nam...',
+    PRIMARY KEY (account_id),
+    FOREIGN KEY (account_id) REFERENCES account(id) ON DELETE CASCADE
+) ENGINE=InnoDB COMMENT='Đơn vị vận chuyển logistics';
 
--- 3. Profile (Hồ sơ người dùng)
-CREATE TABLE IF NOT EXISTS `profile` (
-    `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
-    `account_id` BIGINT NOT NULL UNIQUE,
-    `full_name` VARCHAR(100) NOT NULL,
-    `phone` VARCHAR(20),
-    `email` VARCHAR(100),
-    `address` VARCHAR(255),
-    `avatar` VARCHAR(255),
-    FOREIGN KEY (`account_id`) REFERENCES `account`(`id`) ON DELETE CASCADE
-);
+-- ============================================================
+-- BẢNG 5: admin — Quản trị viên (con của account)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS admin (
+    account_id  BIGINT  NOT NULL,
+    PRIMARY KEY (account_id),
+    FOREIGN KEY (account_id) REFERENCES account(id) ON DELETE CASCADE
+) ENGINE=InnoDB COMMENT='Quản trị viên hệ thống';
 
--- 4. Category (Danh mục)
-CREATE TABLE IF NOT EXISTS `category` (
-    `id` INT AUTO_INCREMENT PRIMARY KEY,
-    `name` VARCHAR(100) NOT NULL,
-    `parent_id` INT,
-    FOREIGN KEY (`parent_id`) REFERENCES `category`(`id`)
-);
+-- ============================================================
+-- BẢNG 6: category — Danh mục sản phẩm
+-- ============================================================
+CREATE TABLE IF NOT EXISTS category (
+    id          INT             NOT NULL AUTO_INCREMENT,
+    name        VARCHAR(100)    NOT NULL COMMENT 'Tên tiếng Việt: Rau củ, Trái cây...',
+    code        VARCHAR(50)     NOT NULL UNIQUE COMMENT 'Code tiếng Anh: Vegetables, Fruits...',
+    description VARCHAR(500)    COMMENT 'Mô tả danh mục',
+    PRIMARY KEY (id),
+    INDEX idx_category_code (code)
+) ENGINE=InnoDB COMMENT='Danh mục sản phẩm nông sản';
 
--- 5. Product (Sản phẩm)
-CREATE TABLE IF NOT EXISTS `product` (
-    `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
-    `category_id` INT NOT NULL,
-    `seller_id` BIGINT NOT NULL,
-    `name` VARCHAR(255) NOT NULL,
-    `description` TEXT,
-    `price` DECIMAL(15, 2) NOT NULL,
-    `unit` VARCHAR(50),
-    `status` VARCHAR(50) DEFAULT 'AVAILABLE',
-    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (`category_id`) REFERENCES `category`(`id`),
-    FOREIGN KEY (`seller_id`) REFERENCES `supplier`(`supplier_id`)
-);
+-- ============================================================
+-- BẢNG 7: product — Sản phẩm nông sản
+-- ============================================================
+CREATE TABLE IF NOT EXISTS product (
+    id              BIGINT          NOT NULL AUTO_INCREMENT,
+    category_id     INT             NOT NULL COMMENT 'FK → category',
+    seller_id       BIGINT          NOT NULL COMMENT 'FK → account (Supplier/Partner)',
+    name            VARCHAR(255)    NOT NULL COMMENT 'Tên tiếng Việt',
+    name_en         VARCHAR(255)    COMMENT 'Tên tiếng Anh',
+    description     TEXT            COMMENT 'Mô tả chi tiết',
+    price           DECIMAL(15,2)   NOT NULL COMMENT 'Giá bán (VND/kg)',
+    unit            VARCHAR(50)     DEFAULT 'kg' COMMENT 'Đơn vị tính',
+    status          VARCHAR(50)     DEFAULT 'AVAILABLE' COMMENT 'AVAILABLE|OUT_OF_STOCK|INACTIVE',
+    min_order_kg    INT             COMMENT 'Khối lượng đặt tối thiểu (kg)',
+    location        VARCHAR(255)    COMMENT 'Vị trí thu hoạch: Đà Lạt, Lâm Đồng...',
+    badges          VARCHAR(500)    COMMENT 'JSON array chứng nhận: [\"VIETGAP\",\"HỮU CƠ\"]',
+    harvest_date    VARCHAR(100)    COMMENT 'Ngày/mùa thu hoạch',
+    rating          DOUBLE          DEFAULT 5.0 COMMENT 'Điểm đánh giá trung bình (1-5)',
+    reviews_count   INT             DEFAULT 0 COMMENT 'Số lượt đánh giá',
+    created_at      DATETIME(6)     COMMENT 'Ngày tạo',
+    updated_at      DATETIME(6)     COMMENT 'Ngày cập nhật',
+    PRIMARY KEY (id),
+    FOREIGN KEY (category_id) REFERENCES category(id),
+    FOREIGN KEY (seller_id) REFERENCES account(id),
+    INDEX idx_product_status (status),
+    INDEX idx_product_seller (seller_id),
+    INDEX idx_product_category (category_id)
+) ENGINE=InnoDB COMMENT='Sản phẩm nông sản';
 
--- 6. Product_Image (Hình ảnh sản phẩm)
-CREATE TABLE IF NOT EXISTS `product_image` (
-    `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
-    `product_id` BIGINT NOT NULL,
-    `image_url` VARCHAR(255) NOT NULL,
-    `is_primary` BOOLEAN DEFAULT FALSE,
-    FOREIGN KEY (`product_id`) REFERENCES `product`(`id`) ON DELETE CASCADE
-);
+-- ============================================================
+-- BẢNG 8: product_image — Hình ảnh sản phẩm
+-- ============================================================
+CREATE TABLE IF NOT EXISTS product_image (
+    id          BIGINT          NOT NULL AUTO_INCREMENT,
+    product_id  BIGINT          NOT NULL COMMENT 'FK → product',
+    image_url   VARCHAR(1000)   NOT NULL COMMENT 'URL hình ảnh',
+    is_primary  TINYINT(1)      DEFAULT 0 COMMENT 'Ảnh đại diện: 1=có, 0=không',
+    PRIMARY KEY (id),
+    FOREIGN KEY (product_id) REFERENCES product(id) ON DELETE CASCADE,
+    INDEX idx_image_product (product_id)
+) ENGINE=InnoDB COMMENT='Hình ảnh sản phẩm';
 
--- 7. Certificate (Chứng chỉ sản phẩm/nông sản)
-CREATE TABLE IF NOT EXISTS `certificate` (
-    `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
-    `product_id` BIGINT NOT NULL,
-    `name` VARCHAR(100) NOT NULL,
-    `issued_by` VARCHAR(100),
-    `valid_until` DATE,
-    `image_url` VARCHAR(255),
-    FOREIGN KEY (`product_id`) REFERENCES `product`(`id`) ON DELETE CASCADE
-);
+-- ============================================================
+-- BẢNG 9: orders — Đơn đặt hàng
+-- ============================================================
+CREATE TABLE IF NOT EXISTS orders (
+    id                  BIGINT          NOT NULL AUTO_INCREMENT,
+    buyer_id            BIGINT          NOT NULL COMMENT 'FK → account (Partner)',
+    total_amount        DECIMAL(15,2)   NOT NULL COMMENT 'Tổng tiền (VND)',
+    status              VARCHAR(50)     DEFAULT 'PENDING'
+                                        COMMENT 'PENDING|SHIPPING|DELIVERED|COMPLETED|CANCELLED',
+    shipping_address    VARCHAR(255)    COMMENT 'Địa chỉ giao hàng',
+    payment_method      VARCHAR(50)     COMMENT 'credit_30|credit_60|bank|deposit',
+    tracking_code       VARCHAR(100)    COMMENT 'Mã vận đơn',
+    estimated_delivery  VARCHAR(50)     COMMENT 'Ngày dự kiến giao',
+    supplier_name       VARCHAR(255)    COMMENT 'Tên nhà cung cấp (denormalized để hiển thị nhanh)',
+    created_at          DATETIME(6)     COMMENT 'Ngày đặt hàng',
+    updated_at          DATETIME(6)     COMMENT 'Ngày cập nhật',
+    PRIMARY KEY (id),
+    FOREIGN KEY (buyer_id) REFERENCES account(id),
+    INDEX idx_order_buyer (buyer_id),
+    INDEX idx_order_status (status),
+    INDEX idx_order_created (created_at)
+) ENGINE=InnoDB COMMENT='Đơn đặt hàng nông sản';
 
--- 8. Inventory_Batch (Lô hàng tồn kho/thu hoạch)
-CREATE TABLE IF NOT EXISTS `inventory_batch` (
-    `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
-    `product_id` BIGINT NOT NULL,
-    `quantity` DECIMAL(15, 2) NOT NULL,
-    `harvest_date` DATE,
-    `expiry_date` DATE,
-    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (`product_id`) REFERENCES `product`(`id`)
-);
+-- ============================================================
+-- BẢNG 10: order_item — Chi tiết đơn hàng
+-- ============================================================
+CREATE TABLE IF NOT EXISTS order_item (
+    id          BIGINT          NOT NULL AUTO_INCREMENT,
+    order_id    BIGINT          NOT NULL COMMENT 'FK → orders',
+    product_id  BIGINT          NOT NULL COMMENT 'FK → product',
+    quantity    DECIMAL(15,2)   NOT NULL COMMENT 'Khối lượng đặt (kg)',
+    price       DECIMAL(15,2)   NOT NULL COMMENT 'Giá tại thời điểm đặt (VND/kg)',
+    PRIMARY KEY (id),
+    FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
+    FOREIGN KEY (product_id) REFERENCES product(id),
+    INDEX idx_orderitem_order (order_id)
+) ENGINE=InnoDB COMMENT='Chi tiết sản phẩm trong đơn hàng';
 
--- 9. Order (Đơn đặt hàng)
-CREATE TABLE IF NOT EXISTS `orders` (
-    `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
-    `buyer_id` BIGINT NOT NULL,
-    `total_amount` DECIMAL(15, 2) NOT NULL,
-    `status` VARCHAR(50) DEFAULT 'PENDING',
-    `shipping_address` VARCHAR(255),
-    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (`buyer_id`) REFERENCES `account`(`id`)
-);
+-- ============================================================
+-- BẢNG 11: group_buy — Chiến dịch mua chung
+-- ============================================================
+CREATE TABLE IF NOT EXISTS group_buy (
+    id                  BIGINT          NOT NULL AUTO_INCREMENT,
+    product_id          BIGINT          NOT NULL COMMENT 'FK → product',
+    title               VARCHAR(500)    COMMENT 'Tiêu đề chiến dịch',
+    target_quantity     DECIMAL(15,2)   NOT NULL COMMENT 'Mục tiêu (kg)',
+    current_quantity    DECIMAL(15,2)   DEFAULT 0 COMMENT 'Đã đăng ký (kg)',
+    discount_price      DECIMAL(15,2)   NOT NULL COMMENT 'Giá ưu đãi (VND/kg)',
+    original_price      DECIMAL(15,2)   COMMENT 'Giá gốc (VND/kg)',
+    discount_percent    INT             COMMENT 'Phần trăm giảm giá',
+    participants_count  INT             DEFAULT 0 COMMENT 'Số người tham gia',
+    start_date          DATETIME        COMMENT 'Ngày bắt đầu',
+    end_date            DATETIME        COMMENT 'Ngày kết thúc',
+    status              VARCHAR(50)     DEFAULT 'OPEN' COMMENT 'OPEN|CLOSED|COMPLETED',
+    PRIMARY KEY (id),
+    FOREIGN KEY (product_id) REFERENCES product(id),
+    INDEX idx_groupbuy_status (status)
+) ENGINE=InnoDB COMMENT='Chiến dịch mua chung — gom đơn lấy giá ưu đãi';
 
--- 10. Order_Item (Chi tiết đơn hàng)
-CREATE TABLE IF NOT EXISTS `order_item` (
-    `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
-    `order_id` BIGINT NOT NULL,
-    `product_id` BIGINT NOT NULL,
-    `quantity` DECIMAL(15, 2) NOT NULL,
-    `price` DECIMAL(15, 2) NOT NULL,
-    FOREIGN KEY (`order_id`) REFERENCES `orders`(`id`) ON DELETE CASCADE,
-    FOREIGN KEY (`product_id`) REFERENCES `product`(`id`)
-);
+-- ============================================================
+-- BẢNG 12: forward_contract — Hợp đồng tương lai / bao tiêu
+-- ============================================================
+CREATE TABLE IF NOT EXISTS forward_contract (
+    id              BIGINT          NOT NULL AUTO_INCREMENT,
+    buyer_id        BIGINT          NOT NULL COMMENT 'FK → account (Partner)',
+    seller_id       BIGINT          NOT NULL COMMENT 'FK → account (Supplier)',
+    product_id      BIGINT          NOT NULL COMMENT 'FK → product',
+    title           VARCHAR(500)    COMMENT 'Tiêu đề hợp đồng',
+    farm_name       VARCHAR(255)    COMMENT 'Tên nông trại cung cấp',
+    quantity        DECIMAL(15,2)   NOT NULL COMMENT 'Khối lượng bao tiêu (kg)',
+    total_amount    DECIMAL(15,2)   NOT NULL COMMENT 'Tổng giá trị hợp đồng (VND)',
+    contract_price  DECIMAL(15,2)   COMMENT 'Giá cố định (VND/kg)',
+    delivery_date   DATE            COMMENT 'Ngày giao hàng dự kiến',
+    deposit_percent INT             COMMENT 'Phần trăm đặt cọc',
+    status          VARCHAR(50)     DEFAULT 'OPEN'
+                                    COMMENT 'DRAFT|OPEN|SIGNED|HARVESTING|COMPLETED',
+    created_at      DATETIME(6)     COMMENT 'Ngày tạo',
+    PRIMARY KEY (id),
+    FOREIGN KEY (buyer_id) REFERENCES account(id),
+    FOREIGN KEY (seller_id) REFERENCES account(id),
+    FOREIGN KEY (product_id) REFERENCES product(id),
+    INDEX idx_fc_buyer (buyer_id),
+    INDEX idx_fc_seller (seller_id),
+    INDEX idx_fc_status (status)
+) ENGINE=InnoDB COMMENT='Hợp đồng tương lai — bao tiêu mùa vụ';
 
--- 11. Group_Buy (Chiến dịch mua chung)
-CREATE TABLE IF NOT EXISTS `group_buy` (
-    `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
-    `product_id` BIGINT NOT NULL,
-    `target_quantity` DECIMAL(15, 2) NOT NULL,
-    `current_quantity` DECIMAL(15, 2) DEFAULT 0,
-    `discount_price` DECIMAL(15, 2) NOT NULL,
-    `start_date` DATETIME NOT NULL,
-    `end_date` DATETIME NOT NULL,
-    `status` VARCHAR(50) DEFAULT 'OPEN',
-    FOREIGN KEY (`product_id`) REFERENCES `product`(`id`)
-);
+-- ============================================================
+-- BẢNG 13: credit_info — Thông tin tín dụng B2B của Partner
+-- ============================================================
+CREATE TABLE IF NOT EXISTS credit_info (
+    id              BIGINT          NOT NULL AUTO_INCREMENT,
+    account_id      BIGINT          NOT NULL UNIQUE COMMENT 'FK → account (Partner)',
+    partner_rank    VARCHAR(50)     DEFAULT 'BRONZE' COMMENT 'BRONZE|SILVER|GOLD|DIAMOND',
+    credit_limit    DECIMAL(15,2)   COMMENT 'Hạn mức tín dụng (VND)',
+    used_credit     DECIMAL(15,2)   DEFAULT 0 COMMENT 'Đã sử dụng (VND)',
+    billing_cycle   INT             DEFAULT 30 COMMENT 'Chu kỳ thanh toán (ngày)',
+    next_due_date   VARCHAR(50)     COMMENT 'Ngày đáo hạn thanh toán tiếp theo',
+    PRIMARY KEY (id),
+    FOREIGN KEY (account_id) REFERENCES account(id) ON DELETE CASCADE
+) ENGINE=InnoDB COMMENT='Thông tin tín dụng B2B của Partner';
 
--- 12. Group_Buy_Participant (Người tham gia mua chung)
-CREATE TABLE IF NOT EXISTS `group_buy_participant` (
-    `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
-    `group_buy_id` BIGINT NOT NULL,
-    `buyer_id` BIGINT NOT NULL,
-    `quantity` DECIMAL(15, 2) NOT NULL,
-    `joined_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (`group_buy_id`) REFERENCES `group_buy`(`id`),
-    FOREIGN KEY (`buyer_id`) REFERENCES `account`(`id`)
-);
+-- ============================================================
+-- BẢNG 14: kyc_profile — Hồ sơ xác minh doanh nghiệp (KYC)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS kyc_profile (
+    id              BIGINT          NOT NULL AUTO_INCREMENT,
+    account_id      BIGINT          NOT NULL UNIQUE COMMENT 'FK → account',
+    business_name   VARCHAR(255)    COMMENT 'Tên doanh nghiệp',
+    business_type   VARCHAR(100)    COMMENT 'Loại hình kinh doanh',
+    tax_code        VARCHAR(50)     COMMENT 'Mã số thuế',
+    representative  VARCHAR(100)    COMMENT 'Người đại diện pháp lý',
+    status          VARCHAR(50)     DEFAULT 'PENDING'
+                                    COMMENT 'PENDING|APPROVED|REJECTED|NEEDS_INFO',
+    note            TEXT            COMMENT 'Ghi chú của Admin khi duyệt/từ chối',
+    PRIMARY KEY (id),
+    FOREIGN KEY (account_id) REFERENCES account(id) ON DELETE CASCADE,
+    INDEX idx_kyc_status (status)
+) ENGINE=InnoDB COMMENT='Hồ sơ xác minh doanh nghiệp KYC';
 
--- 13. Delivery (Thông tin giao hàng)
-CREATE TABLE IF NOT EXISTS `delivery` (
-    `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
-    `order_id` BIGINT NOT NULL,
-    `tracking_number` VARCHAR(100),
-    `status` VARCHAR(50) DEFAULT 'PREPARING',
-    `estimated_delivery_date` DATE,
-    FOREIGN KEY (`order_id`) REFERENCES `orders`(`id`)
-);
+-- ============================================================
+-- BẢNG 15: warehouse — Kho hàng
+-- ============================================================
+CREATE TABLE IF NOT EXISTS warehouse (
+    id              BIGINT          NOT NULL AUTO_INCREMENT,
+    code            VARCHAR(50)     NOT NULL UNIQUE COMMENT 'Mã kho: WH-SGN-01',
+    name            VARCHAR(255)    NOT NULL COMMENT 'Tên kho',
+    type            VARCHAR(100)    COMMENT 'Loại: DRY (khô), COLD (lạnh)',
+    location        VARCHAR(255)    COMMENT 'Địa chỉ kho',
+    manager         VARCHAR(100)    COMMENT 'Tên quản lý kho',
+    phone           VARCHAR(50)     COMMENT 'SĐT quản lý',
+    total_capacity  INT             COMMENT 'Tổng dung tích (tấn)',
+    used_capacity   INT             COMMENT 'Đã sử dụng (tấn)',
+    temperature     VARCHAR(50)     COMMENT 'Nhiệt độ bảo quản: 2°C - 8°C',
+    status          VARCHAR(50)     DEFAULT 'ACTIVE' COMMENT 'ACTIVE|INACTIVE|MAINTENANCE',
+    PRIMARY KEY (id),
+    INDEX idx_warehouse_code (code)
+) ENGINE=InnoDB COMMENT='Kho hàng nông sản';
 
--- 14. Delivery_Log (Lịch sử giao hàng)
-CREATE TABLE IF NOT EXISTS `delivery_log` (
-    `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
-    `delivery_id` BIGINT NOT NULL,
-    `status` VARCHAR(50) NOT NULL,
-    `location` VARCHAR(255),
-    `timestamp` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (`delivery_id`) REFERENCES `delivery`(`id`) ON DELETE CASCADE
-);
+-- ============================================================
+-- BẢNG 16: inventory_batch — Lô hàng trong kho
+-- ============================================================
+CREATE TABLE IF NOT EXISTS inventory_batch (
+    id              BIGINT          NOT NULL AUTO_INCREMENT,
+    batch_code      VARCHAR(50)     NOT NULL UNIQUE COMMENT 'Mã lô: BATCH-2607-SR01',
+    warehouse_id    BIGINT          COMMENT 'FK → warehouse',
+    product_id      BIGINT          COMMENT 'FK → product',
+    quantity        INT             COMMENT 'Số lượng (kg)',
+    import_date     VARCHAR(50)     COMMENT 'Ngày nhập kho: 2026-07-25',
+    expiry_date     VARCHAR(50)     COMMENT 'Ngày hết hạn: 2026-08-06',
+    quality_status  VARCHAR(50)     DEFAULT 'GOOD' COMMENT 'GOOD|WARNING|EXPIRED',
+    supplier_name   VARCHAR(255)    COMMENT 'Tên nhà cung cấp lô hàng',
+    PRIMARY KEY (id),
+    FOREIGN KEY (warehouse_id) REFERENCES warehouse(id),
+    FOREIGN KEY (product_id) REFERENCES product(id),
+    INDEX idx_batch_quality (quality_status)
+) ENGINE=InnoDB COMMENT='Lô hàng trong kho';
 
--- 15. Forward_Contract (Hợp đồng)
-CREATE TABLE IF NOT EXISTS `forward_contract` (
-    `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
-    `buyer_id` BIGINT NOT NULL,
-    `seller_id` BIGINT NOT NULL,
-    `product_id` BIGINT NOT NULL,
-    `quantity` DECIMAL(15, 2) NOT NULL,
-    `total_amount` DECIMAL(15, 2) NOT NULL,
-    `delivery_date` DATE NOT NULL,
-    `status` VARCHAR(50) DEFAULT 'DRAFT',
-    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (`buyer_id`) REFERENCES `account`(`id`),
-    FOREIGN KEY (`seller_id`) REFERENCES `account`(`id`),
-    FOREIGN KEY (`product_id`) REFERENCES `product`(`id`)
-);
+-- ============================================================
+-- BẢNG 17: system_alert — Cảnh báo hệ thống / AI Risk Alerts
+-- ============================================================
+CREATE TABLE IF NOT EXISTS system_alert (
+    id          BIGINT          NOT NULL AUTO_INCREMENT,
+    title       VARCHAR(255)    COMMENT 'Tiêu đề cảnh báo',
+    description TEXT            COMMENT 'Mô tả chi tiết',
+    risk_level  VARCHAR(50)     COMMENT 'WARNING|HIGH|LOW',
+    location    VARCHAR(255)    COMMENT 'Khu vực liên quan',
+    category    VARCHAR(100)    COMMENT 'PRICE_FLUCTUATION|WEATHER|QUALITY|FINANCIAL',
+    created_at  VARCHAR(50)     COMMENT 'Thời điểm tạo: 2026-07-27T07:00:00',
+    PRIMARY KEY (id),
+    INDEX idx_alert_risk (risk_level)
+) ENGINE=InnoDB COMMENT='Cảnh báo hệ thống và AI Risk Alerts';
 
--- 16. Contract_Milestone (Tiến độ hợp đồng)
-CREATE TABLE IF NOT EXISTS `contract_milestone` (
-    `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
-    `contract_id` BIGINT NOT NULL,
-    `title` VARCHAR(100) NOT NULL,
-    `description` TEXT,
-    `due_date` DATE NOT NULL,
-    `status` VARCHAR(50) DEFAULT 'PENDING',
-    FOREIGN KEY (`contract_id`) REFERENCES `forward_contract`(`id`) ON DELETE CASCADE
-);
-
--- 17. Payment (Thanh toán)
-CREATE TABLE IF NOT EXISTS `payment` (
-    `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
-    `order_id` BIGINT,
-    `contract_id` BIGINT,
-    `amount` DECIMAL(15, 2) NOT NULL,
-    `payment_method` VARCHAR(50),
-    `status` VARCHAR(50) DEFAULT 'PENDING',
-    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (`order_id`) REFERENCES `orders`(`id`),
-    FOREIGN KEY (`contract_id`) REFERENCES `forward_contract`(`id`)
-);
-
--- 18. Review (Đánh giá)
-CREATE TABLE IF NOT EXISTS `review` (
-    `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
-    `product_id` BIGINT NOT NULL,
-    `reviewer_id` BIGINT NOT NULL,
-    `rating` INT NOT NULL CHECK (rating >= 1 AND rating <= 5),
-    `comment` TEXT,
-    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (`product_id`) REFERENCES `product`(`id`),
-    FOREIGN KEY (`reviewer_id`) REFERENCES `account`(`id`)
-);
-
--- ============================
--- 1. ACCOUNT (15 dòng: 5 Supplier + 5 Partner + 5 Shipper)
--- ============================
-INSERT INTO `account` (`id`, `email`, `phone_number`, `username`, `password`, `role`, `status`) VALUES
-(1, 'supplier01@agriconnect.vn', '0912345001', 'supplier01', '123456', 'SUPPLIER', 'ACTIVE'),
-(2, 'nguyenthanhsonyb2002@gmail.com', '0912345002', 'supplier02', '123456', 'SUPPLIER', 'PENDING'),
-(3, 'supplier03@agriconnect.vn', '0912345003', 'supplier03', '123456', 'SUPPLIER', 'ACTIVE'),
-(4, 'supplier04@agriconnect.vn', '0912345004', 'supplier04', '123456', 'SUPPLIER', 'LOCKED'),
-(5, 'supplier05@agriconnect.vn', '0912345005', 'supplier05', '123456', 'SUPPLIER', 'PENDING'),
-
-(6, 'partner01@agriconnect.vn', '0923456001', 'partner01', '123456', 'PARTNER', 'ACTIVE'),
-(7, 'partner02@agriconnect.vn', '0923456002', 'partner02', '123456', 'PARTNER', 'PENDING'),
-(8, 'partner03@agriconnect.vn', '0923456003', 'partner03', '123456', 'PARTNER', 'ACTIVE'),
-(9, 'partner04@agriconnect.vn', '0923456004', 'partner04', '123456', 'PARTNER', 'LOCKED'),
-(10, 'partner05@agriconnect.vn', '0923456005', 'partner05', '123456', 'PARTNER', 'REJECTED'),
-
-(11, 'shipper01@agriconnect.vn', '0934567001', 'shipper01', '123456', 'SHIPPER', 'ACTIVE'),
-(12, 'shipper02@agriconnect.vn', '0934567002', 'shipper02', '123456', 'SHIPPER', 'ACTIVE'),
-(13, 'shipper03@agriconnect.vn', '0934567003', 'shipper03', '123456', 'SHIPPER', 'PENDING'),
-(14, 'shipper04@agriconnect.vn', '0934567004', 'shipper04', '123456', 'SHIPPER', 'LOCKED'),
-(15, 'shipper05@agriconnect.vn', '0934567005', 'shipper05', '123456', 'SHIPPER', 'ACTIVE');
-
--- ============================
--- 2. SUPPLIER (account_id 1 -> 5)
--- ============================
-INSERT INTO `supplier` (`supplier_id`, `farm_name`, `farm_area`, `certificate`, `production_capacity`) VALUES
-(1, 'Nông trại Xanh Sạch', 12.50, 'VietGAP-2023-001', 500.00),
-(2, 'Trang trại Hữu Cơ Đà Lạt', 8.75, 'Organic-VN-2022', 320.50),
-(3, 'HTX Nông sản Miền Tây', 25.00, 'GlobalGAP-2024-045', 1200.00),
-(4, 'Nông trại Ba Vì', 15.20, 'VietGAP-2020-077', 450.00),
-(5, 'Trang trại Rau Sạch Mộc Châu', 6.30, 'VietGAP-2021-089', 210.00);
-
--- ============================
--- 3. PARTNER (account_id 6 -> 10)
--- ============================
-INSERT INTO `partner` (`partner_id`, `company_name`, `tax_code`, `business_type`) VALUES
-(6, 'Công ty TNHH Thực Phẩm An Việt', '0102345678', 'Phân phối bán buôn'),
-(7, 'Siêu thị Xanh Farmer Mart', '0309876543', 'Bán lẻ'),
-(8, 'Công ty CP Xuất Nhập Khẩu Nông Sản', '0401122334', 'Xuất khẩu'),
-(9, 'Chuỗi Cửa Hàng Thực Phẩm Sạch', '0355667788', 'Bán lẻ'),
-(10, 'Công ty TNHH Chế Biến Nông Sản Việt', '0207788990', 'Chế biến - Gia công');
-
--- ============================
--- 4. SHIPPER (account_id 11 -> 15)
--- ============================
-INSERT INTO `shipper` (`shipper_id`, `vehicle_type`, `license_number`, `operating_area`) VALUES
-(11, 'Xe tải nhỏ 1.5 tấn', '29C-12345', 'Hà Nội - Hưng Yên'),
-(12, 'Xe tải lạnh 3.5 tấn', '30H-67890', 'Hà Nội - Bắc Ninh - Bắc Giang'),
-(13, 'Xe máy giao hàng', '29B1-11122', 'Nội thành Hà Nội'),
-(14, 'Xe container', '51D-33445', 'TP.HCM - Miền Tây'),
-(15, 'Xe tải 5 tấn', '43C-99887', 'Đà Nẵng - Quảng Nam');
+-- ============================================================
+-- BẢNG 18: audit_log — Nhật ký hoạt động Admin
+-- ============================================================
+CREATE TABLE IF NOT EXISTS audit_log (
+    id          BIGINT          NOT NULL AUTO_INCREMENT,
+    action_type VARCHAR(100)    COMMENT 'KYC_APPROVE|UPDATE_ORDER_STATUS|RESET_PASSWORD...',
+    title       VARCHAR(255)    COMMENT 'Tiêu đề ngắn gọn',
+    subtitle    TEXT            COMMENT 'Mô tả chi tiết hành động',
+    author      VARCHAR(100)    COMMENT 'Username người thực hiện',
+    created_at  VARCHAR(50)     COMMENT 'Thời điểm thực hiện',
+    PRIMARY KEY (id),
+    INDEX idx_auditlog_author (author),
+    INDEX idx_auditlog_action (action_type)
+) ENGINE=InnoDB COMMENT='Nhật ký hoạt động của Admin';

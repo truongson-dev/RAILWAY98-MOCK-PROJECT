@@ -34,6 +34,9 @@ interface AuthState {
 
   /** Gọi khi logout để xóa sạch thông tin xác thực */
   clearAuth: () => void;
+
+  /** Alias của clearAuth — dùng trong PartnerApp và các component khác */
+  logout: () => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -47,6 +50,10 @@ export const useAuthStore = create<AuthState>()(
         set({ user, token, isAuthenticated: true }),
 
       clearAuth: () =>
+        set({ user: null, token: null, isAuthenticated: false }),
+
+      // logout là alias của clearAuth để các component dùng tên trực quan hơn
+      logout: () =>
         set({ user: null, token: null, isAuthenticated: false }),
     }),
     {

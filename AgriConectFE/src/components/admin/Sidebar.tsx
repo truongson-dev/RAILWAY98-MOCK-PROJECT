@@ -83,26 +83,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <span>Người dùng</span>
           </button>
 
-          {/* Phê duyệt hồ sơ */}
-          <button
-            onClick={() => onSelectTab('kyc')}
-            className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition-all cursor-pointer ${
-              isActive('kyc')
-                ? 'bg-[#a3f69c] text-[#003808] font-semibold shadow-xs'
-                : 'text-[#40493d] hover:bg-[#e0e4d9]/60'
-            }`}
-          >
-            <div className="flex items-center space-x-3">
-              <ShieldCheck className="w-4 h-4 shrink-0" />
-              <span>Phê duyệt hồ sơ</span>
-            </div>
-            {pendingKycCount > 0 && (
-              <span className="bg-[#ba1a1a] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
-                {pendingKycCount}
-              </span>
-            )}
-          </button>
-
           {/* Sản phẩm */}
           <button
             onClick={() => onSelectTab('products')}

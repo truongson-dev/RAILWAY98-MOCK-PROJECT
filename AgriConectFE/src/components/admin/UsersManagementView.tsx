@@ -1,23 +1,180 @@
 'use client';
 // Đây là component thuộc giao diện Admin
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { 
   Search, Plus, Star, Filter, ChevronLeft, ChevronRight, SlidersHorizontal,
   Eye, Ban, CheckCircle2, Shield, Edit3, Trash2, X, Building, Truck, Award,
-  AlertTriangle, RefreshCw, FileText, Lock, Unlock, ShieldAlert
+  AlertTriangle, RefreshCw, FileText, Lock, Unlock, ShieldAlert,
+  UserCheck, Phone, MapPin, Building2, Sprout, Clock, XCircle
 } from 'lucide-react';
-import { SUPPLIERS_LIST, PARTNERS_LIST, LOGISTICS_LIST } from '@/data/admin.mockData';
-import { SupplierItem, PartnerItem, LogisticsItem } from '@/types/admin.types';
+import { SUPPLIERS_LIST, PARTNERS_LIST, LOGISTICS_LIST, INITIAL_KYC_RECORDS } from '@/data/admin.mockData';
+import { SupplierItem, PartnerItem, LogisticsItem, KycRecord } from '@/types/admin.types';
+import { useAuthStore } from '@/store/authStore';
+import { KycApprovalView } from '@/components/admin/KycApprovalView';
+import { KycModal } from '@/components/admin/KycModal';
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080';
+
+// ── Types cho tài khoản pending từ API ──────────────────────────────────────
+interface AccountDTO {
+  id: number;
+  email: string;
+  fullName: string | null;
+  phone: string | null;
+  province: string | null;
+  address: string | null;
+  avatar: string | null;
+  role: 'PARTNER' | 'SUPPLIER' | 'SHIPPER' | 'ADMIN';
+  status: string;
+  createdAt: string | null;
+  companyName?: string;
+  taxCode?: string;
+  businessType?: string;
+  farmName?: string;
+  certificate?: string;
+  vehicleType?: string;
+  licenseNumber?: string;
+  operatingArea?: string;
+}
 
 interface UsersManagementViewProps {
-  subTab?: 'suppliers' | 'partners' | 'logistics' | 'permissions';
+  subTab?: 'suppliers' | 'partners' | 'logistics' | 'permissions' | 'pending';
 }
 
 // Component: UsersManagementView - Giao diện quản lý/hiển thị cho Admin
 export const UsersManagementView: React.FC<UsersManagementViewProps> = ({ subTab = 'suppliers' }) => {
-  const [activeSub, setActiveSub] = useState<'suppliers' | 'partners' | 'logistics'>(
-    subTab === 'permissions' ? 'suppliers' : subTab
+  const [activeSub, setActiveSub] = useState<'suppliers' | 'partners' | 'logistics' | 'pending'>(
+    subTab === 'permissions' ? 'suppliers' : (subTab as 'suppliers' | 'partners' | 'logistics' | 'pending')
   );
+
+  // ── Pending accounts state ─────────────────────────────────────────────────
+  const token = useAuthStore((s) => s.token);
+  const [pendingAccounts, setPendingAccounts] = useState<AccountDTO[]>([]);
+  const [pendingLoading, setPendingLoading] = useState(false);
+  const [pendingError, setPendingError] = useState<string | null>(null);
+  const [actionLoading, setActionLoading] = useState<number | null>(null);
+  const [pendingSearch, setPendingSearch] = useState('');
+  const [selectedPending, setSelectedPending] = useState<AccountDTO | null>(null);
+  const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
+
+  // ── KYC state ──────────────────────────────────────────────────────────────
+  const [kycRecords, setKycRecords] = useState<KycRecord[]>(INITIAL_KYC_RECORDS);
+  const [selectedKyc, setSelectedKyc] = useState<KycRecord | null>(null);
+
+  const showToast = (msg: string, type: 'success' | 'error' = 'success') => {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 3000);
+  };
+
+  const fetchPending = useCallback(async () => {
+    if (!token) {
+      setPendingError('Bạn cần đăng nhập bằng tài khoản Admin để xem danh sách chờ duyệt.');
+      return;
+    }
+    setPendingLoading(true);
+    setPendingError(null);
+    try {
+      const res = await fetch(`${API_BASE}/api/admin/accounts?status=PENDING_APPROVAL&size=100`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error();
+      const body = await res.json();
+      setPendingAccounts(body.data?.content ?? []);
+    } catch {
+      setPendingError('Không tải được danh sách. Vui lòng thử lại.');
+    } finally {
+      setPendingLoading(false);
+    }
+  }, [token]);
+
+  // ── KYC handlers ──────────────────────────────────────────────────────────
+  const handleApproveKyc = (id: string) => {
+    setKycRecords((prev) =>
+      prev.map((k) => (k.id === id ? { ...k, status: 'approved' as const, missingDocNote: 'Đã phê duyệt thành công' } : k))
+    );
+    showToast('Đã phê duyệt hồ sơ doanh nghiệp thành công!');
+  };
+  const handleRequestKycInfo = (id: string, note: string) => {
+    setKycRecords((prev) =>
+      prev.map((k) => (k.id === id ? { ...k, status: 'needs_info' as const, missingDocNote: note || 'Cần bổ sung giấy tờ' } : k))
+    );
+    showToast('Đã gửi yêu cầu bổ sung chứng nhận.');
+  };
+  const handleRejectKyc = (id: string) => {
+    setKycRecords((prev) =>
+      prev.map((k) => (k.id === id ? { ...k, status: 'rejected' as const, missingDocNote: 'Đã từ chối' } : k))
+    );
+    showToast('Đã từ chối hồ sơ doanh nghiệp.');
+  };
+
+  const kycPendingCount = kycRecords.filter((k) => k.status === 'pending' || k.status === 'needs_info').length;
+
+  useEffect(() => {
+    if (activeSub === 'pending') fetchPending();
+  }, [activeSub, fetchPending]);
+
+  const handleApprove = async (acc: AccountDTO) => {
+    if (!token) return;
+    setActionLoading(acc.id);
+    try {
+      const res = await fetch(`${API_BASE}/api/admin/accounts/${acc.id}/status`, {
+        method: 'PUT',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'ACTIVE' }),
+      });
+      if (!res.ok) throw new Error();
+      setPendingAccounts((prev) => prev.filter((a) => a.id !== acc.id));
+      setSelectedPending(null);
+      showToast(`✅ Đã duyệt tài khoản ${acc.fullName || acc.email}`);
+    } catch {
+      showToast('Duyệt thất bại. Vui lòng thử lại.', 'error');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleReject = async (acc: AccountDTO) => {
+    if (!token) return;
+    if (!window.confirm(`Xác nhận từ chối tài khoản "${acc.fullName || acc.email}"?`)) return;
+    setActionLoading(acc.id);
+    try {
+      const res = await fetch(`${API_BASE}/api/admin/accounts/${acc.id}/status`, {
+        method: 'PUT',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'REJECTED' }),
+      });
+      if (!res.ok) throw new Error();
+      setPendingAccounts((prev) => prev.filter((a) => a.id !== acc.id));
+      setSelectedPending(null);
+      showToast(`Đã từ chối tài khoản ${acc.fullName || acc.email}`);
+    } catch {
+      showToast('Từ chối thất bại. Vui lòng thử lại.', 'error');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const filteredPending = pendingAccounts.filter((a) => {
+    const q = pendingSearch.toLowerCase();
+    return (
+      (a.fullName ?? '').toLowerCase().includes(q) ||
+      a.email.toLowerCase().includes(q) ||
+      (a.phone ?? '').includes(q) ||
+      (a.companyName ?? '').toLowerCase().includes(q) ||
+      (a.farmName ?? '').toLowerCase().includes(q)
+    );
+  });
+
+  const roleLabel: Record<string, string> = {
+    PARTNER: 'Đối tác thu mua',
+    SUPPLIER: 'Nhà cung cấp',
+    SHIPPER: 'Đơn vị vận chuyển',
+  };
+  const roleColor: Record<string, string> = {
+    PARTNER: 'bg-blue-100 text-blue-700',
+    SUPPLIER: 'bg-emerald-100 text-emerald-700',
+    SHIPPER: 'bg-amber-100 text-amber-700',
+  };
 
   // Data states
   const [suppliers, setSuppliers] = useState<SupplierItem[]>(SUPPLIERS_LIST);
@@ -45,7 +202,6 @@ export const UsersManagementView: React.FC<UsersManagementViewProps> = ({ subTab
   // Switch Subtab
   const handleTabChange = (tab: 'suppliers' | 'partners' | 'logistics') => {
     setActiveSub(tab);
-    setSearchQuery('');
     setRegionFilter('all');
     setCertFilter('all');
     setStatusFilter('all');
@@ -225,7 +381,7 @@ export const UsersManagementView: React.FC<UsersManagementViewProps> = ({ subTab
     }
   };
 
-  const config = tabConfigs[activeSub];
+  const config = activeSub !== 'pending' ? tabConfigs[activeSub] : tabConfigs.suppliers;
 
   return (
     <div className="p-6 md:p-8 space-y-6 bg-[#f7fbf0] min-h-full">
@@ -259,11 +415,138 @@ export const UsersManagementView: React.FC<UsersManagementViewProps> = ({ subTab
         >
           Đơn Vị Vận Chuyển {tabConfigs.logistics.countLabel}
         </button>
+        <button
+          onClick={() => setActiveSub('pending')}
+          className={`pb-3 border-b-2 cursor-pointer transition-all flex items-center gap-1.5 ${activeSub === 'pending' ? 'border-[#ba1a1a] text-[#ba1a1a]' : 'border-transparent hover:text-[#181d16]'}`}
+        >
+          Chờ Duyệt
+          {(pendingAccounts.length > 0 || kycPendingCount > 0) && activeSub !== 'pending' && (
+            <span className="bg-[#ba1a1a] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none">
+              {pendingAccounts.length + kycPendingCount}
+            </span>
+          )}
+        </button>
       </div>
 
       {/* Main Content Area */}
       <div className="space-y-4">
-        {/* Search, Filter & Sorting Bar */}
+
+        {/* ── TAB: CHỜ DUYỆT ── */}
+        {activeSub === 'pending' && (
+          <div className="space-y-4">
+            {/* Toolbar */}
+            <div className="bg-white p-4 rounded-xl border border-[#e0e4d9] flex items-center justify-between gap-3">
+              <div className="relative w-full sm:w-80">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#707a6c]" />
+                <input
+                  type="text"
+                  value={pendingSearch}
+                  onChange={(e) => setPendingSearch(e.target.value)}
+                  placeholder="Tìm theo tên, email, số điện thoại..."
+                  className="w-full pl-9 pr-4 py-2 text-xs bg-[#f7fbf0] border border-[#bfcaba] rounded-lg text-[#181d16] focus:outline-none focus:ring-2 focus:ring-[#176a22]"
+                />
+              </div>
+              <button
+                onClick={fetchPending}
+                className="p-2 text-[#40493d] hover:bg-[#e0e4d9] rounded-xl transition-colors cursor-pointer"
+                title="Làm mới"
+              >
+                <RefreshCw className={`w-4 h-4 ${pendingLoading ? 'animate-spin' : ''}`} />
+              </button>
+            </div>
+
+            {/* ── Tài khoản chờ duyệt từ API ── */}
+            <div>
+              <h3 className="text-sm font-bold text-[#181d16] mb-3 flex items-center gap-2">
+                <UserCheck className="w-4 h-4 text-[#176a22]" />
+                Tài khoản chờ phê duyệt
+                {pendingAccounts.length > 0 && (
+                  <span className="bg-[#ba1a1a] text-white text-[10px] font-bold px-2 py-0.5 rounded-full">{pendingAccounts.length}</span>
+                )}
+              </h3>
+
+              {pendingLoading ? (
+                <div className="flex items-center justify-center py-10 text-[#707a6c]">
+                  <RefreshCw className="w-5 h-5 animate-spin mr-2" />
+                  <span className="text-sm">Đang tải...</span>
+                </div>
+              ) : pendingError ? (
+                <div className="bg-red-50 border border-red-200 rounded-xl p-5 text-center text-red-700 text-sm space-y-2">
+                  <AlertTriangle className="w-5 h-5 mx-auto" />
+                  <p>{pendingError}</p>
+                  {token && <button onClick={fetchPending} className="text-xs underline cursor-pointer">Thử lại</button>}
+                </div>
+              ) : filteredPending.length === 0 ? (
+                <div className="bg-white rounded-xl border border-[#e0e4d9] p-10 text-center space-y-2">
+                  <UserCheck className="w-8 h-8 mx-auto text-[#176a22] opacity-40" />
+                  <p className="text-sm font-semibold text-[#181d16]">Không có tài khoản nào chờ duyệt</p>
+                  <p className="text-xs text-[#707a6c]">{pendingSearch ? 'Thử từ khóa tìm kiếm khác' : 'Tất cả tài khoản đã được xử lý'}</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                  {filteredPending.map((acc) => (
+                    <div key={acc.id} className="bg-white rounded-xl border border-[#e0e4d9] p-5 shadow-sm hover:shadow-md transition-shadow flex flex-col gap-3">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-[#176a22]/10 flex items-center justify-center text-[#176a22] font-bold text-sm shrink-0">
+                            {(acc.fullName || acc.email).charAt(0).toUpperCase()}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-sm font-bold text-[#181d16] truncate">{acc.fullName || '(Chưa có tên)'}</p>
+                            <p className="text-xs text-[#707a6c] truncate">{acc.email}</p>
+                          </div>
+                        </div>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${roleColor[acc.role] ?? 'bg-gray-100 text-gray-600'}`}>
+                          {roleLabel[acc.role] ?? acc.role}
+                        </span>
+                      </div>
+                      <div className="space-y-1 text-xs text-[#40493d]">
+                        {acc.phone && <div className="flex items-center gap-1.5"><Phone className="w-3.5 h-3.5 text-[#707a6c]" />{acc.phone}</div>}
+                        {acc.province && <div className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5 text-[#707a6c]" />{acc.province}</div>}
+                        {(acc.companyName || acc.farmName) && (
+                          <div className="flex items-center gap-1.5"><Building2 className="w-3.5 h-3.5 text-[#707a6c]" /><span className="truncate">{acc.companyName || acc.farmName}</span></div>
+                        )}
+                        {acc.createdAt && (
+                          <div className="flex items-center gap-1.5 text-[#707a6c]"><Clock className="w-3.5 h-3.5" />Đăng ký: {new Date(acc.createdAt).toLocaleDateString('vi-VN')}</div>
+                        )}
+                      </div>
+                      <div className="pt-2 border-t border-[#e0e4d9] flex items-center justify-between gap-2">
+                        <button onClick={() => setSelectedPending(acc)} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-[#f7fbf0] hover:bg-[#e0e4d9] text-[#40493d] rounded-lg transition-colors cursor-pointer">
+                          <Eye className="w-3.5 h-3.5" />Chi tiết
+                        </button>
+                        <div className="flex items-center gap-2">
+                          <button onClick={() => handleReject(acc)} disabled={actionLoading === acc.id} className="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold bg-red-50 hover:bg-red-100 text-red-700 rounded-lg transition-colors cursor-pointer disabled:opacity-50">
+                            <XCircle className="w-3.5 h-3.5" />Từ chối
+                          </button>
+                          <button onClick={() => handleApprove(acc)} disabled={actionLoading === acc.id} className="flex items-center gap-1 px-3 py-1.5 text-xs font-bold bg-[#176a22] hover:bg-[#13561b] text-white rounded-lg transition-colors cursor-pointer disabled:opacity-50 shadow-sm">
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            {actionLoading === acc.id ? 'Đang xử lý...' : 'Duyệt'}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* ── Hồ sơ KYC doanh nghiệp ── */}
+            <div className="pt-2">
+              <h3 className="text-sm font-bold text-[#181d16] mb-3 flex items-center gap-2">
+                <Shield className="w-4 h-4 text-[#176a22]" />
+                Phê duyệt hồ sơ doanh nghiệp (KYC)
+                {kycPendingCount > 0 && (
+                  <span className="bg-[#ba1a1a] text-white text-[10px] font-bold px-2 py-0.5 rounded-full">{kycPendingCount}</span>
+                )}
+              </h3>
+              <KycApprovalView records={kycRecords} onOpenModal={(kyc) => setSelectedKyc(kyc)} />
+            </div>
+          </div>
+        )}
+
+        {/* ── TAB: SUPPLIERS / PARTNERS / LOGISTICS ── */}
+        {activeSub !== 'pending' && (
+          <>
         <div className="bg-white p-4 rounded-xl border border-[#e0e4d9] flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="relative w-full md:w-80">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#707a6c]" />
@@ -549,11 +832,11 @@ export const UsersManagementView: React.FC<UsersManagementViewProps> = ({ subTab
             </button>
           </div>
         </div>
+        </> )} {/* end activeSub !== 'pending' */}
       </div>
 
       {/* Modal Detail & Admin Control */}
-      {selectedItem && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+      {selectedItem && (        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-2xl w-full border border-[#e0e4d9] p-6 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
             {/* Modal Header */}
             <div className="flex items-start justify-between border-b border-[#e0e4d9] pb-4">
@@ -762,6 +1045,76 @@ export const UsersManagementView: React.FC<UsersManagementViewProps> = ({ subTab
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Modal Chi tiết tài khoản chờ duyệt */}
+      {selectedPending && (
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl w-full max-w-lg border border-[#e0e4d9] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="p-5 bg-[#f7fbf0] border-b border-[#e0e4d9] flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-[#176a22] text-white flex items-center justify-center font-bold">
+                  {(selectedPending.fullName || selectedPending.email).charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <h3 className="font-bold text-[#181d16]">{selectedPending.fullName || '(Chưa có tên)'}</h3>
+                  <p className="text-xs text-[#707a6c]">{selectedPending.email}</p>
+                </div>
+              </div>
+              <button onClick={() => setSelectedPending(null)} className="p-1.5 text-[#707a6c] hover:bg-[#e0e4d9] rounded-full cursor-pointer">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-5 space-y-3 overflow-y-auto text-xs text-[#40493d]">
+              <div className="flex items-center gap-2">
+                <span className={`font-bold px-3 py-1 rounded-full ${roleColor[selectedPending.role] ?? 'bg-gray-100 text-gray-600'}`}>
+                  {roleLabel[selectedPending.role] ?? selectedPending.role}
+                </span>
+                <span className="bg-amber-100 text-amber-700 font-semibold px-2 py-0.5 rounded-full">Chờ phê duyệt</span>
+              </div>
+              <div className="bg-[#f7fbf0] p-4 rounded-xl border border-[#e0e4d9] space-y-2">
+                {selectedPending.phone && <p><strong>Điện thoại:</strong> {selectedPending.phone}</p>}
+                {selectedPending.province && <p><strong>Tỉnh/Thành:</strong> {selectedPending.province}</p>}
+                {selectedPending.address && <p><strong>Địa chỉ:</strong> {selectedPending.address}</p>}
+                {selectedPending.companyName && <p><strong>Công ty:</strong> {selectedPending.companyName}</p>}
+                {selectedPending.taxCode && <p><strong>Mã số thuế:</strong> {selectedPending.taxCode}</p>}
+                {selectedPending.businessType && <p><strong>Loại hình:</strong> {selectedPending.businessType}</p>}
+                {selectedPending.farmName && <p><strong>Trang trại:</strong> {selectedPending.farmName}</p>}
+                {selectedPending.certificate && <p><strong>Chứng nhận:</strong> {selectedPending.certificate}</p>}
+                {selectedPending.vehicleType && <p><strong>Loại xe:</strong> {selectedPending.vehicleType}</p>}
+                {selectedPending.licenseNumber && <p><strong>Bằng lái:</strong> {selectedPending.licenseNumber}</p>}
+                {selectedPending.createdAt && <p><strong>Ngày đăng ký:</strong> {new Date(selectedPending.createdAt).toLocaleString('vi-VN')}</p>}
+              </div>
+            </div>
+            <div className="p-4 bg-[#f7fbf0] border-t border-[#e0e4d9] flex items-center justify-between">
+              <button
+                onClick={() => handleReject(selectedPending)}
+                disabled={actionLoading === selectedPending.id}
+                className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-red-700 hover:bg-red-50 rounded-xl transition-colors cursor-pointer disabled:opacity-50"
+              >
+                <XCircle className="w-4 h-4" />Từ chối
+              </button>
+              <button
+                onClick={() => handleApprove(selectedPending)}
+                disabled={actionLoading === selectedPending.id}
+                className="flex items-center gap-1.5 px-5 py-2 text-xs font-bold bg-[#176a22] hover:bg-[#13561b] text-white rounded-xl transition-colors cursor-pointer disabled:opacity-50 shadow-sm"
+              >
+                <CheckCircle2 className="w-4 h-4" />
+                {actionLoading === selectedPending.id ? 'Đang xử lý...' : 'Phê duyệt tài khoản'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Toast notification */}
+      {toast && (
+        <div className={`fixed bottom-6 right-6 z-50 px-4 py-3 rounded-xl shadow-lg font-medium text-xs flex items-center gap-2 ${
+          toast.type === 'success' ? 'bg-[#176a22] text-white' : 'bg-red-600 text-white'
+        }`}>
+          {toast.type === 'success' ? <CheckCircle2 className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
+          <span>{toast.msg}</span>
         </div>
       )}
     </div>
