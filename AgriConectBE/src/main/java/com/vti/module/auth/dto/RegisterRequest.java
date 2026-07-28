@@ -31,6 +31,8 @@ public class RegisterRequest {
     
     private String farmName;
     private Double farmArea;
+    private String certificate;
+    private String farmAddress;
     
     private String vehicleType;
     private String licenseNumber;
@@ -69,6 +71,12 @@ public class RegisterRequest {
     
     public Double getFarmArea() { return farmArea; }
     public void setFarmArea(Double farmArea) { this.farmArea = farmArea; }
+    
+    public String getCertificate() { return certificate; }
+    public void setCertificate(String certificate) { this.certificate = certificate; }
+
+    public String getFarmAddress() { return farmAddress; }
+    public void setFarmAddress(String farmAddress) { this.farmAddress = farmAddress; }
     
     public String getVehicleType() { return vehicleType; }
     public void setVehicleType(String vehicleType) { this.vehicleType = vehicleType; }

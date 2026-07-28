@@ -4,6 +4,8 @@ import com.vti.common.enums.AccountStatus;
 import com.vti.common.enums.UserRole;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -13,6 +15,8 @@ import java.time.LocalDateTime;
  */
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class AccountDTO {
     private Long id;
     private String email;
@@ -32,11 +36,13 @@ public class AccountDTO {
     private String companyName;
     private String taxCode;
     private String businessType;
+    private String businessLicense;
     
     // Thuộc tính của SUPPLIER
     private String farmName;
     private BigDecimal farmArea;
     private String certificate;
+    private String farmAddress;
     
     // Thuộc tính của SHIPPER
     private String vehicleType;

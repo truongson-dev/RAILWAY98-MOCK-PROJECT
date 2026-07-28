@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { CheckCircle2 } from 'lucide-react';
-import { useUIStore } from '@/store/uiStore';
+import Link from 'next/link';
 import type { UserRole } from '@/types/account.type';
 
 const ROLES = [
@@ -45,8 +45,6 @@ const ROLES = [
 ];
 
 export const RoleSection: React.FC = () => {
-  const { openRegisterModal } = useUIStore();
-
   return (
     <section id="vai-tro" className="py-16 lg:py-24 px-4 lg:px-12 bg-[#f7fbf0]">
       <div className="max-w-7xl mx-auto space-y-12">
@@ -83,12 +81,12 @@ export const RoleSection: React.FC = () => {
                 </ul>
               </div>
 
-              <button
-                onClick={() => openRegisterModal(role.id)}
-                className="w-full py-3 px-4 border border-[#176a22] text-[#176a22] hover:bg-[#176a22] hover:text-white font-semibold text-sm rounded-xl transition-colors"
+              <Link
+                href="/auth/register"
+                className="w-full py-3 px-4 border border-[#176a22] text-[#176a22] hover:bg-[#176a22] hover:text-white font-semibold text-sm rounded-xl transition-colors text-center inline-block"
               >
                 {role.buttonText}
-              </button>
+              </Link>
             </div>
           ))}
         </div>

@@ -27,11 +27,17 @@ interface AccountDTO {
   role: 'PARTNER' | 'SUPPLIER' | 'SHIPPER' | 'ADMIN';
   status: string;
   createdAt: string | null;
+  // PARTNER fields
   companyName?: string;
   taxCode?: string;
   businessType?: string;
+  businessLicense?: string;
+  // SUPPLIER fields
   farmName?: string;
+  farmArea?: string | number | null;
+  farmAddress?: string;
   certificate?: string;
+  // SHIPPER fields
   vehicleType?: string;
   licenseNumber?: string;
   operatingArea?: string;
@@ -87,6 +93,138 @@ export const UsersManagementView: React.FC<UsersManagementViewProps> = ({ subTab
     }
   }, [token]);
 
+  const fetchAccounts = useCallback(async () => {
+    if (!token) return;
+    try {
+      const res = await fetch(`${API_BASE}/api/admin/accounts?size=1000`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error();
+      const body = await res.json();
+      const allAccs: AccountDTO[] = body.data?.content ?? [];
+      
+      const activeAccs = allAccs.filter(acc => acc.status === 'ACTIVE' || acc.status === 'SUSPENDED');
+
+      // Loại bỏ phần tệp đính kèm khỏi chuỗi text
+      const cleanText = (c: string) => c
+        .replace(/\(Tệp đính kèm:.*?\)/g, '')
+        .replace(/\(Tệp tài chính:.*?\)/g, '')
+        .trim();
+
+      // Lấy tỉnh/thành từ province hoặc parse cuối address
+      const getRegion = (acc: AccountDTO) => {
+        if (acc.province?.trim()) return acc.province.trim();
+        if (acc.address) {
+          const parts = acc.address.split(',');
+          return parts[parts.length - 1]?.trim() || 'Chưa cập nhật';
+        }
+        return 'Chưa cập nhật';
+      };
+
+      // ── Map SUPPLIER (Nhà Cung Cấp) ─────────────────────────────────────────
+      const dbSuppliers = activeAccs
+        .filter(acc => acc.role === 'SUPPLIER')
+        .map(acc => {
+          // Certificate chứa VietGAP, GlobalGAP... ngăn cách bởi dấu phẩy
+          const rawCerts = acc.certificate ? cleanText(acc.certificate) : '';
+          const certs = rawCerts
+            .split(',')
+            .map(s => s.trim())
+            .filter(Boolean);
+
+          const region = getRegion(acc);
+          const farmAreaStr = acc.farmArea ? `${acc.farmArea} m²` : '';
+          const typeLabel = farmAreaStr ? `Quy mô: ${farmAreaStr}` : 'Nhà vườn / HTX';
+
+          return {
+            id: String(acc.id),
+            code: `NCC-${acc.id}`,
+            name: acc.farmName || acc.fullName || 'Nhà cung cấp nông sản',
+            type: typeLabel,
+            region,
+            // products = danh sách chứng nhận (VietGAP, GlobalGAP...) — đây là sản phẩm chính
+            products: certs.length > 0 ? certs : ['Nông sản sạch'],
+            certifications: certs.length > 0 ? certs : [],
+            creditLimit: 'Chưa đặt',
+            status: acc.status === 'ACTIVE' ? ('active' as const) : ('suspended' as const),
+            rating: 5.0,
+            totalVolume: 'Đang cập nhật',
+          };
+        });
+
+      // ── Map PARTNER (Đối Tác Thu Mua) ───────────────────────────────────────
+      const dbPartners = activeAccs
+        .filter(acc => acc.role === 'PARTNER')
+        .map(acc => {
+          // businessType = "Lúa gạo, Ngô, Đậu" → split thành mảng
+          const sectors = acc.businessType
+            ? acc.businessType.split(',').map(s => s.trim()).filter(Boolean)
+            : [];
+
+          // businessLicense = tên file giấy phép KD
+          const licenseStr = acc.businessLicense ? cleanText(acc.businessLicense) : '';
+          const licenseList = licenseStr
+            .split(',')
+            .map(s => s.trim())
+            .filter(Boolean);
+
+          const region = getRegion(acc);
+
+          return {
+            id: String(acc.id),
+            code: `DT-${acc.id}`,
+            name: acc.companyName || acc.fullName || 'Đối tác thu mua',
+            // type = lĩnh vực kinh doanh đầu tiên, ví dụ: "Thu mua lúa gạo"
+            type: sectors.length > 0 ? sectors[0] : 'Thu mua nông sản',
+            region,
+            // products = danh sách nông sản thu mua theo businessType
+            products: sectors.length > 0 ? sectors : ['Nông sản tổng hợp'],
+            // certifications = giấy phép kinh doanh
+            certifications: licenseList.length > 0 ? licenseList : [],
+            creditLimit: 'Chưa đặt',
+            status: acc.status === 'ACTIVE' ? ('active' as const) : ('suspended' as const),
+            rating: 5.0,
+            totalVolume: 'Đang cập nhật',
+          };
+        });
+
+      // ── Map SHIPPER (Đơn Vị Vận Chuyển) ────────────────────────────────────
+      const dbLogistics = activeAccs
+        .filter(acc => acc.role === 'SHIPPER')
+        .map(acc => {
+          const licenseStr = acc.licenseNumber ? cleanText(acc.licenseNumber) : '';
+          const licenseList = licenseStr
+            .split(',')
+            .map(s => s.trim())
+            .filter(Boolean);
+
+          const region = getRegion(acc);
+          const vehicleLabel = acc.vehicleType || 'Xe tải lạnh';
+
+          return {
+            id: String(acc.id),
+            code: `VC-${acc.id}`,
+            name: acc.fullName || 'Đơn vị vận chuyển',
+            type: vehicleLabel,
+            region,
+            products: [vehicleLabel],
+            certifications: licenseList.length > 0 ? licenseList : [],
+            fleetCapacity: 'Đang cập nhật',
+            status: acc.status === 'ACTIVE' ? ('active' as const) : ('suspended' as const),
+            rating: 5.0,
+            totalVolume: 'Đang cập nhật',
+          };
+        });
+
+      // Đặt dữ liệu thật (db) LÊN ĐẦU, mock data ở sau — để thấy ngay sau khi duyệt
+      setSuppliers([...dbSuppliers, ...SUPPLIERS_LIST]);
+      setPartners([...dbPartners, ...PARTNERS_LIST]);
+      setLogistics([...dbLogistics, ...LOGISTICS_LIST]);
+    } catch (e) {
+      console.error('Lỗi khi tải danh sách tài khoản:', e);
+    }
+  }, [token]);
+
   // ── KYC handlers ──────────────────────────────────────────────────────────
   const handleApproveKyc = (id: string) => {
     setKycRecords((prev) =>
@@ -110,11 +248,30 @@ export const UsersManagementView: React.FC<UsersManagementViewProps> = ({ subTab
   const kycPendingCount = kycRecords.filter((k) => k.status === 'pending' || k.status === 'needs_info').length;
 
   useEffect(() => {
-    if (activeSub === 'pending') fetchPending();
-  }, [activeSub, fetchPending]);
+    if (activeSub === 'pending') {
+      fetchPending();
+    } else {
+      fetchAccounts();
+    }
+  }, [activeSub, fetchPending, fetchAccounts]);
+
+  useEffect(() => {
+    if (token) {
+      fetchAccounts();
+    }
+  }, [token, fetchAccounts]);
+
+  const roleToTab = (role: string): 'suppliers' | 'partners' | 'logistics' => {
+    if (role === 'SUPPLIER') return 'suppliers';
+    if (role === 'PARTNER') return 'partners';
+    return 'logistics';
+  };
 
   const handleApprove = async (acc: AccountDTO) => {
-    if (!token) return;
+    if (!token) {
+      showToast('Phiên đăng nhập hết hạn. Vui lòng đăng xuất và đăng nhập lại.', 'error');
+      return;
+    }
     setActionLoading(acc.id);
     try {
       const res = await fetch(`${API_BASE}/api/admin/accounts/${acc.id}/status`, {
@@ -122,19 +279,47 @@ export const UsersManagementView: React.FC<UsersManagementViewProps> = ({ subTab
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: 'ACTIVE' }),
       });
-      if (!res.ok) throw new Error();
+      if (res.status === 401) {
+        showToast('Phiên đăng nhập hết hạn. Vui lòng đăng xuất và đăng nhập lại.', 'error');
+        return;
+      }
+      if (res.status === 403) {
+        showToast('Bạn không có quyền thực hiện thao tác này.', 'error');
+        return;
+      }
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => null);
+        showToast(errBody?.message || 'Duyệt thất bại. Vui lòng thử lại.', 'error');
+        return;
+      }
+
+      // Xóa khỏi danh sách chờ ngay lập tức
       setPendingAccounts((prev) => prev.filter((a) => a.id !== acc.id));
       setSelectedPending(null);
-      showToast(`✅ Đã duyệt tài khoản ${acc.fullName || acc.email}`);
+
+      // Tải lại cả 2 danh sách
+      await fetchAccounts();
+      fetchPending();
+
+      // Chuyển tab sang đúng role
+      const targetTab = roleToTab(acc.role);
+      const roleName = roleLabel[acc.role] || acc.role;
+      setActiveSub(targetTab);
+      setCurrentPage(1);
+
+      showToast(`✅ Đã duyệt! ${acc.fullName || acc.email} hiện đã xuất hiện trong tab ${roleName}`);
     } catch {
-      showToast('Duyệt thất bại. Vui lòng thử lại.', 'error');
+      showToast('Không thể kết nối đến máy chủ. Vui lòng thử lại.', 'error');
     } finally {
       setActionLoading(null);
     }
   };
 
   const handleReject = async (acc: AccountDTO) => {
-    if (!token) return;
+    if (!token) {
+      showToast('Phiên đăng nhập hết hạn. Vui lòng đăng xuất và đăng nhập lại.', 'error');
+      return;
+    }
     if (!window.confirm(`Xác nhận từ chối tài khoản "${acc.fullName || acc.email}"?`)) return;
     setActionLoading(acc.id);
     try {
@@ -143,27 +328,44 @@ export const UsersManagementView: React.FC<UsersManagementViewProps> = ({ subTab
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: 'REJECTED' }),
       });
-      if (!res.ok) throw new Error();
+      if (res.status === 401) {
+        showToast('Phiên đăng nhập hết hạn. Vui lòng đăng xuất và đăng nhập lại.', 'error');
+        return;
+      }
+      if (res.status === 403) {
+        showToast('Bạn không có quyền thực hiện thao tác này.', 'error');
+        return;
+      }
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => null);
+        showToast(errBody?.message || 'Từ chối thất bại. Vui lòng thử lại.', 'error');
+        return;
+      }
       setPendingAccounts((prev) => prev.filter((a) => a.id !== acc.id));
       setSelectedPending(null);
       showToast(`Đã từ chối tài khoản ${acc.fullName || acc.email}`);
+      fetchPending();
+      fetchAccounts();
     } catch {
-      showToast('Từ chối thất bại. Vui lòng thử lại.', 'error');
+      showToast('Không thể kết nối đến máy chủ. Vui lòng thử lại.', 'error');
     } finally {
       setActionLoading(null);
     }
   };
 
-  const filteredPending = pendingAccounts.filter((a) => {
-    const q = pendingSearch.toLowerCase();
-    return (
-      (a.fullName ?? '').toLowerCase().includes(q) ||
-      a.email.toLowerCase().includes(q) ||
-      (a.phone ?? '').includes(q) ||
-      (a.companyName ?? '').toLowerCase().includes(q) ||
-      (a.farmName ?? '').toLowerCase().includes(q)
-    );
-  });
+  // Lọc danh sách chờ duyệt: bỏ ADMIN (admin không cần duyệt), áp dụng tìm kiếm
+  const filteredPending = pendingAccounts
+    .filter((a) => a.role !== 'ADMIN')
+    .filter((a) => {
+      const q = pendingSearch.toLowerCase();
+      return (
+        (a.fullName ?? '').toLowerCase().includes(q) ||
+        a.email.toLowerCase().includes(q) ||
+        (a.phone ?? '').includes(q) ||
+        (a.companyName ?? '').toLowerCase().includes(q) ||
+        (a.farmName ?? '').toLowerCase().includes(q)
+      );
+    });
 
   const roleLabel: Record<string, string> = {
     PARTNER: 'Đối tác thu mua',
@@ -222,22 +424,46 @@ export const UsersManagementView: React.FC<UsersManagementViewProps> = ({ subTab
   };
 
   // Status Toggle Handler
-  const handleToggleStatus = (itemId: string, targetStatus?: 'active' | 'suspended' | 'pending') => {
+  const handleToggleStatus = async (itemId: string, targetStatus?: 'active' | 'suspended' | 'pending') => {
+    const isMock = itemId.includes('-');
     const updateStatus = (current: 'active' | 'suspended' | 'pending') => {
       if (targetStatus) return targetStatus;
       return current === 'active' ? 'suspended' : 'active';
     };
 
-    if (activeSub === 'suppliers') {
-      setSuppliers(prev => prev.map(item => item.id === itemId ? { ...item, status: updateStatus(item.status) } : item));
-    } else if (activeSub === 'partners') {
-      setPartners(prev => prev.map(item => item.id === itemId ? { ...item, status: updateStatus(item.status) } : item));
+    const currentItem = selectedItem?.id === itemId ? selectedItem : 
+      activeSub === 'suppliers' ? suppliers.find(i => i.id === itemId) :
+      activeSub === 'partners' ? partners.find(i => i.id === itemId) :
+      logistics.find(i => i.id === itemId);
+
+    const nextStatus = updateStatus(currentItem?.status || 'active');
+
+    if (!isMock && token) {
+      const beStatus = nextStatus === 'active' ? 'ACTIVE' : 'SUSPENDED';
+      try {
+        const res = await fetch(`${API_BASE}/api/admin/accounts/${itemId}/status`, {
+          method: 'PUT',
+          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: beStatus }),
+        });
+        if (!res.ok) throw new Error();
+        showToast(`Đã cập nhật trạng thái tài khoản thành công!`);
+        fetchAccounts();
+      } catch {
+        showToast('Cập nhật trạng thái thất bại. Vui lòng thử lại.', 'error');
+      }
     } else {
-      setLogistics(prev => prev.map(item => item.id === itemId ? { ...item, status: updateStatus(item.status) } : item));
+      if (activeSub === 'suppliers') {
+        setSuppliers(prev => prev.map(item => item.id === itemId ? { ...item, status: nextStatus } : item));
+      } else if (activeSub === 'partners') {
+        setPartners(prev => prev.map(item => item.id === itemId ? { ...item, status: nextStatus } : item));
+      } else {
+        setLogistics(prev => prev.map(item => item.id === itemId ? { ...item, status: nextStatus } : item));
+      }
     }
 
     if (selectedItem && selectedItem.id === itemId) {
-      setSelectedItem(prev => prev ? { ...prev, status: updateStatus(prev.status) } : null);
+      setSelectedItem(prev => prev ? { ...prev, status: nextStatus } : null);
     }
   };
 
@@ -281,15 +507,30 @@ export const UsersManagementView: React.FC<UsersManagementViewProps> = ({ subTab
   };
 
   // Delete User / Entity
-  const handleDeleteItem = (itemId: string) => {
+  const handleDeleteItem = async (itemId: string) => {
     if (!window.confirm('Bạn có chắc chắn muốn xóa đối tượng người dùng này khỏi hệ thống không?')) return;
 
-    if (activeSub === 'suppliers') {
-      setSuppliers(prev => prev.filter(i => i.id !== itemId));
-    } else if (activeSub === 'partners') {
-      setPartners(prev => prev.filter(i => i.id !== itemId));
+    const isMock = itemId.includes('-');
+    if (!isMock && token) {
+      try {
+        const res = await fetch(`${API_BASE}/api/admin/accounts/${itemId}`, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error();
+        showToast(`Đã xóa tài khoản khỏi hệ thống!`);
+        fetchAccounts();
+      } catch {
+        showToast('Xóa tài khoản thất bại. Vui lòng thử lại.', 'error');
+      }
     } else {
-      setLogistics(prev => prev.filter(i => i.id !== itemId));
+      if (activeSub === 'suppliers') {
+        setSuppliers(prev => prev.filter(i => i.id !== itemId));
+      } else if (activeSub === 'partners') {
+        setPartners(prev => prev.filter(i => i.id !== itemId));
+      } else {
+        setLogistics(prev => prev.filter(i => i.id !== itemId));
+      }
     }
 
     if (selectedItem?.id === itemId) {
@@ -420,9 +661,9 @@ export const UsersManagementView: React.FC<UsersManagementViewProps> = ({ subTab
           className={`pb-3 border-b-2 cursor-pointer transition-all flex items-center gap-1.5 ${activeSub === 'pending' ? 'border-[#ba1a1a] text-[#ba1a1a]' : 'border-transparent hover:text-[#181d16]'}`}
         >
           Chờ Duyệt
-          {(pendingAccounts.length > 0 || kycPendingCount > 0) && activeSub !== 'pending' && (
+          {pendingAccounts.length > 0 && activeSub !== 'pending' && (
             <span className="bg-[#ba1a1a] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none">
-              {pendingAccounts.length + kycPendingCount}
+              {pendingAccounts.length}
             </span>
           )}
         </button>
@@ -528,18 +769,6 @@ export const UsersManagementView: React.FC<UsersManagementViewProps> = ({ subTab
                   ))}
                 </div>
               )}
-            </div>
-
-            {/* ── Hồ sơ KYC doanh nghiệp ── */}
-            <div className="pt-2">
-              <h3 className="text-sm font-bold text-[#181d16] mb-3 flex items-center gap-2">
-                <Shield className="w-4 h-4 text-[#176a22]" />
-                Phê duyệt hồ sơ doanh nghiệp (KYC)
-                {kycPendingCount > 0 && (
-                  <span className="bg-[#ba1a1a] text-white text-[10px] font-bold px-2 py-0.5 rounded-full">{kycPendingCount}</span>
-                )}
-              </h3>
-              <KycApprovalView records={kycRecords} onOpenModal={(kyc) => setSelectedKyc(kyc)} />
             </div>
           </div>
         )}
@@ -1079,7 +1308,8 @@ export const UsersManagementView: React.FC<UsersManagementViewProps> = ({ subTab
                 {selectedPending.address && <p><strong>Địa chỉ:</strong> {selectedPending.address}</p>}
                 {selectedPending.companyName && <p><strong>Công ty:</strong> {selectedPending.companyName}</p>}
                 {selectedPending.taxCode && <p><strong>Mã số thuế:</strong> {selectedPending.taxCode}</p>}
-                {selectedPending.businessType && <p><strong>Loại hình:</strong> {selectedPending.businessType}</p>}
+                {selectedPending.businessType && <p><strong>Lĩnh vực:</strong> {selectedPending.businessType}</p>}
+                {selectedPending.businessLicense && <p><strong>Giấy phép KD:</strong> {selectedPending.businessLicense}</p>}
                 {selectedPending.farmName && <p><strong>Trang trại:</strong> {selectedPending.farmName}</p>}
                 {selectedPending.certificate && <p><strong>Chứng nhận:</strong> {selectedPending.certificate}</p>}
                 {selectedPending.vehicleType && <p><strong>Loại xe:</strong> {selectedPending.vehicleType}</p>}

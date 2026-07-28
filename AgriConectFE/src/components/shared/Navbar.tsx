@@ -2,12 +2,12 @@
 
 import React from 'react';
 import { Search, Sprout, Bell } from 'lucide-react';
+import Link from 'next/link';
 import { useUIStore } from '@/store/uiStore';
 
 export const Navbar: React.FC = () => {
   const {
     openMarketplace,
-    openRegisterModal,
     openNotifications,
     unreadCount,
   } = useUIStore();
@@ -68,19 +68,19 @@ export const Navbar: React.FC = () => {
 
           <div className="h-4 w-px bg-[#bfcaba]/60 mx-1 hidden sm:block" />
 
-          <button
-            onClick={() => openRegisterModal('Supplier', 'login')}
+          <Link
+            href="/auth/login"
             className="hidden sm:inline-block px-4 py-2 text-sm font-semibold text-[#181d16] hover:text-[#176a22] transition-colors cursor-pointer"
           >
             Đăng nhập
-          </button>
+          </Link>
 
-          <button
-            onClick={() => openRegisterModal('Partner', 'register')}
+          <Link
+            href="/auth/register"
             className="px-5 py-2 text-sm font-semibold text-white bg-[#176a22] hover:bg-[#12531a] active:scale-95 rounded-full transition-all shadow-sm cursor-pointer"
           >
             Đăng ký
-          </button>
+          </Link>
         </div>
       </div>
     </header>

@@ -17,7 +17,12 @@ public class AgriConectBeApplication {
 		dotenv.entries().forEach(entry -> System.setProperty(entry.getKey(), entry.getValue()));
 
 		SpringApplication.run(AgriConectBeApplication.class, args);
+        System.out.println("""
+                ╔════════════════════════════════════════════════════════╗
+                ║   🌾 AgriConnect Backend v1.0 đã khởi động             ║
+                ║   📖 Swagger UI: http://localhost:8080/swagger-ui.html ║
+                ╚════════════════════════════════════════════════════════╝
+                """);
 	}
-
 }
 

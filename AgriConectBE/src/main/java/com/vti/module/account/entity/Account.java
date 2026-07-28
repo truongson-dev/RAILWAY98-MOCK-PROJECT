@@ -43,13 +43,14 @@ import java.time.LocalDateTime;
 )
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn(name = "role", discriminatorType = DiscriminatorType.STRING)
+@DiscriminatorValue("ADMIN")
 @EntityListeners(AuditingEntityListener.class)
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder // @SuperBuilder cho phép Builder kế thừa xuống subclass
-public abstract class Account {
+public class Account {
 
     /** Khóa chính — tự tăng */
     @Id

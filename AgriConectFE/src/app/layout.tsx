@@ -16,8 +16,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="vi" className={inter.variable}>
-      <body className="min-h-screen">{children}</body>
+    <html lang="vi" className={inter.variable} suppressHydrationWarning>
+      <body className="min-h-screen" suppressHydrationWarning>{children}</body>
     </html>
   );
 }

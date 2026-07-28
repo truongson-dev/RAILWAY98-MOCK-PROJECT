@@ -144,16 +144,21 @@ public class AuthServiceImpl implements AuthService {
                 partner.setCompanyName(request.getCompanyName());
                 partner.setTaxCode(request.getTaxCode());
                 partner.setBusinessType(request.getBusinessType());
+                partner.setBusinessLicense(request.getBusinessLicense());
                 account = partner;
                 break;
             case SUPPLIER:
                 Supplier supplier = new Supplier();
                 supplier.setFarmName(request.getFarmName());
+                supplier.setFarmArea(request.getFarmArea());
+                supplier.setCertificate(request.getCertificate());
+                supplier.setFarmAddress(request.getFarmAddress());
                 account = supplier;
                 break;
             case SHIPPER:
                 Shipper shipper = new Shipper();
                 shipper.setVehicleType(request.getVehicleType());
+                shipper.setLicenseNumber(request.getLicenseNumber());
                 account = shipper;
                 break;
             default:
