@@ -2,10 +2,14 @@ package com.vti;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+import org.springframework.scheduling.annotation.EnableAsync;
 
 import io.github.cdimascio.dotenv.Dotenv;
 
 @SpringBootApplication
+// Bật xử lý bất đồng bộ cho các tác vụ như gửi email
+@EnableAsync
 public class AgriConectBeApplication {
 
 	public static void main(String[] args) {
