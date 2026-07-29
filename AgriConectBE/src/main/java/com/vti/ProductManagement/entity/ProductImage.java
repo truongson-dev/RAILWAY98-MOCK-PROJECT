@@ -1,7 +1,5 @@
 package com.vti.ProductManagement.entity;
 
-import java.time.LocalDateTime;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -10,7 +8,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 
 @Entity
@@ -23,21 +20,13 @@ public class ProductImage {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "product_id", nullable = false)
-	private Product product;
+	private Product productId;
 
 	@Column(name = "image_url", nullable = false, length = 500)
 	private String imageUrl;
 
 	@Column(name = "is_primary")
 	private Boolean isPrimary = false;
-
-	@Column(name = "created_at", updatable = false)
-	private LocalDateTime createdAt = LocalDateTime.now();
-
-	@PrePersist
-	protected void onCreate() {
-		createdAt = LocalDateTime.now();
-	}
 
 	public ProductImage() {
 		super();
@@ -52,12 +41,12 @@ public class ProductImage {
 		this.id = id;
 	}
 
-	public Product getProduct() {
-		return product;
+	public Product getProductId() {
+		return productId;
 	}
 
-	public void setProduct(Product product) {
-		this.product = product;
+	public void setProductId(Product productId) {
+		this.productId = productId;
 	}
 
 	public String getImageUrl() {
@@ -74,14 +63,6 @@ public class ProductImage {
 
 	public void setIsPrimary(Boolean isPrimary) {
 		this.isPrimary = isPrimary;
-	}
-
-	public LocalDateTime getCreatedAt() {
-		return createdAt;
-	}
-
-	public void setCreatedAt(LocalDateTime createdAt) {
-		this.createdAt = createdAt;
 	}
 
 }

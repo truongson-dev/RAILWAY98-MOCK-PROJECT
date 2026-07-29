@@ -2,9 +2,11 @@ package com.vti.ProductManagement.entity;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import com.vti.AccountManagement.entity.Account;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -13,6 +15,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -25,11 +28,11 @@ public class Product {
 
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "category_id", nullable = false)
-	private Category category;
+	private Category categoryId;
 
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "seller_id", nullable = false)
-	private Account seller;
+	private Account sellerId;
 
 	@Column(nullable = false, length = 255)
 	private String name;
@@ -52,6 +55,12 @@ public class Product {
 	@Column(name = "updated_at")
 	private LocalDateTime updatedAt = LocalDateTime.now();
 
+	@OneToMany(mappedBy = "productId", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	private List<ProductImage> imageProducts;
+
+	@OneToMany(mappedBy = "productId", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	private List<Inventory> inventories;
+
 	public Product() {
 		super();
 		// TODO Auto-generated constructor stub
@@ -65,20 +74,28 @@ public class Product {
 		this.id = id;
 	}
 
-	public Category getCategory() {
-		return category;
+	public Category getCategoryId() {
+		return categoryId;
 	}
 
-	public void setCategory(Category category) {
-		this.category = category;
+	public void setCategoryId(Category categoryId) {
+		this.categoryId = categoryId;
 	}
 
-	public Account getSeller() {
-		return seller;
+	public Account getSellerId() {
+		return sellerId;
 	}
 
-	public void setSeller(Account seller) {
-		this.seller = seller;
+	public void setSellerId(Account sellerId) {
+		this.sellerId = sellerId;
+	}
+
+	public List<Inventory> getInventories() {
+		return inventories;
+	}
+
+	public void setInventories(List<Inventory> inventories) {
+		this.inventories = inventories;
 	}
 
 	public String getName() {
@@ -135,6 +152,14 @@ public class Product {
 
 	public void setUpdatedAt(LocalDateTime updatedAt) {
 		this.updatedAt = updatedAt;
+	}
+
+	public List<ProductImage> getImageProducts() {
+		return imageProducts;
+	}
+
+	public void setImageProducts(List<ProductImage> imageProducts) {
+		this.imageProducts = imageProducts;
 	}
 
 }

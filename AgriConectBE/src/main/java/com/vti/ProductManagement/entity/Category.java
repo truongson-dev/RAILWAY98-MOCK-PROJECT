@@ -23,7 +23,7 @@ public class Category {
 
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "parent_id")
-	private Category parent;
+	private Category parentId;
 
 	public Category() {
 		super();
@@ -46,12 +46,12 @@ public class Category {
 		this.name = name;
 	}
 
-	public Category getParent() {
-		return parent;
+	public Category getParentId() {
+		return parentId;
 	}
 
-	public void setParent(Category parent) {
-		this.parent = parent;
+	public void setParentId(Category parentId) {
+		this.parentId = parentId;
 	}
 
 }

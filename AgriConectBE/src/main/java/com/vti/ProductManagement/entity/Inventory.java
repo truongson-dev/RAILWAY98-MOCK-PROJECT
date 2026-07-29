@@ -1,5 +1,6 @@
 package com.vti.ProductManagement.entity;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
@@ -9,29 +10,36 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "inventory", catalog = "agriconnect_db")
+@Table(name = "inventory_batch", catalog = "agriconnect_db")
 public class Inventory {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@OneToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "product_id", nullable = false, unique = true)
-	private Product product;
+	// Nếu bạn map quan hệ nhiều-một với Product entity:
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "product_id", nullable = false)
+	private Product productId;
 
-	@Column(name = "stock_quantity", nullable = false)
-	private Integer stockQuantity = 0;
+	@Column(name = "quantity", nullable = false)
+	private Double quantity = 0.00;
 
-	@Column(name = "reserved_quantity", nullable = false)
-	private Integer reservedQuantity = 0;
+	@Column(name = "min_stock_level")
+	private Double minStockLevel = 10.00;
 
-	@Column(name = "updated_at")
-	private LocalDateTime updatedAt = LocalDateTime.now();
+	@Column(name = "harvest_date")
+	private LocalDate harvestDate;
+
+	@Column(name = "expiry_date")
+	private LocalDate expiryDate;
+
+	@Column(name = "created_at", updatable = false, insertable = false)
+	private LocalDateTime createdAt;
 
 	public Inventory() {
 		super();
@@ -46,36 +54,52 @@ public class Inventory {
 		this.id = id;
 	}
 
-	public Product getProduct() {
-		return product;
+	public Product getProductId() {
+		return productId;
 	}
 
-	public void setProduct(Product product) {
-		this.product = product;
+	public void setProductId(Product productId) {
+		this.productId = productId;
 	}
 
-	public Integer getStockQuantity() {
-		return stockQuantity;
+	public Double getMinStockLevel() {
+		return minStockLevel;
 	}
 
-	public void setStockQuantity(Integer stockQuantity) {
-		this.stockQuantity = stockQuantity;
+	public void setMinStockLevel(Double minStockLevel) {
+		this.minStockLevel = minStockLevel;
 	}
 
-	public Integer getReservedQuantity() {
-		return reservedQuantity;
+	public Double getQuantity() {
+		return quantity;
 	}
 
-	public void setReservedQuantity(Integer reservedQuantity) {
-		this.reservedQuantity = reservedQuantity;
+	public void setQuantity(Double quantity) {
+		this.quantity = quantity;
 	}
 
-	public LocalDateTime getUpdatedAt() {
-		return updatedAt;
+	public LocalDate getHarvestDate() {
+		return harvestDate;
 	}
 
-	public void setUpdatedAt(LocalDateTime updatedAt) {
-		this.updatedAt = updatedAt;
+	public void setHarvestDate(LocalDate harvestDate) {
+		this.harvestDate = harvestDate;
+	}
+
+	public LocalDate getExpiryDate() {
+		return expiryDate;
+	}
+
+	public void setExpiryDate(LocalDate expiryDate) {
+		this.expiryDate = expiryDate;
+	}
+
+	public LocalDateTime getCreatedAt() {
+		return createdAt;
+	}
+
+	public void setCreatedAt(LocalDateTime createdAt) {
+		this.createdAt = createdAt;
 	}
 
 }

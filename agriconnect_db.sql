@@ -110,6 +110,7 @@ CREATE TABLE IF NOT EXISTS `inventory_batch` (
     `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
     `product_id` BIGINT NOT NULL,
     `quantity` DECIMAL(15, 2) NOT NULL,
+    `min_stock_level` DECIMAL(15, 2) DEFAULT 10,
     `harvest_date` DATE,
     `expiry_date` DATE,
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -286,3 +287,34 @@ INSERT INTO `shipper` (`shipper_id`, `vehicle_type`, `license_number`, `operatin
 (13, 'Xe máy giao hàng', '29B1-11122', 'Nội thành Hà Nội'),
 (14, 'Xe container', '51D-33445', 'TP.HCM - Miền Tây'),
 (15, 'Xe tải 5 tấn', '43C-99887', 'Đà Nẵng - Quảng Nam');
+
+-- 1. Insert dữ liệu vào bảng category trước (vì product phụ thuộc vào category)
+INSERT INTO `category` (`id`, `name`, `parent_id`) VALUES
+(1, 'Nông sản sạch', NULL),
+(2, 'Trái cây tươi', NULL),
+(3, 'Đặc sản vùng miền', NULL),
+(4, 'Gạo các loại', 1),
+(5, 'Hạt dinh dưỡng', 1);
+
+-- 2. Insert dữ liệu vào bảng product (với seller_id giả định là 1, bạn có thể thay đổi nếu cần)
+INSERT INTO `product` (`category_id`, `seller_id`, `name`, `description`, `price`, `unit`, `status`) VALUES
+(4, 1, 'Gạo ST25 hữu cơ', 'Gạo đặc sản Sóc Trăng, hạt dài, dẻo thơm.', 180000.00, 'Túi 5kg', 'AVAILABLE'),
+(2, 1, 'Xoài cát Hòa Lộc', 'Xoài tươi ngon, ngọt đậm đà, chuẩn VietGAP.', 60000.00, 'Kg', 'AVAILABLE'),
+(3, 1, 'Mật ong hoa cà phê', 'Mật ong nguyên chất tự nhiên 100%.', 150000.00, 'Chai 1L', 'AVAILABLE'),
+(5, 1, 'Hạt điều rang muối Bình Phước', 'Hạt điều to, giòn rụm, béo ngậy.', 160000.00, 'Hộp 500g', 'AVAILABLE'),
+(2, 1, 'Bơ sáp Đắk Lắk', 'Bơ dẻo, béo, nhiều thịt, chuẩn chất lượng.', 45000.00, 'Kg', 'AVAILABLE');
+
+-- 3. Insert dữ liệu vào bảng product_image tương ứng với 5 sản phẩm vừa tạo
+INSERT INTO `product_image` (`product_id`, `image_url`, `is_primary`) VALUES
+(1, 'https://example.com/images/gao-st25.jpg', TRUE),
+(2, 'https://example.com/images/xoai-cat.jpg', TRUE),
+(3, 'https://example.com/images/mat-ong.jpg', TRUE),
+(4, 'https://example.com/images/hat-dieu.jpg', TRUE),
+(5, 'https://example.com/images/bo-sap.jpg', TRUE);
+
+INSERT INTO `inventory_batch` (`product_id`, `quantity`) VALUES
+(1, 5.00),    
+(2, 50.00),   
+(3, 30.00),   
+(4, 8.00),    
+(5, 100.00);

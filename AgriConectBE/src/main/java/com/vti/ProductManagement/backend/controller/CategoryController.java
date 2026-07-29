@@ -36,8 +36,8 @@ public class CategoryController {
 				categoryDto.setId(category.getId());
 				categoryDto.setName(category.getName());
 
-				if (category.getParent() != null) {
-					categoryDto.setParentName(category.getParent().getName());
+				if (category.getParentId() != null) {
+					categoryDto.setParentName(category.getParentId().getName());
 				}
 
 				return categoryDto;

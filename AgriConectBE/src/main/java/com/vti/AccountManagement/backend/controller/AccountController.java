@@ -49,22 +49,33 @@ public class AccountController {
 	}
 
 	@PutMapping("/{id}/active")
-	public ResponseEntity<AccountDTO> approve(@PathVariable Long id) {
-		Account account = accountService.approveUserEmail(id);
-
-		return ResponseEntity.ok(toAccountDto(account));
+	public ResponseEntity<?> approve(@PathVariable Long id) {
+		try {
+			Account account = accountService.approveUserEmail(id);
+			return ResponseEntity.ok(toAccountDto(account));
+		} catch (RuntimeException e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
+		}
 	}
 
 	@PutMapping("/{id}/rejected")
-	public ResponseEntity<AccountDTO> reject(@PathVariable Long id) {
-		Account account = accountService.rejectUserEmail(id);
-		return ResponseEntity.ok(toAccountDto(account));
+	public ResponseEntity<?> reject(@PathVariable Long id) {
+		try {
+			Account account = accountService.rejectUserEmail(id);
+			return ResponseEntity.ok(toAccountDto(account));
+		} catch (RuntimeException e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
+		}
 	}
 
 	@PutMapping("/{id}/locked")
-	public ResponseEntity<AccountDTO> lock(@PathVariable Long id) {
-		Account account = accountService.lockUserEmail(id);
-		return ResponseEntity.ok(toAccountDto(account));
+	public ResponseEntity<?> lock(@PathVariable Long id) {
+		try {
+			Account account = accountService.lockUserEmail(id);
+			return ResponseEntity.ok(toAccountDto(account));
+		} catch (RuntimeException e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
+		}
 	}
 
 	private AccountDTO toAccountDto(Account account) {

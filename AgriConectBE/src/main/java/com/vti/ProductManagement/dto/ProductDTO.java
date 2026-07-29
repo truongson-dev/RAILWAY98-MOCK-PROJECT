@@ -2,6 +2,7 @@ package com.vti.ProductManagement.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class ProductDTO {
 
@@ -15,6 +16,7 @@ public class ProductDTO {
 	private String status;
 	private LocalDateTime createdAt;
 	private LocalDateTime updatedAt;
+	private List<String> imageProducts;
 
 	public ProductDTO() {
 		super();
@@ -99,6 +101,14 @@ public class ProductDTO {
 
 	public void setUpdatedAt(LocalDateTime updatedAt) {
 		this.updatedAt = updatedAt;
+	}
+
+	public List<String> getImageProducts() {
+		return imageProducts;
+	}
+
+	public void setImageProducts(List<String> imageProducts) {
+		this.imageProducts = imageProducts;
 	}
 
 }
