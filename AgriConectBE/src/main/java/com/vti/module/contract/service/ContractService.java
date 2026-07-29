@@ -18,6 +18,7 @@ public interface ContractService {
 
     // Forward Contracts
     ForwardContractDTO createForwardContract(CreateForwardRequest request, Long adminId);
+    EscrowDTO createEscrowFromForwardContract(Long forwardContractId, Long partnerId);
     PageResponse<ForwardContractDTO> getForwardContracts(ContractStatus status, Pageable pageable);
     ForwardContractDTO getForwardContractById(Long id);
     ForwardContractDTO updateForwardStatus(Long id, ContractStatus status);

@@ -116,6 +116,7 @@ export default function RegisterPage() {
     transportLicenseFiles: [] as FileEntry[],
     fleetClosedTrucks: 0, fleetRefrigeratedTrucks: 0, fleetContainerTrucks: 0,
     hasColdChainCert: false,
+    vehicleType: 'Xe tải lạnh',
   });
 
   // ─── STATE CHO CHỮ KÝ SỐ (Canvas Drawing) ─────────────────────────────────
@@ -262,7 +263,7 @@ export default function RegisterPage() {
           phone:       carrierForm.phone,
           address:     carrierForm.address,
           fullName:    carrierForm.repName,
-          vehicleType: carrierForm.vehicleType || 'Xe tải lạnh',
+          vehicleType: 'Xe tải lạnh',
           licenseNumber: carrierForm.transportLicenseFiles.map(f => f.name).join(', '),
           province:    carrierForm.address ? carrierForm.address.split(',').pop()?.trim() : '',
         };

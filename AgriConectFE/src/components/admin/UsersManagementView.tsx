@@ -85,7 +85,8 @@ export const UsersManagementView: React.FC<UsersManagementViewProps> = ({ subTab
       });
       if (!res.ok) throw new Error();
       const body = await res.json();
-      setPendingAccounts(body.data?.content ?? []);
+      const allAccs = body.data?.content ?? [];
+      setPendingAccounts(allAccs.filter((a: AccountDTO) => a.status === 'PENDING_APPROVAL'));
     } catch {
       setPendingError('Không tải được danh sách. Vui lòng thử lại.');
     } finally {
@@ -355,7 +356,7 @@ export const UsersManagementView: React.FC<UsersManagementViewProps> = ({ subTab
 
   // Lọc danh sách chờ duyệt: bỏ ADMIN (admin không cần duyệt), áp dụng tìm kiếm
   const filteredPending = pendingAccounts
-    .filter((a) => a.role !== 'ADMIN')
+    .filter((a) => a.role !== 'ADMIN' && a.status === 'PENDING_APPROVAL')
     .filter((a) => {
       const q = pendingSearch.toLowerCase();
       return (

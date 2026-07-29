@@ -1,8 +1,0 @@
-{
-  "name": "Remix Remix Remix: AgriShipper - Quản lý Vận chuyển Nông sản",
-  "description": "Ứng dụng quản lý lộ trình vận chuyển, đội xe và đơn hàng nông sản AgriMarket B2B dành cho tài xế và đối tác.",
-  "requestFramePermissions": [],
-  "majorCapabilities": [
-    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
-  ]
-}

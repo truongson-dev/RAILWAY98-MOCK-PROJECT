@@ -1,6 +1,0 @@
-{
-  "name": "AgriConnect",
-  "description": "Cổng thông tin Nhà cung cấp AgriConnect - Quản lý nông trại, đơn hàng, kho bãi và thị trường nông sản.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}

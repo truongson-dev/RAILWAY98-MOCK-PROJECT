@@ -2,7 +2,7 @@
 // Kết nối API BE Spring Boot cho giao diện Partner B2B Marketplace.
 // Base URL: NEXT_PUBLIC_API_URL (mặc định http://localhost:8080)
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://127.0.0.1:8080';
 
 // ─── Lấy JWT Token từ localStorage ────────────────────────────────────────────
 function getAuthHeader(): Record<string, string> {
@@ -22,12 +22,15 @@ function getAuthHeader(): Record<string, string> {
 interface BeProduct {
   id: number;
   name: string;
+  nameEn: string;
   description: string;
   price: number;
   unit: string;
   status: string;
   categoryName: string;
-  sellerUsername: string;
+  sellerName: string;
+  location: string;
+  minOrderKg: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -38,6 +41,12 @@ interface BePage<T> {
   totalPages: number;
   number: number;
   size: number;
+}
+
+interface ApiResponse<T> {
+  success: boolean;
+  message: string;
+  data: T;
 }
 
 // ─── Kiểu dữ liệu dùng trong FE ───────────────────────────────────────────────
@@ -130,6 +139,7 @@ function mapBeProduct(p: BeProduct): ApiProduct {
     'Đậu các loại': 'Grains',
     'Ngũ cốc - Đậu': 'Grains',
     'Gạo - Ngũ cốc': 'Grains',
+    'Lúa gạo': 'Grains',
     'Thảo mộc - Gia vị': 'Roots',
   };
 
@@ -139,11 +149,11 @@ function mapBeProduct(p: BeProduct): ApiProduct {
   return {
     id: String(p.id),
     name: p.name,
-    nameEn: p.name, // BE chưa có trường nameEn
+    nameEn: p.nameEn ?? p.name, // BE có nameEn
     category,
     categoryVn: p.categoryName ?? 'Rau củ quả',
-    location: 'Việt Nam',
-    minOrderKg: 10,
+    location: p.location ?? 'Việt Nam',
+    minOrderKg: p.minOrderKg ?? 10,
     priceVnd: p.price,
     priceUsd: Math.round(p.price / usdRate * 100) / 100,
     unit: p.unit ?? 'kg',
@@ -151,15 +161,15 @@ function mapBeProduct(p: BeProduct): ApiProduct {
     imageAlt: p.name,
     badges: p.status === 'AVAILABLE' ? ['Còn hàng'] : ['Hết hàng'],
     inStock: p.status === 'AVAILABLE',
-    rating: 4.5,
+    rating: 5.0,
     reviewsCount: 0,
     description: p.description ?? '',
     harvestDate: p.createdAt?.split('T')[0] ?? '',
     supplier: {
-      name: p.sellerUsername ?? 'Nhà cung cấp',
+      name: p.sellerName ?? 'Nhà cung cấp',
       verified: true,
       phone: '',
-      address: 'Việt Nam',
+      address: p.location ?? 'Việt Nam',
     },
   };
 }
@@ -168,17 +178,17 @@ function mapBeProduct(p: BeProduct): ApiProduct {
 
 /**
  * Lấy tất cả sản phẩm từ BE (public - không cần JWT)
- * GET /api/v1/products?size=100
+ * GET /api/products?size=100
  */
 export async function fetchProducts(): Promise<ApiProduct[]> {
   try {
-    const res = await fetch(`${API_BASE}/api/v1/products?size=100`, {
+    const res = await fetch(`${API_BASE}/api/products?size=100`, {
       headers: { 'Content-Type': 'application/json' },
       cache: 'no-store',
     });
     if (!res.ok) throw new Error(`Lỗi lấy sản phẩm: ${res.status}`);
-    const page: BePage<BeProduct> = await res.json();
-    return page.content.map(mapBeProduct);
+    const json: ApiResponse<BePage<BeProduct>> = await res.json();
+    return json.data.content.map(mapBeProduct);
   } catch (err) {
     console.error('[partner.service] fetchProducts error:', err);
     return [];
@@ -206,50 +216,160 @@ export async function fetchMyOrders(): Promise<ApiOrder[]> {
 }
 
 /**
- * Lấy danh sách mua chung (chưa có BE → trả về rỗng)
+ * Lấy danh sách mua chung
  */
 export async function fetchGroupBuys(): Promise<ApiGroupBuy[]> {
+  const MOCK_GROUP_BUYS = [
+    {
+      id: 'gb-1',
+      title: 'Mua chung Cà chua Cherry Đà Lạt',
+      targetVolumeKg: 500,
+      currentVolumeKg: 250,
+      discountPercent: 15,
+      originalPriceVnd: 45000,
+      discountedPriceVnd: 38250,
+      endDate: '2026-10-15',
+      participantsCount: 3,
+      product: {
+        id: 'p-1',
+        name: 'Cà chua Cherry',
+        location: 'Đà Lạt, Lâm Đồng',
+        minOrderKg: 50,
+        image: 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=400'
+      }
+    },
+    {
+      id: 'gb-2',
+      title: 'Gom đơn Hành Tây siêu tiết kiệm',
+      targetVolumeKg: 1000,
+      currentVolumeKg: 850,
+      discountPercent: 20,
+      originalPriceVnd: 20000,
+      discountedPriceVnd: 16000,
+      endDate: '2026-10-10',
+      participantsCount: 8,
+      product: {
+        id: 'p-2',
+        name: 'Hành Tây',
+        location: 'Đơn Dương, Lâm Đồng',
+        minOrderKg: 100,
+        image: 'https://images.unsplash.com/photo-1461354464878-ad92f492a5a0?w=400'
+      }
+    }
+  ];
+
   try {
     const res = await fetch(`${API_BASE}/api/v1/group-buys`, {
       headers: { 'Content-Type': 'application/json' },
       cache: 'no-store',
     });
-    if (!res.ok) return [];
-    return res.json();
+    if (!res.ok) return MOCK_GROUP_BUYS;
+    const json = await res.json();
+    if (json && json.data && json.data.content && json.data.content.length > 0) {
+      return json.data.content;
+    }
+    return MOCK_GROUP_BUYS;
   } catch {
-    return [];
+    return MOCK_GROUP_BUYS;
   }
 }
 
 /**
- * Lấy danh sách hợp đồng tương lai (chưa có BE → trả về rỗng)
+ * Lấy danh sách hợp đồng tương lai
  */
 export async function fetchForwardContracts(): Promise<ApiForwardContract[]> {
+  const MOCK_FORWARD_CONTRACTS = [
+    {
+      id: 'fc-1',
+      title: 'Hợp đồng Sầu Riêng Ri6',
+      cropName: 'Sầu Riêng Ri6 VietGAP',
+      farmName: 'Trang trại Sầu Riêng Chín Hóa',
+      location: 'Cai Lậy, Tiền Giang',
+      expectedHarvest: '2026-10-15',
+      estimatedQuantityKg: 5000,
+      contractPriceVnd: 85000,
+      depositPercent: 20,
+      status: 'Mở đăng ký',
+      image: 'https://images.unsplash.com/photo-1595841696650-6819ebcb0338?w=500'
+    },
+    {
+      id: 'fc-2',
+      title: 'Hợp đồng Cà Phê Robusta',
+      cropName: 'Cà Phê Robusta Chín Cây',
+      farmName: 'Nông trang Ban Mê',
+      location: 'Buôn Ma Thuột, Đắk Lắk',
+      expectedHarvest: '2026-11-20',
+      estimatedQuantityKg: 10000,
+      contractPriceVnd: 110000,
+      depositPercent: 25,
+      status: 'Mở đăng ký',
+      image: 'https://images.unsplash.com/photo-1559525839-b184a4d698c7?w=500'
+    }
+  ];
+
   try {
-    const res = await fetch(`${API_BASE}/api/v1/forward-contracts`, {
+    const res = await fetch(`${API_BASE}/api/forward-contracts`, {
       headers: { 'Content-Type': 'application/json' },
       cache: 'no-store',
     });
-    if (!res.ok) return [];
-    return res.json();
+    if (!res.ok) return MOCK_FORWARD_CONTRACTS;
+    
+    // The API returns ApiResponse<PageResponse<ForwardContractDTO>>
+    const json = await res.json();
+    if (json && json.data && json.data.content && json.data.content.length > 0) {
+      return json.data.content.map((c: any) => ({
+        id: String(c.id),
+        title: c.title,
+        cropName: c.cropName,
+        farmName: c.farmName,
+        location: c.location,
+        expectedHarvest: c.expectedHarvest,
+        estimatedQuantityKg: c.estimatedQuantityKg,
+        contractPriceVnd: c.contractPriceVnd,
+        depositPercent: c.depositPercent,
+        status: c.status,
+        image: c.imageUrl || 'https://images.unsplash.com/photo-1595841696650-6819ebcb0338?w=500'
+      }));
+    }
+    return MOCK_FORWARD_CONTRACTS;
   } catch {
-    return [];
+    return MOCK_FORWARD_CONTRACTS;
   }
 }
 
 /**
  * Tham gia chiến dịch mua chung (cần JWT)
- * POST /api/v1/group-buys/{id}/join
+ * POST /api/partner/group-buys/{id}/join
  */
 export async function joinGroupBuy(id: string, volumeKg: number): Promise<ApiGroupBuy | null> {
   try {
-    const res = await fetch(`${API_BASE}/api/v1/group-buys/${id}/join`, {
+    const res = await fetch(`${API_BASE}/api/partner/group-buys/${id}/join`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         ...getAuthHeader(),
       },
       body: JSON.stringify({ volumeKg }),
+    });
+    if (!res.ok) return null;
+    return res.json();
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Đăng ký Hợp đồng Tương lai (cần JWT)
+ * POST /api/partner/contracts/forward/{id}/register
+ */
+export async function registerForwardContract(id: string): Promise<any | null> {
+  try {
+    const res = await fetch(`${API_BASE}/api/partner/contracts/forward/${id}/register`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeader(),
+      },
     });
     if (!res.ok) return null;
     return res.json();

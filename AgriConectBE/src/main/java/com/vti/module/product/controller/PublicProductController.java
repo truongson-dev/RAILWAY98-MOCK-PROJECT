@@ -46,4 +46,25 @@ public class PublicProductController {
     public ApiResponse<List<CategoryDTO>> getAllCategories() {
         return ApiResponse.success(categoryService.getAllCategories());
     }
+
+    // TẠM THỜI: Seed danh mục
+    @PostMapping("/seed-categories")
+    public ApiResponse<String> seedCategories() {
+        String[][] cats = {
+            {"Trái cây ăn quả", "Fruits", "Các loại trái cây tươi"},
+            {"Cây công nghiệp", "Industrial Crops", "Cà phê, tiêu, điều..."},
+            {"Lúa gạo & Lương thực", "Rice & Grains", "Lúa gạo và các loại ngũ cốc"},
+            {"Rau củ quả sạch", "Vegetables", "Rau củ hữu cơ, an toàn"}
+        };
+        for (String[] cat : cats) {
+            try {
+                com.vti.module.product.dto.CategoryCreateRequest req = new com.vti.module.product.dto.CategoryCreateRequest();
+                req.setName(cat[0]);
+                req.setNameEn(cat[1]);
+                req.setDescription(cat[2]);
+                categoryService.createCategory(req);
+            } catch(Exception e) {}
+        }
+        return ApiResponse.success("Seed done");
+    }
 }

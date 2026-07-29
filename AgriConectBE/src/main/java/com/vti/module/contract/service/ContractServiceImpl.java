@@ -135,6 +135,46 @@ public class ContractServiceImpl implements ContractService {
     }
 
     @Override
+    @Transactional
+    public EscrowDTO createEscrowFromForwardContract(Long forwardContractId, Long partnerId) {
+        ForwardContract fwd = forwardRepo.findById(forwardContractId)
+                .orElseThrow(() -> new AppException(ErrorCode.FORWARD_CONTRACT_NOT_FOUND));
+        Account buyer = accountRepo.findById(partnerId)
+                .orElseThrow(() -> new AppException(ErrorCode.ACCOUNT_NOT_FOUND));
+
+        EscrowContract contract = new EscrowContract();
+        contract.setContractCode("ESC-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
+        contract.setBuyer(buyer);
+        contract.setSeller(fwd.getCreatedBy());
+        contract.setProductName(fwd.getCropName());
+        contract.setQuantityTons(fwd.getEstimatedQuantityKg().divide(new java.math.BigDecimal("1000")));
+        contract.setTotalValueVnd(fwd.getEstimatedQuantityKg().multiply(fwd.getContractPriceVnd()));
+        contract.setNotes("Created from Forward Contract: " + fwd.getContractCode());
+        contract.setStatus(ContractStatus.OPEN);
+        contract.setProgressPercent(0);
+
+        // Pre-create milestones based on forward contract
+        java.util.List<EscrowMilestone> milestones = new java.util.ArrayList<>();
+        String[] defaultMilestones = {"Gieo hạt", "Đang phát triển", "Sắp thu hoạch", "Thu hoạch"};
+        for (int i = 0; i < defaultMilestones.length; i++) {
+            EscrowMilestone m = new EscrowMilestone();
+            m.setContract(contract);
+            m.setTitle(defaultMilestones[i]);
+            m.setDescription("Milestone " + (i + 1) + " for " + fwd.getCropName());
+            m.setDisplayOrder(i + 1);
+            m.setStatus(com.vti.module.contract.enums.MilestoneStatus.PENDING);
+            milestones.add(m);
+        }
+        contract.setMilestones(milestones);
+
+        // Update forward contract status if needed (e.g., IN_PROGRESS or CLOSED if fully booked)
+        fwd.setStatus(ContractStatus.IN_PROGRESS);
+        forwardRepo.save(fwd);
+
+        return convertToEscrowDTO(escrowRepo.save(contract));
+    }
+
+    @Override
     public PageResponse<ForwardContractDTO> getForwardContracts(ContractStatus status, Pageable pageable) {
         Page<ForwardContract> page = status != null ? 
             forwardRepo.findByStatus(status, pageable) : 

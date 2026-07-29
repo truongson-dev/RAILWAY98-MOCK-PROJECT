@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { Search, Filter, QrCode, ShoppingBag, MapPin, Calendar, Star } from 'lucide-react';
 import { Modal } from '@/components/ui/Modal';
 import { Badge } from '@/components/ui/Badge';
-import { MOCK_PRODUCTS } from '@/data/mockData';
+import api from '@/lib/axios';
 import { useUIStore } from '@/store/uiStore';
 import type { CertificationLabel } from '@/types/product.type';
 import { formatNumber } from '@/utils/currency';
@@ -14,14 +14,28 @@ export const MarketplaceModal: React.FC = () => {
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCert, setSelectedCert] = useState<string>('ALL');
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  const filtered = MOCK_PRODUCTS.filter((p) => {
+  React.useEffect(() => {
+    if (isMarketplaceOpen) {
+      setLoading(true);
+      api.get('/products')
+        .then((res) => {
+          setProducts(res.data.data?.content || []);
+        })
+        .catch(console.error)
+        .finally(() => setLoading(false));
+    }
+  }, [isMarketplaceOpen]);
+
+  const filtered = products.filter((p) => {
     const matchesSearch =
-      p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.origin.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.seller.toLowerCase().includes(searchTerm.toLowerCase());
+      p.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p.location?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p.sellerName?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCert =
-      selectedCert === 'ALL' || p.certifications.includes(selectedCert as CertificationLabel);
+      selectedCert === 'ALL' || (p.certifications && p.certifications.includes(selectedCert as CertificationLabel));
     return matchesSearch && matchesCert;
   });
 
@@ -66,6 +80,7 @@ export const MarketplaceModal: React.FC = () => {
 
       {/* Product Grid */}
       <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {loading && <p>Đang tải dữ liệu sản phẩm...</p>}
         {filtered.map((p) => (
           <div
             key={p.id}
@@ -74,28 +89,28 @@ export const MarketplaceModal: React.FC = () => {
             <div>
               <div className="relative h-44 overflow-hidden">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={p.image} alt={p.name} className="w-full h-full object-cover" />
+                <img src={p.imageUrl || '/images/default-product.jpg'} alt={p.name} className="w-full h-full object-cover" />
                 <div className="absolute top-3 left-3 flex gap-1.5 flex-wrap">
-                  {p.certifications.map((cert) => (
+                  {p.certifications?.map((cert: string) => (
                     <Badge key={cert} variant="green">{cert}</Badge>
                   ))}
                 </div>
                 <div className="absolute bottom-3 right-3 bg-black/60 backdrop-blur-md text-white text-xs px-2.5 py-1 rounded-md flex items-center gap-1 font-semibold">
                   <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                  {p.rating}
+                  {p.rating || '5.0'}
                 </div>
               </div>
 
               <div className="p-4 space-y-2">
                 <span className="text-[11px] font-semibold text-[#176a22] tracking-wider uppercase">
-                  {p.category}
+                  {p.categoryName || 'Sản phẩm'}
                 </span>
                 <h3 className="font-bold text-base text-[#181d16] leading-snug line-clamp-1">
                   {p.name}
                 </h3>
                 <div className="flex items-center gap-1.5 text-xs text-[#40493d]">
                   <MapPin className="w-3.5 h-3.5 text-[#707a6c]" />
-                  <span>{p.origin}</span>
+                  <span>{p.location}</span>
                 </div>
                 <div className="flex items-center gap-1.5 text-xs text-[#40493d]">
                   <Calendar className="w-3.5 h-3.5 text-[#707a6c]" />
@@ -104,11 +119,11 @@ export const MarketplaceModal: React.FC = () => {
                 <div className="pt-2 flex items-baseline justify-between border-t border-[#f1f5ea]">
                   <span className="text-xs text-[#707a6c]">Giá sỉ B2B:</span>
                   <span className="text-lg font-bold text-[#176a22]">
-                    {formatNumber(p.pricePerKg)} đ/kg
+                    {formatNumber(p.price)} đ/{p.unit || 'kg'}
                   </span>
                 </div>
                 <p className="text-[11px] text-[#707a6c] text-right">
-                  Số lượng: {p.availableQuantityTons} Tấn (Min order: {p.minOrderTons} Tấn)
+                  Kho: {p.inventoryQuantity || 100} Tấn (Min order: {p.minOrderKg} kg)
                 </p>
               </div>
             </div>
@@ -117,7 +132,7 @@ export const MarketplaceModal: React.FC = () => {
               <button
                 onClick={() => {
                   closeMarketplace();
-                  openQrModal(p.qrBatchCode);
+                  openQrModal(p.id.toString());
                 }}
                 className="w-full py-2.5 px-4 bg-[#176a22] hover:bg-[#12531a] active:scale-95 text-white text-xs font-semibold rounded-xl flex items-center justify-center gap-2 transition-all"
               >

@@ -20,6 +20,7 @@ import {
   fetchGroupBuys,
   fetchForwardContracts,
   fetchMyCreditInfo,
+  registerForwardContract,
 } from '@/services/partner.service';
 import { CreditManagementView } from '../partner/CreditManagementView';
 import {
@@ -294,8 +295,17 @@ export default function PartnerApp() {
   };
 
   // Register Future Contract
-  const handleRegisterContract = (contract: FutureContract) => {
-    showToast(`Đã gửi dự thảo hợp đồng bao tiêu ${contract.cropName}`);
+  const handleRegisterContract = async (contract: FutureContract) => {
+    try {
+      const res = await registerForwardContract(contract.id);
+      if (res) {
+        showToast(`Đã ký dự thảo hợp đồng bao tiêu ${contract.cropName}`);
+      } else {
+        showToast('Có lỗi xảy ra khi ký hợp đồng!');
+      }
+    } catch (e) {
+      showToast('Có lỗi xảy ra khi ký hợp đồng!');
+    }
   };
 
   // Reorder

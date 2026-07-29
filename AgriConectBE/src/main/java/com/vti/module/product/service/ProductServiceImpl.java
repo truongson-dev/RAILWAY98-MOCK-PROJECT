@@ -55,6 +55,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ProductDTO getProductById(Long id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
@@ -62,6 +63,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public PageResponse<ProductDTO> searchProducts(String keyword, Long categoryId, Pageable pageable) {
         Page<Product> page = productRepository.searchProducts(keyword, categoryId, null, null, null, pageable);
         return PageResponse.of(page.map(this::mapToDTO));

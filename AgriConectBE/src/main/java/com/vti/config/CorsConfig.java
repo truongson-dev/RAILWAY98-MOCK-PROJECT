@@ -21,7 +21,7 @@ public class CorsConfig {
         config.setAllowCredentials(true);
         
         // Cho phép các domain nào được phép gọi API
-        config.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://localhost:5173"));
+        config.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://localhost:3001", "http://localhost:5173"));
         
         // Cho phép các method HTTP
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
