@@ -52,7 +52,7 @@ export async function createProduct(payload: ProductCreatePayload): Promise<ApiP
 
 export async function fetchSupplierProducts(): Promise<ApiProduct[]> {
   try {
-    const res = await fetch(`${API_BASE}/api/products?size=100`, {
+    const res = await fetch(`${API_BASE}/api/supplier/products?size=100`, {
       headers: {
         'Content-Type': 'application/json',
         ...getAuthHeader(),

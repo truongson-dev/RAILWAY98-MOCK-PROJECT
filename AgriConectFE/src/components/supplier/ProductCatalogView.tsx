@@ -112,12 +112,22 @@ export const ProductCatalogView: React.FC<ProductCatalogViewProps> = ({
                       alt={prod.name}
                       className="w-full h-full object-cover"
                     />
-                    <span className="absolute top-3 right-3 bg-black/75 text-white text-xs font-bold px-3 py-1 rounded-full">
-                      {prod.stockText}
-                    </span>
+
 
                     <span className="absolute top-3 left-3 bg-[#dbe6cf] text-[#176a22] text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-md">
                       {prod.category}
+                    </span>
+                    
+                    {/* Real Status Badge */}
+                    <span className={`absolute top-3 right-3 px-2.5 py-1 font-extrabold text-[10px] rounded-lg shadow-2xs ${
+                      prod.status === 'PENDING_APPROVAL' ? 'bg-[#fef3c7] text-[#b45309] border border-[#fde68a]' :
+                      prod.status === 'REJECTED' ? 'bg-[#fee2e2] text-[#b91c1c] border border-[#fecaca]' :
+                      prod.status === 'AVAILABLE' ? 'bg-[#dcfce7] text-[#15803d] border border-[#bbf7d0]' :
+                      'bg-[#e2e8f0] text-[#334155] border border-[#cbd5e1]'
+                    }`}>
+                      {prod.status === 'PENDING_APPROVAL' ? 'Chờ duyệt' :
+                       prod.status === 'REJECTED' ? 'Bị từ chối' :
+                       prod.status === 'AVAILABLE' ? 'Đang bán' : prod.status}
                     </span>
                   </div>
 

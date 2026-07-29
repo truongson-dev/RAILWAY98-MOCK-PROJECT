@@ -8,8 +8,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 import java.math.BigDecimal;
 
+import com.vti.common.enums.ProductStatus;
+
 public interface ProductService {
-    PageResponse<ProductDTO> searchProducts(String keyword, Long categoryId, Pageable pageable);
+    PageResponse<ProductDTO> searchProducts(String keyword, Long categoryId, ProductStatus status, Long sellerId, Pageable pageable);
+    
+    ProductDTO approveProduct(Long id);
+    
+    ProductDTO rejectProduct(Long id);
     
     ProductDTO getProductById(Long id);
     

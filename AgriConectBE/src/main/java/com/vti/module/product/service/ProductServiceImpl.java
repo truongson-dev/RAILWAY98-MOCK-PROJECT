@@ -50,7 +50,26 @@ public class ProductServiceImpl implements ProductService {
         product.setHarvestDate(request.getHarvestDate());
         product.setCategory(category);
         product.setSeller(seller);
+        product.setStatus(com.vti.common.enums.ProductStatus.PENDING_APPROVAL);
 
+        return mapToDTO(productRepository.save(product));
+    }
+
+    @Override
+    @Transactional
+    public ProductDTO approveProduct(Long id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+        product.setStatus(com.vti.common.enums.ProductStatus.AVAILABLE);
+        return mapToDTO(productRepository.save(product));
+    }
+
+    @Override
+    @Transactional
+    public ProductDTO rejectProduct(Long id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+        product.setStatus(com.vti.common.enums.ProductStatus.REJECTED);
         return mapToDTO(productRepository.save(product));
     }
 
@@ -64,8 +83,8 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional(readOnly = true)
-    public PageResponse<ProductDTO> searchProducts(String keyword, Long categoryId, Pageable pageable) {
-        Page<Product> page = productRepository.searchProducts(keyword, categoryId, null, null, null, pageable);
+    public PageResponse<ProductDTO> searchProducts(String keyword, Long categoryId, com.vti.common.enums.ProductStatus status, Long sellerId, Pageable pageable) {
+        Page<Product> page = productRepository.searchProducts(keyword, categoryId, null, null, null, status, sellerId, pageable);
         return PageResponse.of(page.map(this::mapToDTO));
     }
 

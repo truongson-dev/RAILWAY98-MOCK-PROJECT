@@ -21,6 +21,8 @@ export const ROUTES = {
   ADMIN: '/dashboard/admin',
   ADMIN_ROLES: '/dashboard/admin/roles',       // Quản lý vai trò người dùng
   ADMIN_DISPUTES: '/dashboard/admin/disputes', // Xử lý tranh chấp hợp đồng
+  ADMIN_PRODUCTS: '/dashboard/admin/products', // Duyệt sản phẩm
+
 
   // Supplier — nhà cung cấp (nông dân, HTX)
   SUPPLIER: '/dashboard/supplier',

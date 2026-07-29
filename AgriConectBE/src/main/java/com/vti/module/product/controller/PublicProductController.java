@@ -32,7 +32,7 @@ public class PublicProductController {
             @RequestParam(defaultValue = "id,desc") String sort) {
         
         Pageable pageable = PageRequest.of(page, size);
-        return ApiResponse.success(productService.searchProducts(keyword, categoryId, pageable));
+        return ApiResponse.success(productService.searchProducts(keyword, categoryId, com.vti.common.enums.ProductStatus.AVAILABLE, null, pageable));
     }
 
     // Lấy chi tiết sản phẩm

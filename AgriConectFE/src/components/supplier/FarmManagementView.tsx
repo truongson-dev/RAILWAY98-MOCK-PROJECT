@@ -278,7 +278,8 @@ export const FarmManagementView: React.FC<FarmManagementViewProps> = ({
         if (triggerToast) triggerToast(`Thêm sản phẩm nông sản "${formName}" thành công!`);
         
         // Refresh products
-        const updatedList = await fetchSupplierProducts();
+        const res = await api.get('/supplier/products');
+        const updatedList = res.data.data?.content || [];
         setProducts(updatedList.map(item => ({
           id: String(item.id),
           name: item.name,

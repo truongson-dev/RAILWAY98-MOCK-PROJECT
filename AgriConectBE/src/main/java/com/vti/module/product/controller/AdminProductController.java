@@ -61,6 +61,25 @@ public class AdminProductController {
         return ApiResponse.success("Upload ảnh thành công", url);
     }
 
+    // ----- DUYỆT SẢN PHẨM -----
+    @GetMapping("/products/pending")
+    public ApiResponse<com.vti.common.PageResponse<ProductDTO>> getPendingProducts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size);
+        return ApiResponse.success(productService.searchProducts(null, null, com.vti.common.enums.ProductStatus.PENDING_APPROVAL, null, pageable));
+    }
+
+    @PatchMapping("/products/{id}/approve")
+    public ApiResponse<ProductDTO> approveProduct(@PathVariable Long id) {
+        return ApiResponse.success(productService.approveProduct(id));
+    }
+
+    @PatchMapping("/products/{id}/reject")
+    public ApiResponse<ProductDTO> rejectProduct(@PathVariable Long id) {
+        return ApiResponse.success(productService.rejectProduct(id));
+    }
+
     // ----- QUẢN LÝ DANH MỤC -----
 
     // Tạo mới danh mục

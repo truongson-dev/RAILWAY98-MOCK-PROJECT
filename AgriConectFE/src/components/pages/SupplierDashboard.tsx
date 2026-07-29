@@ -52,7 +52,7 @@ export const SupplierDashboard: React.FC = () => {
 
   useEffect(() => {
     // Fetch products
-    api.get('/products').then((res) => {
+    api.get('/supplier/products').then((res) => {
       setProducts(res.data.data?.content || []);
     }).catch(console.error);
 
@@ -122,7 +122,7 @@ export const SupplierDashboard: React.FC = () => {
         const res = await createProduct(payload);
         if (res) {
           triggerToast("Thêm sản phẩm thành công!");
-          api.get('/products').then((res) => {
+          api.get('/supplier/products').then((res) => {
             setProducts(res.data.data?.content || []);
           }).catch(console.error);
         } else {

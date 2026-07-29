@@ -2,12 +2,13 @@
 
 import React from 'react';
 import { Sidebar } from '@/components/shared/Sidebar';
-import { Users, AlertTriangle, BarChart2, ShieldCheck } from 'lucide-react';
+import { Users, AlertTriangle, BarChart2, ShieldCheck, Package } from 'lucide-react';
 import { ROUTES } from '@/config/routes';
 
 const SIDEBAR_ITEMS = [
   { href: ROUTES.ADMIN_ROLES, label: 'Quản lý vai trò', icon: <Users className="w-5 h-5" /> },
   { href: ROUTES.ADMIN_DISPUTES, label: 'Tranh chấp', icon: <AlertTriangle className="w-5 h-5" /> },
+  { href: ROUTES.ADMIN_PRODUCTS, label: 'Duyệt sản phẩm', icon: <Package className="w-5 h-5" /> },
   { href: ROUTES.ADMIN, label: 'Tổng quan', icon: <BarChart2 className="w-5 h-5" /> },
 ];
 

@@ -18,17 +18,21 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     // Lấy danh sách sản phẩm theo trạng thái có phân trang
     Page<Product> findByStatus(ProductStatus status, Pageable pageable);
 
-    // Tìm kiếm sản phẩm theo từ khóa, danh mục, giá, vị trí
+    // Tìm kiếm sản phẩm theo từ khóa, danh mục, giá, vị trí, trạng thái, người bán
     @Query("SELECT p FROM Product p WHERE " +
            "(:keyword IS NULL OR LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND " +
            "(:categoryId IS NULL OR p.category.id = :categoryId) AND " +
            "(:minPrice IS NULL OR p.price >= :minPrice) AND " +
            "(:maxPrice IS NULL OR p.price <= :maxPrice) AND " +
-           "(:location IS NULL OR LOWER(p.location) LIKE LOWER(CONCAT('%', :location, '%')))")
+           "(:location IS NULL OR LOWER(p.location) LIKE LOWER(CONCAT('%', :location, '%'))) AND " +
+           "(:status IS NULL OR p.status = :status) AND " +
+           "(:sellerId IS NULL OR p.seller.id = :sellerId)")
     Page<Product> searchProducts(@Param("keyword") String keyword,
                                  @Param("categoryId") Long categoryId,
                                  @Param("minPrice") BigDecimal minPrice,
                                  @Param("maxPrice") BigDecimal maxPrice,
                                  @Param("location") String location,
+                                 @Param("status") ProductStatus status,
+                                 @Param("sellerId") Long sellerId,
                                  Pageable pageable);
 }
