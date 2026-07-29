@@ -387,7 +387,9 @@ export const FarmManagementView: React.FC<FarmManagementViewProps> = ({
 
         <div className="flex flex-wrap items-center gap-2.5">
           <button
-            onClick={handleOpenCreateModal}
+            onClick={() => {
+              if (onOpenAddProductModal) onOpenAddProductModal();
+            }}
             className="px-4 py-2.5 bg-[#176a22] hover:bg-[#12541b] active:bg-[#0e4315] text-white font-extrabold text-xs rounded-xl transition-all cursor-pointer flex items-center gap-2 shadow-xs border border-[#a3f69c]/30"
           >
             <PackagePlus size={18} strokeWidth={2.5} />

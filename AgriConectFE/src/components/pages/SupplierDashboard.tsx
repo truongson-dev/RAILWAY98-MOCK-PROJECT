@@ -95,16 +95,42 @@ export const SupplierDashboard: React.FC = () => {
   };
 
   // Handlers for Products
-  const handleAddOrUpdateProduct = (productData: Omit<Product, 'id'>) => {
+  const handleAddOrUpdateProduct = async (productData: Omit<Product, 'id'>) => {
     if (editingProduct) {
       setProducts(prev => prev.map(p => p.id === editingProduct.id ? { ...productData, id: editingProduct.id } : p));
       setEditingProduct(null);
     } else {
-      const newProd: Product = {
-        ...productData,
-        id: `prod-${Date.now()}`
+      let categoryIdToSave = 1;
+      if (productData.category === 'Cây công nghiệp') categoryIdToSave = 2;
+      if (productData.category === 'Lúa gạo') categoryIdToSave = 3;
+      if (productData.category === 'Rau củ') categoryIdToSave = 4;
+      
+      const payload = {
+        name: productData.name,
+        description: productData.description,
+        price: productData.price,
+        unit: productData.unit,
+        minOrderKg: 50, // default
+        location: productData.origin,
+        harvestDate: productData.harvestDate,
+        categoryId: categoryIdToSave,
+        imageUrls: [productData.imageUrl]
       };
-      setProducts(prev => [newProd, ...prev]);
+      
+      try {
+        const { createProduct } = await import('@/services/supplier.service');
+        const res = await createProduct(payload);
+        if (res) {
+          triggerToast("Thêm sản phẩm thành công!");
+          api.get('/products').then((res) => {
+            setProducts(res.data.data?.content || []);
+          }).catch(console.error);
+        } else {
+          triggerToast("Thất bại: Không thể tạo sản phẩm");
+        }
+      } catch (e) {
+        triggerToast("Lỗi khi thêm sản phẩm");
+      }
     }
   };
 
