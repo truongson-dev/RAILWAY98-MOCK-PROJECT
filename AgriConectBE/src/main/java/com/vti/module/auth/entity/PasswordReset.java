@@ -20,14 +20,16 @@ public class PasswordReset {
     @Column(nullable = false)
     private String email;
 
-    @Column(unique = true, nullable = false)
+    @Column(name = "reset_token", unique = true, nullable = false)
     private String resetToken;
 
+    @Column(name = "expires_at")
     private LocalDateTime expiresAt;
     
     @Column(name = "is_used")
     private boolean used = false;
     
+    @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
 
     public void setEmail(String email) { this.email = email; }

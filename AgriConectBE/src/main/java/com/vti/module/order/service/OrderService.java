@@ -22,6 +22,7 @@ public interface OrderService {
 
     // Cập nhật trạng thái đơn hàng (dành cho Admin/Nhân viên)
     OrderDTO updateOrderStatus(Long id, UpdateOrderStatusRequest request, Long adminId);
+    OrderDTO updateOrderStatusSupplier(Long id, OrderStatus newStatus);
 
     // Hủy đơn hàng (chỉ thực hiện khi đơn hàng chưa được xử lý)
     OrderDTO cancelOrder(Long id, String reason, Long buyerId);

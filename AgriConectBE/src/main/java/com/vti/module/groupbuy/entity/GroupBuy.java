@@ -99,4 +99,31 @@ public class GroupBuy {
     public void setParticipants(List<GroupBuyParticipant> participants) { this.participants = participants; }
     
     public Integer getParticipantsCount() { return participantsCount; }
+
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public String getTitle() { return title; }
+
+    public String getDescription() { return description; }
+
+    public BigDecimal getTargetQuantity() { return targetQuantity; }
+
+    public BigDecimal getDiscountPercent() { return discountPercent; }
+
+    public BigDecimal getOriginalPrice() { return originalPrice; }
+
+    public BigDecimal getDiscountPrice() { return discountPrice; }
+
+    public LocalDateTime getStartDate() { return startDate; }
+
+    public LocalDateTime getEndDate() { return endDate; }
+
+    public List<GroupBuyParticipant> getParticipants() { return participants; }
+
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 }

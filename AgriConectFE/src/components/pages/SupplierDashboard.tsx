@@ -194,6 +194,50 @@ export const SupplierDashboard: React.FC = () => {
 
         {/* Dynamic Page Views */}
         <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6 max-w-7xl w-full mx-auto">
+          
+          {currentTab === 'orders' && (
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+              <h2 className="text-xl font-bold mb-4">Quản lý Đơn hàng</h2>
+              <div className="space-y-4">
+                {orders.map(order => (
+                  <div key={order.id} className="border p-4 rounded-lg flex justify-between items-center">
+                    <div>
+                      <p className="font-semibold text-lg">Mã đơn: {order.orderCode}</p>
+                      <p className="text-gray-500">Trạng thái: {order.status}</p>
+                      <p className="text-gray-500">Địa chỉ: {order.shippingAddress}</p>
+                    </div>
+                    <div className="flex gap-2">
+                      {order.status === 'PENDING' && (
+                        <button onClick={() => {
+                          fetch(`http://localhost:8080/api/supplier/orders/${order.id}/status?status=CONFIRMED`, {
+                            method: 'PUT',
+                            headers: { 'Authorization': `Bearer ${localStorage.getItem('agri_token')}` }
+                          }).then(() => { triggerToast('Đã chấp nhận đơn hàng'); window.location.reload(); })
+                        }} className="bg-green-500 text-white px-4 py-2 rounded-lg">Chấp nhận đơn</button>
+                      )}
+                      {order.status === 'CONFIRMED' && (
+                        <button onClick={() => {
+                          fetch(`http://localhost:8080/api/supplier/orders/${order.id}/status?status=PROCESSING`, {
+                            method: 'PUT',
+                            headers: { 'Authorization': `Bearer ${localStorage.getItem('agri_token')}` }
+                          }).then(() => { triggerToast('Đã đóng gói xong'); window.location.reload(); })
+                        }} className="bg-blue-500 text-white px-4 py-2 rounded-lg">Đóng gói xong</button>
+                      )}
+                      {order.status === 'PROCESSING' && (
+                        <button onClick={() => {
+                          fetch(`http://localhost:8080/api/supplier/orders/${order.id}/status?status=SHIPPING`, {
+                            method: 'PUT',
+                            headers: { 'Authorization': `Bearer ${localStorage.getItem('agri_token')}` }
+                          }).then(() => { triggerToast('Đã yêu cầu Shipper'); window.location.reload(); })
+                        }} className="bg-yellow-500 text-white px-4 py-2 rounded-lg">Yêu cầu Shipper</button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {currentTab === 'dashboard' && (
             <DashboardView
               products={products}
@@ -253,6 +297,19 @@ export const SupplierDashboard: React.FC = () => {
             <OrderTrackingView
               orders={orders}
               onSelectOrder={(ord) => setSelectedOrderForDetail(ord)}
+              onConfirmOrder={(orderId) => {
+                api.put(`/supplier/orders/${orderId}/status?status=PROCESSING`)
+                  .then(() => {
+                    triggerToast('Đã xác nhận đơn hàng thành công!');
+                    api.get('/supplier/orders').then((res) => {
+                      setOrders(res.data.data?.content || []);
+                    });
+                  })
+                  .catch((err) => {
+                    console.error(err);
+                    triggerToast('Có lỗi xảy ra khi xác nhận đơn hàng.');
+                  });
+              }}
             />
           )}
 

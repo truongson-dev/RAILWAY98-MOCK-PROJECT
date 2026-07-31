@@ -24,7 +24,7 @@ export const GroupBuysManagementView: React.FC<GroupBuysManagementViewProps> = (
     // Fetch group buys (in a real app, this might be filtered by supplierId backend-side)
     const fetchCampaigns = async () => {
       try {
-        const res = await api.get('/public/group-buys');
+        const res = await api.get('/group-buys');
         if (res.data && res.data.data && res.data.data.content) {
           setCampaigns(res.data.data.content);
         } else if (res.data && Array.isArray(res.data)) {

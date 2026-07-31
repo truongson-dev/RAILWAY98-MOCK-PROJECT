@@ -1,6 +1,11 @@
 package com.vti.module.order.service.impl;
 
 import com.vti.common.PageResponse;
+
+import com.vti.module.shipment.repository.ShipmentRepository;
+import com.vti.module.shipment.entity.Shipment;
+import com.vti.common.enums.ShipmentStatus;
+import java.util.UUID;
 import com.vti.common.enums.OrderStatus;
 import com.vti.exception.AppException;
 import com.vti.exception.ErrorCode;
@@ -37,6 +42,7 @@ public class OrderServiceImpl implements OrderService {
     private final OrderItemRepository orderItemRepository;
     private final ProductRepository productRepository;
     private final AccountRepository accountRepository;
+    private final ShipmentRepository shipmentRepository;
 
     @Override
     @Transactional
@@ -85,6 +91,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public PageResponse<OrderDTO> getOrders(String keyword, OrderStatus status, Pageable pageable) {
         Page<Order> orderPage = orderRepository.searchOrders(keyword, status, null, pageable);
         Page<OrderDTO> dtoPage = orderPage.map(this::mapToDTO);
@@ -92,6 +99,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public OrderDTO getOrderById(Long id) {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
@@ -99,6 +107,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public PageResponse<OrderDTO> getMyOrders(Long buyerId, OrderStatus status, Pageable pageable) {
         Page<Order> orderPage = orderRepository.searchOrders(null, status, buyerId, pageable);
         Page<OrderDTO> dtoPage = orderPage.map(this::mapToDTO);
@@ -107,6 +116,35 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
+    public OrderDTO updateOrderStatusSupplier(Long id, OrderStatus newStatus) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+        
+        order.setStatus(newStatus);
+        order = orderRepository.save(order);
+        
+        // If status is SHIPPING, we make sure a Shipment exists and is READY_FOR_PICKUP
+        if (newStatus == OrderStatus.SHIPPING) {
+            java.util.Optional<Shipment> existingShipment = shipmentRepository.findByOrderId(order.getId());
+            if (existingShipment.isEmpty()) {
+                Shipment s = new Shipment();
+                s.setOrder(order);
+                s.setTrackingCode("SHP-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
+                s.setStatus(ShipmentStatus.READY_FOR_PICKUP);
+                s.setDeliveryAddress(order.getShippingAddress());
+                shipmentRepository.save(s);
+            } else {
+                Shipment s = existingShipment.get();
+                if (s.getStatus() == ShipmentStatus.PENDING) {
+                    s.setStatus(ShipmentStatus.READY_FOR_PICKUP);
+                    shipmentRepository.save(s);
+                }
+            }
+        }
+        
+        return mapToDTO(order);
+    }
+
     public OrderDTO updateOrderStatus(Long id, UpdateOrderStatusRequest request, Long adminId) {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));

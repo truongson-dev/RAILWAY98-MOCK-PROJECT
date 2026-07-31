@@ -5,11 +5,13 @@ import { Truck, Search, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
 interface OrderTrackingViewProps {
   orders: Order[];
   onSelectOrder: (order: Order) => void;
+  onConfirmOrder?: (orderId: string) => void;
 }
 
 export const OrderTrackingView: React.FC<OrderTrackingViewProps> = ({
   orders,
-  onSelectOrder
+  onSelectOrder,
+  onConfirmOrder
 }) => {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -17,10 +19,15 @@ export const OrderTrackingView: React.FC<OrderTrackingViewProps> = ({
   const itemsPerPage = 3;
 
   const filteredOrders = orders.filter((o) => {
-    const matchesStatus = statusFilter === 'all' || o.status === statusFilter;
+    const matchesStatus = statusFilter === 'all' || 
+    (statusFilter === 'PENDING' && (o.status === 'PENDING' || o.status === 'new')) || 
+    (statusFilter === 'PROCESSING' && (o.status === 'PROCESSING' || o.status === 'CONFIRMED' || o.status === 'processing')) || 
+    (statusFilter === 'SHIPPING' && (o.status === 'SHIPPING' || o.status === 'shipping')) || 
+    (statusFilter === 'DELIVERED' && (o.status === 'DELIVERED' || o.status === 'completed')) || 
+    o.status === statusFilter;
     const matchesSearch = o.orderCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          o.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          o.productName.toLowerCase().includes(searchQuery.toLowerCase());
+                          (o.customerName || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          ((o.items && o.items[0]?.productName) || o.productName || '').toLowerCase().includes(searchQuery.toLowerCase());
     return matchesStatus && matchesSearch;
   });
 
@@ -35,16 +42,24 @@ export const OrderTrackingView: React.FC<OrderTrackingViewProps> = ({
 
   const getStatusBadge = (status: Order['status']) => {
     switch (status) {
+      case 'PENDING':
       case 'new':
-        return <span className="px-2.5 py-1 bg-[#dbe6cf] text-[#176a22] font-bold text-xs rounded-full">Đơn mới</span>;
+        return <span className="px-2.5 py-1 bg-[#dbe6cf] text-[#176a22] font-bold text-xs rounded-full">Đơn mới (Chờ duyệt)</span>;
+      case 'CONFIRMED':
+      case 'PROCESSING':
       case 'processing':
         return <span className="px-2.5 py-1 bg-[#ffd9e2] text-[#9d3c5f] font-bold text-xs rounded-full">Đang xử lý</span>;
+      case 'SHIPPING':
       case 'shipping':
         return <span className="px-2.5 py-1 bg-blue-100 text-blue-800 font-bold text-xs rounded-full">Đang giao</span>;
+      case 'DELIVERED':
       case 'completed':
         return <span className="px-2.5 py-1 bg-green-100 text-green-800 font-bold text-xs rounded-full">Hoàn thành</span>;
+      case 'CANCELLED':
       case 'cancelled':
         return <span className="px-2.5 py-1 bg-red-100 text-red-800 font-bold text-xs rounded-full">Đã hủy</span>;
+      default:
+        return <span className="px-2.5 py-1 bg-gray-100 text-gray-800 font-bold text-xs rounded-full">{status}</span>;
     }
   };
 
@@ -143,29 +158,46 @@ export const OrderTrackingView: React.FC<OrderTrackingViewProps> = ({
                   </td>
                 </tr>
               ) : (
-                paginatedOrders.map((ord) => (
+                paginatedOrders.map((ord) => {
+                  const productName = ord.productName || (ord.items && ord.items.length > 0 ? (ord.items[0].productName || `Sản phẩm #${ord.items[0].productId}`) : 'N/A');
+                  const quantity = ord.quantity || (ord.items ? ord.items.reduce((sum: number, i: any) => sum + i.quantity, 0) : 0);
+                  const totalAmount = ord.totalAmount || ord.totalPrice || (ord.items ? ord.items.reduce((sum: number, i: any) => sum + (i.price * i.quantity), 0) : 0);
+                  const customerName = ord.customerName || ord.buyerName || (ord.buyerId ? `Khách hàng #${ord.buyerId}` : 'Khách hàng ẩn danh');
+                  const orderCode = ord.orderCode || `ORD-${String(ord.id).padStart(5, '0')}`;
+                  const orderDate = ord.createdAt || ord.updatedAt ? new Date(ord.createdAt || ord.updatedAt).toLocaleDateString('vi-VN') : 'Hôm nay';
+
+                  return (
                   <tr key={ord.id} className="hover:bg-[#f7fbf0] transition-colors">
-                    <td className="py-3.5 px-4 font-extrabold text-[#176a22]">{ord.orderCode}</td>
-                    <td className="py-3.5 px-4 font-semibold text-[#181d16]">{ord.customerName}</td>
+                    <td className="py-3.5 px-4 font-extrabold text-[#176a22]">{orderCode}</td>
+                    <td className="py-3.5 px-4 font-semibold text-[#181d16]">{customerName}</td>
                     <td className="py-3.5 px-4">
-                      <span className="font-bold text-[#181d16]">{ord.productName}</span>
-                      <span className="text-xs text-[#5e6958] block">SL: {ord.quantity}</span>
+                      <span className="font-bold text-[#181d16]">{productName}</span>
+                      <span className="text-xs text-[#5e6958] block">SL: {quantity}</span>
                     </td>
                     <td className="py-3.5 px-4 text-right font-black text-[#181d16]">
-                      {ord.totalPrice.toLocaleString('vi-VN')} đ
+                      {totalAmount.toLocaleString('vi-VN')} đ
                     </td>
                     <td className="py-3.5 px-4">{getStatusBadge(ord.status)}</td>
-                    <td className="py-3.5 px-4 text-xs text-[#5e6958]">{ord.createdAt}</td>
+                    <td className="py-3.5 px-4 text-xs text-[#5e6958]">{orderDate}</td>
                     <td className="py-3.5 px-4 text-center">
-                      <button
-                        onClick={() => onSelectOrder(ord)}
-                        className="p-2 bg-[#f1f5ea] hover:bg-[#e0e8d6] text-[#176a22] rounded-lg transition-colors inline-flex items-center gap-1 font-semibold text-xs cursor-pointer"
-                      >
-                        <Eye size={16} /> Xem
-                      </button>
+                      {(ord.status === 'PENDING' || ord.status === 'new') && onConfirmOrder ? (
+                        <button
+                          onClick={() => onConfirmOrder(String(ord.id))}
+                          className="p-2 bg-[#176a22] hover:bg-[#12541b] text-white rounded-lg transition-colors inline-flex items-center gap-1 font-semibold text-xs cursor-pointer shadow-xs"
+                        >
+                          Xác nhận
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => onSelectOrder(ord)}
+                          className="p-2 bg-[#f1f5ea] hover:bg-[#e0e8d6] text-[#176a22] rounded-lg transition-colors inline-flex items-center gap-1 font-semibold text-xs cursor-pointer"
+                        >
+                          <Eye size={16} /> Xem
+                        </button>
+                      )}
                     </td>
                   </tr>
-                ))
+                )})
               )}
             </tbody>
           </table>

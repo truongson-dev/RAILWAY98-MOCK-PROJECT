@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Sidebar } from '../shipper/Sidebar';
 import { Header } from '../shipper/Header';
 import { Footer } from '../shipper/Footer';
@@ -16,35 +17,42 @@ import { SystemStatusModal } from '../shipper/SystemStatusModal';
 import { AssignOrderModal, AssignableOrder } from '../shipper/AssignOrderModal';
 import { getDriverAvatarByName } from '../shipper/mockData';
 import api from '@/lib/axios';
+import { useAuthStore } from '@/store/authStore';
 import { NavigationTab, OrderItem, Vehicle, TransportRoute, NotificationItem } from '../shipper/types';
 import { CheckCircle2, AlertCircle } from 'lucide-react';
 
 export const ShipperDashboard: React.FC = () => {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<NavigationTab>('dashboard');
   const [isProfileView, setIsProfileView] = useState(false);
   const [orders, setOrders] = useState<OrderItem[]>([]);
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [routes, setRoutes] = useState<TransportRoute[]>([]);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+  const { isAuthenticated } = useAuthStore();
 
   useEffect(() => {
-    // Fetch active shipments/orders for the shipper
-    api.get('/shipper/shipments').then((res) => {
-      // mapping shipment -> orderItem roughly
+    if (!isAuthenticated) {
+      router.push('/auth/login');
+      return;
+    }
+
+    // Fetch orders that are in SHIPPING status (from suppliers)
+    api.get('/shipper/orders?status=SHIPPING').then((res) => {
       const data = res.data.data?.content || [];
-      const mappedOrders = data.map((s: any) => ({
-        id: s.id?.toString(),
-        orderCode: s.trackingCode,
-        pickupLocation: s.pickupAddress || 'Kho phân loại',
-        deliveryLocation: s.deliveryAddress,
-        expectedRevenue: 0,
-        revenueFormatted: '0 ₫',
-        status: s.status?.toLowerCase() === 'pending' ? 'pending' : 'in_transit',
+      const mappedOrders = data.map((o: any) => ({
+        id: o.id?.toString(),
+        orderCode: o.orderCode || `#AG-${o.id}`,
+        pickupLocation: o.shippingAddress || 'Kho phân loại', // Can be supplier's address, using shippingAddress or mock
+        deliveryLocation: o.shippingAddress,
+        expectedRevenue: o.totalAmount ? o.totalAmount * 0.1 : 50000, // 10% or default 50k
+        revenueFormatted: `${(o.totalAmount ? o.totalAmount * 0.1 : 50000).toLocaleString('vi-VN')} ₫`,
+        status: 'pending', // for shipper to "nhận đơn", the local state is 'pending' before assigning
         productType: 'Nông sản',
-        weight: '0 Tấn',
-        vehiclePlate: s.vehiclePlate,
-        driverName: s.contactName,
-        createdAt: s.createdAt
+        weight: 'N/A', // Not in order directly
+        vehiclePlate: null,
+        driverName: null,
+        createdAt: o.createdAt
       }));
       setOrders(mappedOrders);
     }).catch(console.error);
@@ -520,7 +528,11 @@ export const ShipperDashboard: React.FC = () => {
   };
 
   const handleLogout = () => {
+    useAuthStore.getState().logout(); // Properly clear Zustand state and localStorage
     showToast('Đã đăng xuất khỏi tài khoản AgriShipper.');
+    setTimeout(() => {
+      router.push('/auth/login');
+    }, 1000);
   };
 
   const pendingCount = orders.filter(o => o.status === 'pending').length;

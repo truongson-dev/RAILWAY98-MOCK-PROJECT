@@ -24,7 +24,7 @@ public class Shipment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false)
+    @Column(name = "tracking_code", unique = true, nullable = false)
     private String trackingCode;
 
     @OneToOne(fetch = FetchType.LAZY)
@@ -38,17 +38,20 @@ public class Shipment {
     @Enumerated(EnumType.STRING)
     private ShipmentStatus status = ShipmentStatus.PENDING;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "delivery_address", columnDefinition = "TEXT")
     private String deliveryAddress;
 
+    @Column(name = "contact_name")
     private String contactName;
+    
+    @Column(name = "contact_phone")
     private String contactPhone;
 
     @Column(columnDefinition = "TEXT")
     private String notes;
 
     @CreatedDate
-    @Column(updatable = false)
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
     @LastModifiedDate

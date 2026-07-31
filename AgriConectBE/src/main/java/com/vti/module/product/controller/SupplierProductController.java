@@ -31,4 +31,27 @@ public class SupplierProductController {
         Pageable pageable = PageRequest.of(page, size);
         return ApiResponse.success(productService.searchProducts(keyword, categoryId, null, currentUser.getId(), pageable));
     }
+
+    @PostMapping("/products")
+    public ApiResponse<ProductDTO> createProduct(
+            @RequestBody com.vti.module.product.dto.ProductCreateRequest request,
+            @AuthenticationPrincipal UserPrincipal currentUser) {
+        return ApiResponse.success(productService.createProduct(request, currentUser.getId()));
+    }
+
+    @PutMapping("/products/{id}")
+    public ApiResponse<ProductDTO> updateProduct(
+            @PathVariable Long id,
+            @RequestBody com.vti.module.product.dto.ProductUpdateRequest request,
+            @AuthenticationPrincipal UserPrincipal currentUser) {
+        return ApiResponse.success(productService.updateProduct(id, request, currentUser.getId()));
+    }
+
+    @DeleteMapping("/products/{id}")
+    public ApiResponse<Void> deleteProduct(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserPrincipal currentUser) {
+        productService.deleteProduct(id, currentUser.getId());
+        return ApiResponse.success(null);
+    }
 }

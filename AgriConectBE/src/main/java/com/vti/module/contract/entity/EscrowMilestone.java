@@ -55,4 +55,6 @@ public class EscrowMilestone {
     public int getDisplayOrder() { return displayOrder; }
     public LocalDateTime getCompletionDate() { return completionDate; }
     public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setId(Long id) { this.id = id; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 }

@@ -37,6 +37,8 @@ import { Sidebar } from '../partner/Sidebar';
 import { HeroBanner } from '../partner/HeroBanner';
 import { StatsGrid } from '../partner/StatsGrid';
 import { ProductCard } from '../partner/ProductCard';
+import { GroupBuyJoinModal } from '../partner/GroupBuyJoinModal';
+
 import { ProductDetailModal } from '../partner/ProductDetailModal';
 import { CartDrawer } from '../partner/CartDrawer';
 import { GroupBuyingView } from '../partner/GroupBuyingView';
@@ -174,6 +176,9 @@ export default function PartnerApp() {
   // Modal & Drawer Control
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isCartOpen, setIsCartOpen] = useState(false);
+
+  const [selectedGroupBuyProduct, setSelectedGroupBuyProduct] = useState<Product | null>(null);
+
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -562,6 +567,7 @@ export default function PartnerApp() {
                       onToggleFavorite={handleToggleFavorite}
                       onAddToCart={handleAddToCart}
                       onSelectProduct={setSelectedProduct}
+                        onJoinGroupBuy={(e, p) => { e.stopPropagation(); setSelectedGroupBuyProduct(p); }}
                     />
                   ))}
                 </div>

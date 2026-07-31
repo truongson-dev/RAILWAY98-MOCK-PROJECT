@@ -82,4 +82,21 @@ public class EscrowContract {
     public void setNotes(String notes) { this.notes = notes; }
     public void setMilestones(List<EscrowMilestone> milestones) { this.milestones = milestones; }
     public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public String getContractCode() { return contractCode; }
+
+    public String getProductName() { return productName; }
+
+    public BigDecimal getQuantityTons() { return quantityTons; }
+
+    public BigDecimal getTotalValueVnd() { return totalValueVnd; }
+
+    public String getNotes() { return notes; }
+
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 }

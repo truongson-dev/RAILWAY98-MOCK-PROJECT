@@ -25,8 +25,13 @@ public class RefreshToken {
     @JoinColumn(name = "account_id")
     private Account account;
 
+    @Column(name = "expires_at")
     private LocalDateTime expiresAt;
+    
+    @Column(name = "revoked")
     private boolean revoked = false;
+    
+    @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
 
     public void setToken(String token) { this.token = token; }

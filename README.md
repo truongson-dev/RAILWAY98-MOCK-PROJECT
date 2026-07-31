@@ -18,10 +18,19 @@
 ```
 RAILWAY98-MOCK-PROJECT/
 ├── AgriConectBE/          # Spring Boot 3.2.5 — Backend REST API
+│   └── src/main/java/com/vti/
+│       ├── module/        # Modules: auth, account, product, order, shipment, contract, notification
+│       ├── config/        # Security, CORS, Swagger
+│       └── security/      # JWT Filter, UserDetails
 ├── AgriConectFE/          # Next.js 15 — Frontend toàn bộ role
-├── agriconnect_db.sql     # Schema + data mẫu ban đầu
-├── seed.py                # Script Python seed danh mục nhanh
-└── PROJECT_STATUS.md      # Trạng thái tiến độ dự án
+│   └── src/
+│       ├── app/           # Routes: auth, admin, dashboard/partner, dashboard/supplier, dashboard/shipper
+│       ├── components/    # UI Components theo tính năng
+│       ├── services/      # Axios services API gọi Backend
+│       ├── store/         # Zustand + persist JWT
+│       ├── lib/           # Axios instance + JWT auto-attach
+│       └── hooks/         # Custom hooks
+└── agriconnect_db.sql     # Schema + data mẫu ban đầu
 ```
 
 ---
@@ -35,7 +44,7 @@ RAILWAY98-MOCK-PROJECT/
 | Java (JDK) | 17+ |
 | Node.js | 18+ (khuyên dùng v20) |
 | MySQL | 8.0+ |
-| Python | 3.x (chỉ cần nếu chạy seed.py) |
+| Python | 3.x (để chạy script tạo dữ liệu mẫu) |
 
 ---
 
@@ -50,7 +59,32 @@ CREATE DATABASE agriconnect_db
 
 Sau đó **import** file `agriconnect_db.sql` vào database vừa tạo.
 
-Seed danh mục mặc định (chỉ chạy 1 lần):
+**Seed danh mục mặc định:** Tạo file `seed.py` với nội dung bên dưới và chạy để thêm 4 danh mục cơ bản vào DB (chỉ chạy 1 lần):
+```python
+import pymysql
+
+conn = pymysql.connect(host='localhost', user='root', password='', database='agriconnect_db')
+cursor = conn.cursor()
+cats = [
+    (1, 'Trái cây ăn quả', 'Fruits', 'Các loại trái cây tươi'),
+    (2, 'Cây công nghiệp', 'Industrial Crops', 'Cà phê, tiêu, điều...'),
+    (3, 'Lúa gạo & Lương thực', 'Rice & Grains', 'Lúa gạo và các loại ngũ cốc'),
+    (4, 'Rau củ quả sạch', 'Vegetables', 'Rau củ hữu cơ, an toàn')
+]
+
+for cat in cats:
+    try:
+        cursor.execute("INSERT IGNORE INTO categories (id, name, nameEn, description) VALUES (%s, %s, %s, %s)", cat)
+    except Exception as e:
+        print(f"Error: {e}")
+
+conn.commit()
+cursor.close()
+conn.close()
+print("Seed categories done!")
+```
+
+Chạy script bằng lệnh:
 ```bash
 pip install pymysql
 python seed.py
@@ -73,11 +107,7 @@ cd AgriConectBE
 > ✅ Backend chạy tại: **http://localhost:8080**
 > 📖 Swagger UI: **http://localhost:8080/swagger-ui.html**
 
-Kiểm tra file `AgriConectBE/src/main/resources/application.properties` — đảm bảo thông tin DB khớp với máy:
-```properties
-spring.datasource.username=root
-spring.datasource.password=       # để trống nếu không có mật khẩu
-```
+Kiểm tra file `AgriConectBE/src/main/resources/application.properties` — đảm bảo thông tin DB khớp với máy (mặc định user root, không password).
 
 ---
 
@@ -106,7 +136,7 @@ npm run dev -- -p 3000
 
 ## 🗺️ Sơ đồ luồng nghiệp vụ
 
-```
+```text
 [Supplier] Đăng sản phẩm
      ↓
 [Admin] Duyệt tài khoản / sản phẩm
@@ -122,73 +152,73 @@ npm run dev -- -p 3000
 
 ---
 
-## 🧑‍💻 Phân công team
+## 🧑‍💻 Phân công & Tiến độ (Cập nhật 29/07/2026)
 
-| Thành viên | Luồng nghiệp vụ |
-|---|---|
-| **Tiến** | Auth & User Management (Login → JWT → RBAC) |
-| **Nguyễn Sơn** | Admin System (Duyệt User → Category → Dashboard) |
-| **Thanh Sơn** | Supplier System (Đăng sản phẩm → Quản lý đơn) |
-| **Lâm** | Shipping Workflow (Nhận đơn → Giao hàng → Tracking) |
+> Mỗi người chịu trách nhiệm **toàn bộ luồng**: DB → Entity → Service → API → Frontend → Test.
 
-> Chi tiết phân công xem tại: [`TEAM_WORKFLOW.md`](./TEAM_WORKFLOW.md)
+### 🔐 Tiến — Auth & User Management (Hoàn thành trước tiên)
+- [x] Đăng ký, Login, OTP, Trả JWT
+- [x] Refresh Token
+- [x] RBAC Guard API theo Role & Route guard theo Role (FE)
+- [ ] Logout API (revoke refresh token), Cập nhật Profile, Đổi mật khẩu
 
----
+### 🛠️ Nguyễn Sơn — Admin System
+- [x] Duyệt, từ chối tài khoản Supplier/Partner/Shipper
+- [ ] Dashboard thống kê Admin (Đang làm 40%)
+- [ ] Quản lý User (List, khóa/mở khóa)
+- [ ] Quản lý Category CRUD
+- [ ] Hệ thống Notification
 
-## 📡 API Endpoints chính
+### 🌾 Thanh Sơn — Supplier System
+- [x] Dashboard Supplier
+- [x] Form thêm sản phẩm 3 bước (Đang làm 60%)
+- [x] Hợp đồng kỳ hạn Supplier (Đang làm 70%)
+- [x] Mua chung Supplier (Đang làm 70%)
+- [ ] Lấy danh sách sản phẩm riêng, sửa/xóa sản phẩm
+- [ ] Xác nhận đơn hàng, Quản lý kho, Báo cáo doanh thu
 
-| Method | Endpoint | Mô tả | Auth |
-|---|---|---|---|
-| POST | `/api/auth/login` | Đăng nhập | Public |
-| POST | `/api/auth/register` | Đăng ký | Public |
-| POST | `/api/auth/verify-email` | Xác thực OTP | Public |
-| GET | `/api/products` | Lấy danh sách sản phẩm | Public |
-| POST | `/api/admin` | Tạo sản phẩm mới | SUPPLIER/ADMIN |
-| GET | `/api/admin/accounts` | Quản lý tài khoản | ADMIN |
-| GET | `/api/categories` | Danh sách danh mục | Public |
+### 🚚 Lâm — Shipping Workflow
+- [x] Dashboard Shipper (tổng quan đội xe)
+- [ ] Danh sách đơn chờ giao & nhận đơn
+- [ ] Cập nhật trạng thái (Đang lấy / Đang giao / Đã giao)
+- [ ] Upload Proof of Delivery & Tracking code
 
----
-
-## 🏗️ Tech Stack
-
-### Backend
-- **Spring Boot 3.2.5** — REST API Framework
-- **Spring Security + JWT** — Authentication & Authorization
-- **Spring Data JPA + Hibernate** — ORM
-- **MySQL 8.0** — Database
-- **Flyway** — Database Migration
-- **Lombok** — Boilerplate reduction
-- **Swagger/OpenAPI 3** — API Documentation
-
-### Frontend
-- **Next.js 15** (App Router) — React Framework
-- **TypeScript** — Type safety
-- **Tailwind CSS** — Styling
-- **Zustand** — State Management
-- **Axios** — HTTP Client (với JWT interceptor tự động)
-- **Recharts** — Biểu đồ / Analytics
-- **Lucide React** — Icon library
+### 🛒 Partner (Chưa phân công)
+- [ ] Đặt hàng từ Marketplace & Checkout
+- [ ] Tham gia Group Buy & Ký hợp đồng kỳ hạn
 
 ---
 
-## ⚙️ Lưu ý khi phát triển
+## 🐛 Lỗi đã biết (Known Issues)
+
+| Lỗi | Trạng thái | Ghi chú |
+|---|---|---|
+| Axios 401 khi chưa login | ✅ Fixed | Đã gắn JWT interceptor vào `axios.ts` |
+| Import `getAuthHeader` không tồn tại | ✅ Fixed | Sửa trong `supplier.service.ts` |
+| NaN trong form Group Buy | ✅ Fixed | Thêm `minOrderKg` vào mock object |
+| Backend compile lỗi Lombok | ✅ Fixed | Chạy `mvn clean` trước khi build |
+
+---
+
+## ⚙️ Quy trình Git & Team Workflow
 
 ```bash
-# Mỗi khi bắt đầu làm việc
+# 1. Luôn pull trước khi làm
 git pull origin main
 
-# Tạo branch theo format
-git checkout -b feature/[ten-thanh-vien]-[ten-tinh-nang]
-# Ví dụ: feature/tien-refresh-token
+# 2. Tạo branch theo format: feature/[ten]/[tinh-nang]
+git checkout -b feature/tien/refresh-token
 
-# Commit theo Conventional Commits
-git commit -m "feat: add refresh token endpoint"
-git commit -m "fix: correct JWT expiry validation"
-git commit -m "docs: update API documentation"
+# 3. Commit theo chuẩn Conventional Commits
+git commit -m "feat: mô tả tính năng"
+git commit -m "fix: mô tả lỗi được sửa"
+
+# 4. Push branch lên remote
+git push origin feature/tien/refresh-token
+
+# 5. Tạo Pull Request trên GitHub → Tag 1 người review
 ```
 
-> ⚠️ **Không push thẳng lên `main`**. Tạo PR và cần ít nhất 1 người review trước khi merge.
-
----
-
-*Cập nhật lần cuối: 29/07/2026 — Team AgriConnect*
+> ⚠️ **Không push thẳng lên `main`** — luôn tạo PR.
+> ⚠️ **Không sửa file của người khác** nếu không báo trước qua chat nhóm.
+> ✅ Nếu cần thêm bảng DB — báo team trong nhóm chat trước khi thêm vào migration.

@@ -1,5 +1,7 @@
 import React from 'react';
 import { Order } from './types';
+import { FeedbackModal } from './FeedbackModal';
+import { useState } from 'react';
 import { ShoppingBag, Truck, CheckCircle, Clock, MapPin, ExternalLink } from 'lucide-react';
 
 interface OrdersViewProps {
@@ -9,6 +11,38 @@ interface OrdersViewProps {
 }
 
 export const OrdersView: React.FC<OrdersViewProps> = ({ orders, currency, onReorder }) => {
+  
+  const [selectedOrderForFeedback, setSelectedOrderForFeedback] = useState<Order | null>(null);
+
+  const handleFeedbackSubmit = async (rating: number, comment: string) => {
+    if (!selectedOrderForFeedback) return;
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:8080/api/v1/feedbacks', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          productId: selectedOrderForFeedback.items[0]?.productId || 1, // Defaulting to first item
+          orderId: selectedOrderForFeedback.id,
+          rating,
+          comment
+        })
+      });
+      if (response.ok) {
+        alert('Cảm ơn bạn đã đánh giá!');
+        setSelectedOrderForFeedback(null);
+      } else {
+        alert('Có lỗi xảy ra khi gửi đánh giá.');
+      }
+    } catch (error) {
+      console.error(error);
+      alert('Lỗi kết nối.');
+    }
+  };
+
   const formatPrice = (priceVnd: number) => {
     return currency === 'USD'
       ? `$${(priceVnd / 24500).toFixed(2)}`
@@ -141,12 +175,27 @@ export const OrdersView: React.FC<OrdersViewProps> = ({ orders, currency, onReor
                   >
                     Đặt Lại Đơn Này
                   </button>
+
+                  <button
+                    onClick={() => setSelectedOrderForFeedback(ord)}
+                    className="px-4 py-2 bg-[#eab308] hover:bg-[#ca8a04] text-white rounded-xl font-bold text-xs shadow-xs transition-colors ml-2"
+                  >
+                    Đánh giá
+                  </button>
                 </div>
               </div>
             </div>
           ))
         )}
       </div>
-    </div>
+    
+      {selectedOrderForFeedback && (
+        <FeedbackModal
+          order={selectedOrderForFeedback}
+          onClose={() => setSelectedOrderForFeedback(null)}
+          onSubmit={handleFeedbackSubmit}
+        />
+      )}
+</div>
   );
 };

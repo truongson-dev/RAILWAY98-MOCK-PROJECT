@@ -76,11 +76,14 @@ export interface Order {
   productName: string;
   quantity: string;
   totalPrice: number;
-  status: 'new' | 'processing' | 'shipping' | 'completed' | 'cancelled';
+  status: 'PENDING' | 'CONFIRMED' | 'PROCESSING' | 'SHIPPING' | 'DELIVERED' | 'CANCELLED' | 'new' | 'processing' | 'shipping' | 'completed' | 'cancelled';
   createdAt: string;
   deliveryDate?: string;
   paymentMethod: string;
   notes?: string;
+  items?: any[];
+  totalAmount?: number;
+  shippingAddress?: string;
 }
 
 export interface FarmPlot {

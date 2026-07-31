@@ -88,4 +88,37 @@ public class ForwardContract {
     public void setDepositPercent(BigDecimal depositPercent) { this.depositPercent = depositPercent; }
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
     public void setDescription(String description) { this.description = description; }
+
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public String getContractCode() { return contractCode; }
+
+    public String getTitle() { return title; }
+
+    public String getCropName() { return cropName; }
+
+    public String getFarmName() { return farmName; }
+
+    public String getLocation() { return location; }
+
+    public LocalDate getExpectedHarvest() { return expectedHarvest; }
+
+    public BigDecimal getEstimatedQuantityKg() { return estimatedQuantityKg; }
+
+    public BigDecimal getContractPriceVnd() { return contractPriceVnd; }
+
+    public BigDecimal getDepositPercent() { return depositPercent; }
+
+    public ContractStatus getStatus() { return status; }
+
+    public String getImageUrl() { return imageUrl; }
+
+    public String getDescription() { return description; }
+
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 }

@@ -20,4 +20,18 @@ public class CategoryDTO {
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+
+    public Long getId() { return id; }
+
+    public String getName() { return name; }
+
+    public String getNameEn() { return nameEn; }
+
+    public String getDescription() { return description; }
+
+    public String getImageUrl() { return imageUrl; }
+
+    public LocalDateTime getCreatedAt() { return createdAt; }
+
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
 }

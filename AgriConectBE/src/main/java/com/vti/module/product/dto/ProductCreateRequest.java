@@ -27,4 +27,14 @@ public class ProductCreateRequest {
     public String getHarvestDate() { return harvestDate; }
     public Long getCategoryId() { return categoryId; }
     public List<String> getImageUrls() { return imageUrls; }
+    public void setName(String name) { this.name = name; }
+    public void setNameEn(String nameEn) { this.nameEn = nameEn; }
+    public void setDescription(String description) { this.description = description; }
+    public void setPrice(BigDecimal price) { this.price = price; }
+    public void setUnit(String unit) { this.unit = unit; }
+    public void setMinOrderKg(Integer minOrderKg) { this.minOrderKg = minOrderKg; }
+    public void setLocation(String location) { this.location = location; }
+    public void setHarvestDate(String harvestDate) { this.harvestDate = harvestDate; }
+    public void setCategoryId(Long categoryId) { this.categoryId = categoryId; }
+    public void setImageUrls(List<String> imageUrls) { this.imageUrls = imageUrls; }
 }

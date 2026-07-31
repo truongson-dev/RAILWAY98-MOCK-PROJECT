@@ -5,10 +5,10 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
-public class DbFixRunner implements CommandLineRunner {
+public class AppDbFixRunner implements CommandLineRunner {
     private final JdbcTemplate jdbcTemplate;
 
-    public DbFixRunner(JdbcTemplate jdbcTemplate) {
+    public AppDbFixRunner(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
@@ -26,6 +26,13 @@ public class DbFixRunner implements CommandLineRunner {
         );
         if (adminFixed > 0) {
             System.out.println("====== DB FIX RUNNER: Khôi phục tài khoản admin về ACTIVE (" + adminFixed + " row) ======");
+        }
+
+        try {
+            jdbcTemplate.execute("ALTER TABLE products MODIFY COLUMN status ENUM('PENDING_APPROVAL','AVAILABLE','OUT_OF_STOCK','DISCONTINUED','REJECTED') DEFAULT 'PENDING_APPROVAL'");
+            System.out.println("====== DB FIX RUNNER: Updated products ENUM successfully! ======");
+        } catch (Exception e) {
+            System.out.println("====== DB FIX RUNNER ERROR updating products ENUM: " + e.getMessage() + " ======");
         }
     }
 }

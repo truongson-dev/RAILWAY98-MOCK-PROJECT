@@ -48,4 +48,42 @@ public class ProductDTO {
     public void setImageUrls(List<String> imageUrls) { this.imageUrls = imageUrls; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+
+    public Long getId() { return id; }
+
+    public String getName() { return name; }
+
+    public String getNameEn() { return nameEn; }
+
+    public String getDescription() { return description; }
+
+    public BigDecimal getPrice() { return price; }
+
+    public String getUnit() { return unit; }
+
+    public Integer getMinOrderKg() { return minOrderKg; }
+
+    public String getLocation() { return location; }
+
+    public String getHarvestDate() { return harvestDate; }
+
+    public ProductStatus getStatus() { return status; }
+
+    public BigDecimal getRating() { return rating; }
+
+    public Integer getReviewsCount() { return reviewsCount; }
+
+    public Long getCategoryId() { return categoryId; }
+
+    public String getCategoryName() { return categoryName; }
+
+    public Long getSellerId() { return sellerId; }
+
+    public String getSellerName() { return sellerName; }
+
+    public List<String> getImageUrls() { return imageUrls; }
+
+    public LocalDateTime getCreatedAt() { return createdAt; }
+
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
 }

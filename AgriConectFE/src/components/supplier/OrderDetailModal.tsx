@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import api from '@/lib/axios';
 import { 
   X, 
   Truck, 
@@ -115,11 +116,17 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
   const [updateEstDate, setUpdateEstDate] = useState<string>('2026-08-25');
   const [noticeMessage, setNoticeMessage] = useState<string | null>(null);
 
-  const handleStatusChange = (newStatus: Order['status']) => {
-    setCurrentStatus(newStatus);
-    onUpdateStatus(order.id, newStatus);
-    setNoticeMessage(`Đã cập nhật trạng thái đơn hàng thành "${getStatusText(newStatus)}"!`);
-    setTimeout(() => setNoticeMessage(null), 4000);
+  const handleStatusChange = async (newStatus: Order['status']) => {
+    try {
+      await api.put(`/supplier/orders/${order.id}/status?status=${newStatus}`);
+      setCurrentStatus(newStatus);
+      onUpdateStatus(order.id, newStatus);
+      setNoticeMessage(`Đã cập nhật trạng thái đơn hàng thành "${getStatusText(newStatus)}"!`);
+      setTimeout(() => setNoticeMessage(null), 4000);
+    } catch (error) {
+      console.error('Lỗi khi cập nhật trạng thái đơn hàng:', error);
+      alert('Không thể cập nhật trạng thái. Vui lòng thử lại!');
+    }
   };
 
   const handleSaveProgress = (e: React.FormEvent) => {
@@ -150,9 +157,15 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
     setTimeout(() => setNoticeMessage(null), 3000);
   };
 
-  const contractCode = order.orderCode.startsWith('#') ? order.orderCode : `#${order.orderCode}`;
-  const depositAmount = Math.round(order.totalPrice * 0.2);
-  const remainingAmount = order.totalPrice - depositAmount;
+  const contractCode = order.orderCode || `ORD-${String(order.id).padStart(5, '0')}`;
+  const totalAmount = order.totalAmount || order.totalPrice || (order.items ? order.items.reduce((sum: number, i: any) => sum + (i.price * i.quantity), 0) : 0);
+  const safeTotal = totalAmount || 0;
+  const depositAmount = Math.round(safeTotal * 0.2);
+  const remainingAmount = safeTotal - depositAmount;
+
+  const productName = order.productName || (order.items && order.items.length > 0 ? (order.items[0].productName || `Sản phẩm #${order.items[0].productId}`) : 'N/A');
+  const quantity = order.quantity || (order.items ? order.items.reduce((sum: number, i: any) => sum + i.quantity, 0) : 0);
+  const customerName = order.customerName || order.buyerName || (order.buyerId ? `Khách hàng #${order.buyerId}` : 'Khách hàng ẩn danh');
 
   function getStatusText(status: Order['status']) {
     switch (status) {
@@ -192,24 +205,31 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
                 </span>
               </div>
               <p className="text-xs text-[#5e6958] mt-0.5">
-                Nông sản: <span className="font-bold text-[#181d16]">{order.productName}</span> ({order.quantity}) • Khách hàng: <span className="font-bold text-[#181d16]">{order.customerName}</span>
+                Nông sản: <span className="font-bold text-[#181d16]">{productName}</span> ({quantity}) • Khách hàng: <span className="font-bold text-[#181d16]">{customerName}</span>
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2 self-end sm:self-center flex-wrap">
-            {/* Status Switcher Dropdown */}
-            <select
-              value={currentStatus}
-              onChange={(e) => handleStatusChange(e.target.value as Order['status'])}
-              className="h-9 px-3 bg-[#f1f5ea] border border-[#707a6c]/40 rounded-xl text-xs font-bold text-[#181d16] focus:ring-2 focus:ring-[#176a22] outline-none cursor-pointer"
-            >
-              <option value="new">Chuyển: Đơn mới</option>
-              <option value="processing">Chuyển: Đang xử lý</option>
-              <option value="shipping">Chuyển: Đang giao hàng</option>
-              <option value="completed">Chuyển: Hoàn thành</option>
-              <option value="cancelled">Chuyển: Đã hủy</option>
-            </select>
+            {currentStatus === 'PENDING' && (
+              <button
+                onClick={() => handleStatusChange('PROCESSING')}
+                className="h-9 px-4 bg-[#176a22] hover:bg-[#12541b] text-white rounded-xl font-bold text-xs transition-colors shadow-xs flex items-center gap-1.5 cursor-pointer"
+              >
+                <CheckCircle2 size={15} />
+                Xác nhận đơn
+              </button>
+            )}
+            
+            {currentStatus === 'PROCESSING' && (
+              <button
+                onClick={() => handleStatusChange('SHIPPING')}
+                className="h-9 px-4 bg-[#e6b12a] hover:bg-[#c99a22] text-white rounded-xl font-bold text-xs transition-colors shadow-xs flex items-center gap-1.5 cursor-pointer"
+              >
+                <Truck size={15} />
+                Chuẩn bị xong - Giao Shipper
+              </button>
+            )}
 
             <button
               onClick={() => alert(`Đang tải file Hợp đồng & Hóa đơn VAT PDF (${contractCode})`)}
@@ -257,7 +277,7 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="bg-white p-4 rounded-xl border border-[#bfcaba]/30 shadow-2xs space-y-1">
               <span className="text-[11px] font-bold text-[#707a6c] uppercase tracking-wider">Tổng Giá Trị Đơn</span>
-              <p className="text-xl font-black text-[#176a22]">{order.totalPrice.toLocaleString('vi-VN')} VNĐ</p>
+              <p className="text-xl font-black text-[#176a22]">{safeTotal.toLocaleString('vi-VN')} VNĐ</p>
               <span className="text-[11px] text-[#5e6958] block">Thanh toán: {order.paymentMethod || 'Ví AgriPay Escrow'}</span>
             </div>
 
@@ -303,7 +323,7 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
                   <div className="space-y-2">
                     <div>
                       <span className="text-[#707a6c] block">Tên người mua / Doanh nghiệp:</span>
-                      <span className="font-bold text-sm text-[#181d16]">{order.customerName}</span>
+                      <span className="font-bold text-sm text-[#181d16]">{customerName}</span>
                     </div>
                     <div>
                       <span className="text-[#707a6c] block">Số điện thoại liên hệ:</span>

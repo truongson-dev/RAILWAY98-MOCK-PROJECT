@@ -35,4 +35,12 @@ public class SupplierOrderController {
     public ApiResponse<OrderDTO> getOrderById(@PathVariable Long id) {
         return ApiResponse.success(orderService.getOrderById(id));
     }
+    // Cập nhật trạng thái đơn hàng (Dành cho Supplier: Xác nhận, Chuẩn bị xong)
+    @PutMapping("/{id}/status")
+    @PreAuthorize("hasAnyRole('SUPPLIER')")
+    public ApiResponse<OrderDTO> updateOrderStatus(
+            @PathVariable Long id,
+            @RequestParam OrderStatus status) {
+        return ApiResponse.success(orderService.updateOrderStatusSupplier(id, status));
+    }
 }

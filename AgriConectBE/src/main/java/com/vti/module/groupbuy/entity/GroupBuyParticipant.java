@@ -45,4 +45,20 @@ public class GroupBuyParticipant {
     public void setVolumeKg(BigDecimal volumeKg) { this.volumeKg = volumeKg; }
     public void setAmountVnd(BigDecimal amountVnd) { this.amountVnd = amountVnd; }
     public void setJoinedAt(LocalDateTime joinedAt) { this.joinedAt = joinedAt; }
+
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public GroupBuy getGroupBuy() { return groupBuy; }
+
+    public Account getAccount() { return account; }
+
+    public BigDecimal getVolumeKg() { return volumeKg; }
+
+    public BigDecimal getAmountVnd() { return amountVnd; }
+
+    public LocalDateTime getJoinedAt() { return joinedAt; }
+
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 }

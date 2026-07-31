@@ -132,14 +132,14 @@ export const AddProductModal: React.FC<AddProductModalProps> = ({
   // Sync state when modal opens or editingProduct changes
   useEffect(() => {
     if (editingProduct) {
-      setName(editingProduct.name);
-      setCategory(editingProduct.category);
-      setPrice(editingProduct.price.toString());
-      setUnit(editingProduct.unit);
-      setStockKg(editingProduct.stockKg.toString());
-      setOrigin(editingProduct.origin);
-      setDescription(editingProduct.description);
-      setImageUrl(editingProduct.imageUrl);
+      setName(editingProduct.name || '');
+      setCategory(editingProduct.category || 'Trái cây');
+      setPrice(editingProduct.price ? editingProduct.price.toString() : '0');
+      setUnit(editingProduct.unit || 'kg');
+      setStockKg(editingProduct.stockKg ? editingProduct.stockKg.toString() : '0');
+      setOrigin(editingProduct.origin || '');
+      setDescription(editingProduct.description || '');
+      setImageUrl(editingProduct.imageUrl || '');
       setCertifications(editingProduct.certifications || ['VietGAP']);
       setHarvestDate(editingProduct.harvestDate || '');
     } else {

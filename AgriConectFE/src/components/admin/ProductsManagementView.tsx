@@ -28,6 +28,37 @@ import {
   BarChart2
 } from 'lucide-react';
 
+
+import { getCategories, createCategory, updateCategory, deleteCategory, getProducts, deleteProduct, ProductDTO, CategoryDTO } from '@/services/admin.service';
+import { useEffect } from 'react';
+
+const mapCategory = (dto: CategoryDTO): ProductCategory => ({
+  id: dto.id.toString(),
+  code: dto.code || `DM-${dto.id}`,
+  name: dto.name || '',
+  description: dto.description || '',
+  iconType: 'fruit',
+  certifications: [],
+  status: dto.status === 'ACTIVE' ? 'active' : 'inactive',
+  createdAt: dto.createdAt || new Date().toISOString(),
+});
+
+const mapProduct = (dto: ProductDTO): ProductItem => ({
+  id: dto.id.toString(),
+  code: dto.code || `SP-${dto.id}`,
+  name: dto.name || '',
+  categoryId: dto.categoryId?.toString() || '',
+  categoryName: dto.categoryName || '',
+  price: dto.price ? `${dto.price.toLocaleString('vi-VN')}đ` : 'Liên hệ',
+  unit: dto.unit || 'kg',
+  origin: dto.origin || '',
+  grade: dto.grade || '',
+  certifications: [],
+  stockVolume: dto.stockQuantity ? `${dto.stockQuantity}` : '0',
+  supplierName: dto.supplierName || '',
+  status: dto.status === 'AVAILABLE' ? 'active' : 'draft',
+});
+
 export interface ProductCategory {
   id: string;
   code: string;
@@ -294,8 +325,8 @@ const INITIAL_PRODUCTS: ProductItem[] = [
 // Component: ProductsManagementView - Giao diện quản lý/hiển thị cho Admin
 export const ProductsManagementView: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'categories' | 'products'>('categories');
-  const [categories, setCategories] = useState<ProductCategory[]>(INITIAL_CATEGORIES);
-  const [products, setProducts] = useState<ProductItem[]>(INITIAL_PRODUCTS);
+  const [categories, setCategories] = useState<ProductCategory[]>([]);
+  const [products, setProducts] = useState<ProductItem[]>([]);
 
   // Filters & Search State
   const [searchQuery, setSearchQuery] = useState('');
@@ -326,6 +357,23 @@ export const ProductsManagementView: React.FC = () => {
 
   // Toast Notification
   const [toastMsg, setToastMsg] = useState<string | null>(null);
+
+  const loadData = async () => {
+    try {
+      const cats = await getCategories();
+      setCategories(cats.map(mapCategory));
+      const prodsData = await getProducts(0, 100);
+      setProducts(prodsData.content.map(mapProduct));
+    } catch (e) {
+      console.error(e);
+      setToastMsg('Lỗi khi tải dữ liệu');
+    }
+  };
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
 
   const triggerToast = (msg: string) => {
     setToastMsg(msg);
