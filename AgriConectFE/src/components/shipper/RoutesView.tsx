@@ -22,7 +22,7 @@ import {
   Fuel
 } from 'lucide-react';
 import { TransportRoute, Vehicle } from './types';
-import { getDriverAvatarByName } from './mockData';
+
 
 interface RoutesViewProps {
   routes: TransportRoute[];

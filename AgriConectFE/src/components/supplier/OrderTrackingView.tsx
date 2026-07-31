@@ -6,6 +6,7 @@ interface OrderTrackingViewProps {
   orders: Order[];
   onSelectOrder: (order: Order) => void;
   onConfirmOrder?: (orderId: string) => void;
+  onShipOrder?: (orderId: string) => void;
 }
 
 export const OrderTrackingView: React.FC<OrderTrackingViewProps> = ({

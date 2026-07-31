@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { ShieldCheck, Lock, CheckCircle2, DollarSign, Clock, ArrowRight } from 'lucide-react';
 import { Modal } from '@/components/ui/Modal';
-import { MOCK_ESCROW } from '@/data/mockData';
+import { MOCK_ESCROW } from './localMockData';
 import { useUIStore } from '@/store/uiStore';
 import { formatNumber } from '@/utils/currency';
 

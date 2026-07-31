@@ -197,11 +197,11 @@ export async function fetchProducts(): Promise<ApiProduct[]> {
 
 /**
  * Lấy đơn hàng của Partner đang đăng nhập (cần JWT)
- * GET /api/v1/orders/my — chưa có BE, trả về mảng rỗng
+ * GET /api/partner/orders
  */
 export async function fetchMyOrders(): Promise<ApiOrder[]> {
   try {
-    const res = await fetch(`${API_BASE}/api/v1/orders/my`, {
+    const res = await fetch(`${API_BASE}/api/partner/orders`, {
       headers: {
         'Content-Type': 'application/json',
         ...getAuthHeader(),
@@ -209,7 +209,11 @@ export async function fetchMyOrders(): Promise<ApiOrder[]> {
       cache: 'no-store',
     });
     if (!res.ok) return [];
-    return res.json();
+    const json = await res.json();
+    if (json && json.data && json.data.content) {
+      return json.data.content;
+    }
+    return [];
   } catch {
     return [];
   }
@@ -219,58 +223,21 @@ export async function fetchMyOrders(): Promise<ApiOrder[]> {
  * Lấy danh sách mua chung
  */
 export async function fetchGroupBuys(): Promise<ApiGroupBuy[]> {
-  const MOCK_GROUP_BUYS = [
-    {
-      id: 'gb-1',
-      title: 'Mua chung Cà chua Cherry Đà Lạt',
-      targetVolumeKg: 500,
-      currentVolumeKg: 250,
-      discountPercent: 15,
-      originalPriceVnd: 45000,
-      discountedPriceVnd: 38250,
-      endDate: '2026-10-15',
-      participantsCount: 3,
-      product: {
-        id: 'p-1',
-        name: 'Cà chua Cherry',
-        location: 'Đà Lạt, Lâm Đồng',
-        minOrderKg: 50,
-        image: 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=400'
-      }
-    },
-    {
-      id: 'gb-2',
-      title: 'Gom đơn Hành Tây siêu tiết kiệm',
-      targetVolumeKg: 1000,
-      currentVolumeKg: 850,
-      discountPercent: 20,
-      originalPriceVnd: 20000,
-      discountedPriceVnd: 16000,
-      endDate: '2026-10-10',
-      participantsCount: 8,
-      product: {
-        id: 'p-2',
-        name: 'Hành Tây',
-        location: 'Đơn Dương, Lâm Đồng',
-        minOrderKg: 100,
-        image: 'https://images.unsplash.com/photo-1461354464878-ad92f492a5a0?w=400'
-      }
-    }
-  ];
+  
 
   try {
     const res = await fetch(`${API_BASE}/api/v1/group-buys`, {
       headers: { 'Content-Type': 'application/json' },
       cache: 'no-store',
     });
-    if (!res.ok) return MOCK_GROUP_BUYS;
+    if (!res.ok) return [];
     const json = await res.json();
     if (json && json.data && json.data.content && json.data.content.length > 0) {
       return json.data.content;
     }
-    return MOCK_GROUP_BUYS;
+    return [];
   } catch {
-    return MOCK_GROUP_BUYS;
+    return [];
   }
 }
 
@@ -278,41 +245,14 @@ export async function fetchGroupBuys(): Promise<ApiGroupBuy[]> {
  * Lấy danh sách hợp đồng tương lai
  */
 export async function fetchForwardContracts(): Promise<ApiForwardContract[]> {
-  const MOCK_FORWARD_CONTRACTS = [
-    {
-      id: 'fc-1',
-      title: 'Hợp đồng Sầu Riêng Ri6',
-      cropName: 'Sầu Riêng Ri6 VietGAP',
-      farmName: 'Trang trại Sầu Riêng Chín Hóa',
-      location: 'Cai Lậy, Tiền Giang',
-      expectedHarvest: '2026-10-15',
-      estimatedQuantityKg: 5000,
-      contractPriceVnd: 85000,
-      depositPercent: 20,
-      status: 'Mở đăng ký',
-      image: 'https://images.unsplash.com/photo-1595841696650-6819ebcb0338?w=500'
-    },
-    {
-      id: 'fc-2',
-      title: 'Hợp đồng Cà Phê Robusta',
-      cropName: 'Cà Phê Robusta Chín Cây',
-      farmName: 'Nông trang Ban Mê',
-      location: 'Buôn Ma Thuột, Đắk Lắk',
-      expectedHarvest: '2026-11-20',
-      estimatedQuantityKg: 10000,
-      contractPriceVnd: 110000,
-      depositPercent: 25,
-      status: 'Mở đăng ký',
-      image: 'https://images.unsplash.com/photo-1559525839-b184a4d698c7?w=500'
-    }
-  ];
+  
 
   try {
     const res = await fetch(`${API_BASE}/api/forward-contracts`, {
       headers: { 'Content-Type': 'application/json' },
       cache: 'no-store',
     });
-    if (!res.ok) return MOCK_FORWARD_CONTRACTS;
+    if (!res.ok) return [];
     
     // The API returns ApiResponse<PageResponse<ForwardContractDTO>>
     const json = await res.json();
@@ -331,9 +271,9 @@ export async function fetchForwardContracts(): Promise<ApiForwardContract[]> {
         image: c.imageUrl || 'https://images.unsplash.com/photo-1595841696650-6819ebcb0338?w=500'
       }));
     }
-    return MOCK_FORWARD_CONTRACTS;
+    return [];
   } catch {
-    return MOCK_FORWARD_CONTRACTS;
+    return [];
   }
 }
 
@@ -380,7 +320,7 @@ export async function registerForwardContract(id: string): Promise<any | null> {
 
 /**
  * Tạo đơn hàng (cần JWT)
- * POST /api/v1/orders
+ * POST /api/partner/orders
  */
 export async function createOrder(payload: {
   totalVnd: number;
@@ -389,7 +329,7 @@ export async function createOrder(payload: {
   items: { productId: string; quantityKg: number }[];
 }): Promise<ApiOrder | null> {
   try {
-    const res = await fetch(`${API_BASE}/api/v1/orders`, {
+    const res = await fetch(`${API_BASE}/api/partner/orders`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

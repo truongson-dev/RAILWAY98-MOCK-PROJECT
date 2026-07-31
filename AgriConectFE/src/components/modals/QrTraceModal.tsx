@@ -4,7 +4,7 @@ import React from 'react';
 import { QrCode, CheckCircle2, ShieldCheck, MapPin, Calendar, Thermometer, UserCheck, Download } from 'lucide-react';
 import { Modal } from '@/components/ui/Modal';
 import { Badge } from '@/components/ui/Badge';
-import { MOCK_TRACE_BATCH } from '@/data/mockData';
+import { MOCK_TRACE_BATCH } from './localMockData';
 import { useUIStore } from '@/store/uiStore';
 
 export const QrTraceModal: React.FC = () => {

@@ -72,6 +72,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
         productName: ci.product.name,
         quantityKg: ci.quantityKg,
         priceVnd: ci.product.priceVnd,
+        productId: ci.product.id,
       })),
       totalVnd: finalTotalVnd,
       status: 'Đang xử lý' as const,

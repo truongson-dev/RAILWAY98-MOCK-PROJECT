@@ -23,7 +23,7 @@ import {
   Award
 } from 'lucide-react';
 import { NavTab } from '@/types/admin.types';
-import { CONTRACTS_LIST } from '@/data/admin.mockData';
+// import { CONTRACTS_LIST } from '@/data/admin.mockData';
 
 interface GenericSectionViewProps {
   tab: NavTab;
@@ -139,33 +139,12 @@ export const GenericSectionView: React.FC<GenericSectionViewProps> = ({ tab, onO
                   <th className="py-3 px-4 text-right">Thao Tác</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#e0e4d9]">
-                {CONTRACTS_LIST.map((hd) => (
-                  <tr key={hd.id} className="hover:bg-[#f7fbf0]">
-                    <td className="py-3.5 px-4 font-mono font-bold text-[#176a22]">{hd.contractNo}</td>
-                    <td className="py-3.5 px-4 font-medium text-[#181d16]">{hd.buyer}</td>
-                    <td className="py-3.5 px-4 text-[#40493d]">{hd.seller}</td>
-                    <td className="py-3.5 px-4 text-[#181d16] font-semibold">{hd.product} ({hd.quantity})</td>
-                    <td className="py-3.5 px-4 font-bold text-[#181d16]">{hd.totalValue}</td>
-                    <td className="py-3.5 px-4">
-                      {hd.escrowStatus === 'locked' && (
-                        <span className="bg-[#a3f69c]/40 text-[#003808] font-bold px-2.5 py-1 rounded-full">
-                          🔒 Tiền đã tạm giữ 100%
-                        </span>
-                      )}
-                      {hd.escrowStatus === 'partially_released' && (
-                        <span className="bg-[#e0f2fe] text-[#0284c7] font-bold px-2.5 py-1 rounded-full">
-                          ⚡ Đã giải ngân 50%
-                        </span>
-                      )}
-                    </td>
-                    <td className="py-3.5 px-4 text-right">
-                      <button className="px-3 py-1 bg-[#176a22] text-white rounded-lg font-semibold cursor-pointer">
-                        Chi tiết Escrow
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+              <tbody>
+                <tr>
+                  <td colSpan={7} className="py-8 px-4 text-center text-[#707a6c]">
+                    Chưa có hợp đồng nào (Tính năng mở rộng)
+                  </td>
+                </tr>
               </tbody>
             </table>
           </div>

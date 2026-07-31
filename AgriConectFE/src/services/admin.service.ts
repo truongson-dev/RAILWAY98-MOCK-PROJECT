@@ -110,3 +110,42 @@ export async function deleteProduct(id: number): Promise<void> {
     method: 'DELETE',
   });
 }
+
+
+// Accounts
+export interface AccountDTO {
+  id: number;
+  email: string;
+  fullName: string;
+  phone: string;
+  province: string;
+  address: string;
+  avatar: string;
+  role: string;
+  status: string;
+  createdAt: string;
+}
+
+export async function getAccounts(role?: string): Promise<AccountDTO[]> {
+  try {
+    let url = '/api/admin/accounts';
+    if (role) {
+      url += '?role=' + role;
+    }
+    const res = await apiCall(url);
+    if (res && res.data && res.data.content) {
+      return res.data.content;
+    }
+    return [];
+  } catch (e) {
+    console.error('getAccounts error:', e);
+    return [];
+  }
+}
+
+export async function updateAccountStatus(id: number, status: string): Promise<void> {
+  await apiCall('/api/admin/accounts/' + id + '/status', {
+    method: 'PUT',
+    body: JSON.stringify({ status })
+  });
+}

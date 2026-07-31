@@ -45,7 +45,8 @@ export const SupplierDashboard: React.FC = () => {
   const [products, setProducts] = useState<any[]>([]);
   const [marketPrices] = useState<MarketPrice[]>([]);
   const [notices, setNotices] = useState<NoticeItem[]>([]);
-  const [orders, setOrders] = useState<any[]>([]);
+  const [orders, setOrders] = useState<any[]>([]); // Đơn bán (khách đặt)
+  const [purchases, setPurchases] = useState<any[]>([]); // Đơn mua (mình đặt)
   const [farmPlots] = useState<FarmPlot[]>([]);
   const [harvestEvents] = useState<HarvestEvent[]>([]);
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
@@ -56,9 +57,14 @@ export const SupplierDashboard: React.FC = () => {
       setProducts(res.data.data?.content || []);
     }).catch(console.error);
 
-    // Fetch orders
+    // Fetch sales orders
     api.get('/supplier/orders').then((res) => {
       setOrders(res.data.data?.content || []);
+    }).catch(console.error);
+    
+    // Fetch purchase orders
+    api.get('/supplier/orders?type=purchases').then((res) => {
+      setPurchases(res.data.data?.content || []);
     }).catch(console.error);
   }, []);
 
@@ -209,26 +215,20 @@ export const SupplierDashboard: React.FC = () => {
                     <div className="flex gap-2">
                       {order.status === 'PENDING' && (
                         <button onClick={() => {
-                          fetch(`http://localhost:8080/api/supplier/orders/${order.id}/status?status=CONFIRMED`, {
-                            method: 'PUT',
-                            headers: { 'Authorization': `Bearer ${localStorage.getItem('agri_token')}` }
-                          }).then(() => { triggerToast('Đã chấp nhận đơn hàng'); window.location.reload(); })
+                          api.put(`/supplier/orders/${order.id}/status?status=CONFIRMED`)
+                             .then(() => { triggerToast('Đã chấp nhận đơn hàng'); window.location.reload(); })
                         }} className="bg-green-500 text-white px-4 py-2 rounded-lg">Chấp nhận đơn</button>
                       )}
                       {order.status === 'CONFIRMED' && (
                         <button onClick={() => {
-                          fetch(`http://localhost:8080/api/supplier/orders/${order.id}/status?status=PROCESSING`, {
-                            method: 'PUT',
-                            headers: { 'Authorization': `Bearer ${localStorage.getItem('agri_token')}` }
-                          }).then(() => { triggerToast('Đã đóng gói xong'); window.location.reload(); })
+                          api.put(`/supplier/orders/${order.id}/status?status=PROCESSING`)
+                             .then(() => { triggerToast('Đã đóng gói xong'); window.location.reload(); })
                         }} className="bg-blue-500 text-white px-4 py-2 rounded-lg">Đóng gói xong</button>
                       )}
                       {order.status === 'PROCESSING' && (
                         <button onClick={() => {
-                          fetch(`http://localhost:8080/api/supplier/orders/${order.id}/status?status=SHIPPING`, {
-                            method: 'PUT',
-                            headers: { 'Authorization': `Bearer ${localStorage.getItem('agri_token')}` }
-                          }).then(() => { triggerToast('Đã yêu cầu Shipper'); window.location.reload(); })
+                          api.put(`/supplier/orders/${order.id}/status?status=SHIPPING`)
+                             .then(() => { triggerToast('Đã yêu cầu Shipper'); window.location.reload(); })
                         }} className="bg-yellow-500 text-white px-4 py-2 rounded-lg">Yêu cầu Shipper</button>
                       )}
                     </div>
@@ -294,23 +294,13 @@ export const SupplierDashboard: React.FC = () => {
           )}
 
           {currentTab === 'order-tracking' && (
-            <OrderTrackingView
-              orders={orders}
-              onSelectOrder={(ord) => setSelectedOrderForDetail(ord)}
-              onConfirmOrder={(orderId) => {
-                api.put(`/supplier/orders/${orderId}/status?status=PROCESSING`)
-                  .then(() => {
-                    triggerToast('Đã xác nhận đơn hàng thành công!');
-                    api.get('/supplier/orders').then((res) => {
-                      setOrders(res.data.data?.content || []);
-                    });
-                  })
-                  .catch((err) => {
-                    console.error(err);
-                    triggerToast('Có lỗi xảy ra khi xác nhận đơn hàng.');
-                  });
-              }}
-            />
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+              <h2 className="text-xl font-bold mb-4">Đơn Hàng Đã Đặt (Mua)</h2>
+              <OrderTrackingView
+                orders={purchases}
+                onSelectOrder={(ord) => setSelectedOrderForDetail(ord)}
+              />
+            </div>
           )}
 
           {currentTab === 'inventory' && (

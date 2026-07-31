@@ -27,7 +27,7 @@ import {
   Droplets
 } from 'lucide-react';
 import { OrderItem, Vehicle } from './types';
-import { getDriverAvatarByName } from './mockData';
+
 
 interface ShipmentTrackingViewProps {
   orders?: OrderItem[];

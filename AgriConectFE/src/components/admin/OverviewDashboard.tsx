@@ -1,44 +1,13 @@
 'use client';
 // Đây là component thuộc giao diện Admin
 import React, { useState } from 'react';
-import {
-  Wallet,
-  Users,
-  FileText,
-  Briefcase,
-  TrendingUp,
-  UserPlus,
-  Calendar,
-  Sparkles,
-  CheckCircle2,
-  Sliders,
-  ChevronRight,
-  ShieldAlert,
-  ArrowUpRight,
-  Clock,
-  Building2,
-  Truck,
-  ExternalLink
+import { 
+  Wallet, Users, FileText, Briefcase, TrendingUp, Sparkles, Sliders, ChevronRight, 
+  CheckCircle2, ShieldAlert, ArrowUpRight, Calendar, UserPlus, Clock, Building2, Truck 
 } from 'lucide-react';
-import {
-  ResponsiveContainer,
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  Tooltip,
-  PieChart,
-  Pie,
-  Cell
+import { 
+  ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, PieChart, Pie, Cell 
 } from 'recharts';
-import {
-  METRIC_CARDS,
-  REVENUE_PROFIT_CHART,
-  USER_DISTRIBUTION,
-  AI_RISK_ITEMS,
-  RECENT_ACTIVITIES,
-  INITIAL_KYC_RECORDS
-} from '@/data/admin.mockData';
 import { KycRecord, NavTab } from '@/types/admin.types';
 
 interface OverviewDashboardProps {
@@ -48,6 +17,208 @@ interface OverviewDashboardProps {
 }
 
 // Component: OverviewDashboard - Giao diện quản lý/hiển thị cho Admin
+
+const METRIC_CARDS: MetricCardData[] = [
+  {
+    id: '1',
+    title: 'TỔNG GIÁ TRỊ GIAO DỊCH',
+    value: '12.8 tỷ VNĐ',
+    change: '+8.2%',
+    changeType: 'positive',
+    icon: 'wallet'
+  },
+  {
+    id: '2',
+    title: 'NGƯỜI DÙNG HOẠT ĐỘNG',
+    value: '2,450',
+    change: '+124 mới',
+    changeType: 'positive',
+    icon: 'users'
+  },
+  {
+    id: '3',
+    title: 'HỢP ĐỒNG HIỆU LỰC',
+    value: '856',
+    changeType: 'neutral',
+    icon: 'file-text'
+  },
+  {
+    id: '4',
+    title: 'HỒ SƠ CHỜ DUYỆT',
+    value: '14',
+    badgeText: 'CẦN XỬ LÝ',
+    changeType: 'urgent',
+    icon: 'briefcase'
+  }
+];
+const REVENUE_PROFIT_CHART: ChartDataPoint[] = [
+  { month: 'Th1', revenue: 8.5, profit: 2.1 },
+  { month: 'Th2', revenue: 9.2, profit: 2.4 },
+  { month: 'Th3', revenue: 10.8, profit: 3.1 },
+  { month: 'Th4', revenue: 11.4, profit: 3.5 },
+  { month: 'Th5', revenue: 12.1, profit: 3.8 },
+  { month: 'Th6', revenue: 12.8, profit: 4.2 }
+];
+const USER_DISTRIBUTION: UserDistribution[] = [
+  { name: 'Nhà cung cấp', percentage: 65, count: 1592, color: '#176a22' },
+  { name: 'Đối tác', percentage: 25, count: 612, color: '#607f5b' },
+  { name: 'Vận chuyển', percentage: 10, count: 246, color: '#d97706' }
+];
+const AI_RISK_ITEMS: AiRiskItem[] = [
+  {
+    id: 'risk-1',
+    title: 'Dấu hiệu bất thường tài chính',
+    description: 'Phát hiện khối lượng giao dịch đột biến (300%) tại kho Lâm Đồng.',
+    timestamp: '2 giờ trước',
+    level: 'high',
+    location: 'Lâm Đồng',
+    category: 'financial'
+  },
+  {
+    id: 'risk-2',
+    title: 'Dự báo đứt gãy chuỗi cung ứng',
+    description: 'Thời tiết xấu tại khu vực miền Tây làm ảnh hưởng tiến độ thu hoạch lúa ST25.',
+    timestamp: '4 giờ trước',
+    level: 'medium',
+    location: 'Cần Thơ - An Giang',
+    category: 'weather'
+  },
+  {
+    id: 'risk-3',
+    title: 'Cảnh báo chất lượng dư lượng',
+    description: 'Lô hàng Sầu Riêng Ri6 tại Đồng Nai phát hiện tần suất biến động dư lượng phân bón.',
+    timestamp: '6 giờ trước',
+    level: 'high',
+    location: 'Đồng Nai',
+    category: 'quality'
+  }
+];
+const RECENT_ACTIVITIES: RecentActivity[] = [
+  {
+    id: 'act-1',
+    type: 'approval',
+    title: 'Phê duyệt đối tác mới',
+    subtitle: 'Global Grains Corp đã được cấp quyền Tín dụng cấp 1.',
+    timestamp: '12 phút trước • Quản trị viên A',
+    author: 'Quản trị viên A',
+    iconType: 'check'
+  },
+  {
+    id: 'act-2',
+    type: 'system',
+    title: 'Cập nhật biểu phí Escrow',
+    subtitle: 'Hệ thống đã cập nhật phí thanh toán tạm giữ mới cho nhà cung cấp.',
+    timestamp: '45 phút trước • Hệ thống',
+    author: 'Hệ thống',
+    iconType: 'settings'
+  },
+  {
+    id: 'act-3',
+    type: 'contract',
+    title: 'Giải ngân hợp đồng #HD-9082',
+    subtitle: 'Đã hoàn tất thanh toán Escrow 1.25 tỷ VNĐ cho HTX Nông Nghiệp Lâm Đồng.',
+    timestamp: '1 giờ trước • Tự động Escrow',
+    author: 'Hệ thống Escrow',
+    iconType: 'document'
+  }
+];
+const INITIAL_KYC_RECORDS: KycRecord[] = [
+  {
+    id: 'kyc-1',
+    name: 'Nông trại Sen Vàng',
+    category: 'Trồng trọt & Xuất khẩu Nông sản',
+    type: 'supplier',
+    status: 'pending',
+    submittedDate: '2026-07-23 14:20',
+    location: 'Đà Lạt, Lâm Đồng',
+    taxCode: '5801293812',
+    representative: 'Nguyễn Văn Sen',
+    phone: '0912 345 678',
+    email: 'senvang.farm@agriconnect.vn',
+    documents: {
+      businessLicense: true,
+      landCertificate: true,
+      vietGapCert: true,
+      idCard: true
+    },
+    missingDocNote: 'Chờ xác minh thực địa'
+  },
+  {
+    id: 'kyc-2',
+    name: 'Logistics Phía Nam',
+    category: 'Vận tải Chuỗi Cung ứng Lạnh',
+    type: 'logistics',
+    status: 'needs_info',
+    submittedDate: '2026-07-23 11:05',
+    location: 'Quận 7, TP. Hồ Chí Minh',
+    taxCode: '0314920192',
+    representative: 'Trần Minh Nam',
+    phone: '0988 765 432',
+    email: 'contact@logisticsphianam.vn',
+    documents: {
+      businessLicense: false,
+      idCard: true
+    },
+    missingDocNote: 'Thiếu giấy phép kinh doanh'
+  },
+  {
+    id: 'kyc-3',
+    name: 'Global Grains Corp',
+    category: 'Doanh nghiệp Xuất Nhập Khẩu Lương Thực',
+    type: 'partner',
+    status: 'approved',
+    submittedDate: '2026-07-22 09:30',
+    location: 'Cần Thơ',
+    taxCode: '1801239981',
+    representative: 'Lê Hoàng Anh',
+    phone: '0903 112 233',
+    email: 'info@globalgrains.com',
+    documents: {
+      businessLicense: true,
+      idCard: true,
+      vietGapCert: true
+    }
+  },
+  {
+    id: 'kyc-4',
+    name: 'Hợp Tác Xã Sầu Riêng Krông Pắc',
+    category: 'Trồng trọt & Thu hoạch Sầu Riêng',
+    type: 'supplier',
+    status: 'pending',
+    submittedDate: '2026-07-23 08:15',
+    location: 'Krông Pắc, Đắk Lắk',
+    taxCode: '6001283910',
+    representative: 'Y Bham Niê',
+    phone: '0935 889 900',
+    email: 'htx.saurieng.kp@agriconnect.vn',
+    documents: {
+      businessLicense: true,
+      landCertificate: true,
+      idCard: true,
+      vietGapCert: true
+    },
+    missingDocNote: 'Chờ đối soát chứng nhận GlobalGAP xuất khẩu'
+  },
+  {
+    id: 'kyc-5',
+    name: 'Vận Tải Nông Sản Đồng Nai',
+    category: 'Dịch vụ xe container lạnh',
+    type: 'logistics',
+    status: 'pending',
+    submittedDate: '2026-07-22 16:45',
+    location: 'Biên Hòa, Đồng Nai',
+    taxCode: '3601928371',
+    representative: 'Phạm Thanh Bình',
+    phone: '0977 123 999',
+    email: 'vantainongsan.dn@gmail.com',
+    documents: {
+      businessLicense: true,
+      idCard: true
+    },
+    missingDocNote: 'Chờ thẩm định bảo hiểm lô hàng'
+  }
+];
+
 export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
   onSelectTab,
   onOpenKycModal,

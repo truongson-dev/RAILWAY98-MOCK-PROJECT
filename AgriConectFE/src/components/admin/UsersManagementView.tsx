@@ -7,7 +7,6 @@ import {
   AlertTriangle, RefreshCw, FileText, Lock, Unlock, ShieldAlert,
   UserCheck, Phone, MapPin, Building2, Sprout, Clock, XCircle
 } from 'lucide-react';
-import { SUPPLIERS_LIST, PARTNERS_LIST, LOGISTICS_LIST, INITIAL_KYC_RECORDS } from '@/data/admin.mockData';
 import { SupplierItem, PartnerItem, LogisticsItem, KycRecord } from '@/types/admin.types';
 import { useAuthStore } from '@/store/authStore';
 import { KycApprovalView } from '@/components/admin/KycApprovalView';
@@ -64,7 +63,7 @@ export const UsersManagementView: React.FC<UsersManagementViewProps> = ({ subTab
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
 
   // ── KYC state ──────────────────────────────────────────────────────────────
-  const [kycRecords, setKycRecords] = useState<KycRecord[]>(INITIAL_KYC_RECORDS);
+  const [kycRecords, setKycRecords] = useState<KycRecord[]>([]);
   const [selectedKyc, setSelectedKyc] = useState<KycRecord | null>(null);
 
   const showToast = (msg: string, type: 'success' | 'error' = 'success') => {
@@ -217,10 +216,10 @@ export const UsersManagementView: React.FC<UsersManagementViewProps> = ({ subTab
           };
         });
 
-      // Đặt dữ liệu thật (db) LÊN ĐẦU, mock data ở sau — để thấy ngay sau khi duyệt
-      setSuppliers([...dbSuppliers, ...SUPPLIERS_LIST]);
-      setPartners([...dbPartners, ...PARTNERS_LIST]);
-      setLogistics([...dbLogistics, ...LOGISTICS_LIST]);
+      // Đặt dữ liệu thật (db)
+      setSuppliers(dbSuppliers);
+      setPartners(dbPartners);
+      setLogistics(dbLogistics);
     } catch (e) {
       console.error('Lỗi khi tải danh sách tài khoản:', e);
     }
@@ -380,9 +379,9 @@ export const UsersManagementView: React.FC<UsersManagementViewProps> = ({ subTab
   };
 
   // Data states
-  const [suppliers, setSuppliers] = useState<SupplierItem[]>(SUPPLIERS_LIST);
-  const [partners, setPartners] = useState<PartnerItem[]>(PARTNERS_LIST);
-  const [logistics, setLogistics] = useState<LogisticsItem[]>(LOGISTICS_LIST);
+  const [suppliers, setSuppliers] = useState<SupplierItem[]>([]);
+  const [partners, setPartners] = useState<PartnerItem[]>([]);
+  const [logistics, setLogistics] = useState<LogisticsItem[]>([]);
 
   // Filter & Search states
   const [searchQuery, setSearchQuery] = useState('');

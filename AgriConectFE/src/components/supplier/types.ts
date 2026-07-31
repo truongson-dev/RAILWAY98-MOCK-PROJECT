@@ -4,6 +4,7 @@ export type TabType =
   | 'forward-contracts'
   | 'group-buys'
   | 'product-catalog' 
+  | 'orders'
   | 'order-tracking' 
   | 'inventory' 
   | 'analytics' 

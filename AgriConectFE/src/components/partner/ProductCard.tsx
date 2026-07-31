@@ -8,6 +8,7 @@ interface ProductCardProps {
   isFavorite: boolean;
   onToggleFavorite: (e: React.MouseEvent, id: string) => void;
   onAddToCart: (e: React.MouseEvent, product: Product) => void;
+  onGroupBuy?: (e: React.MouseEvent, product: Product) => void;
   onSelectProduct: (product: Product) => void;
 }
 
@@ -17,6 +18,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   isFavorite,
   onToggleFavorite,
   onAddToCart,
+  onGroupBuy,
   onSelectProduct,
 }) => {
   const formattedPrice = `${product.priceVnd.toLocaleString('vi-VN')}đ`;
@@ -86,13 +88,24 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             </p>
           </div>
 
-          <button
-            onClick={(e) => onAddToCart(e, product)}
-            className="bg-[#176a22] text-white w-10 h-10 rounded-xl flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-xs hover:bg-[#358439]"
-            title="Thêm số lượng tối thiểu vào giỏ hàng"
-          >
-            <Plus className="w-5 h-5" />
-          </button>
+          <div className="flex gap-2">
+            {onGroupBuy && (
+              <button
+                onClick={(e) => onGroupBuy(e, product)}
+                className="bg-[#e49b1a] text-white w-auto px-3 h-10 rounded-xl flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-xs hover:bg-[#c88616]"
+                title="Mua nhóm"
+              >
+                <Plus className="w-4 h-4 mr-1" /> Mua nhóm
+              </button>
+            )}
+            <button
+              onClick={(e) => onAddToCart(e, product)}
+              className="bg-[#176a22] text-white w-10 h-10 rounded-xl flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-xs hover:bg-[#358439]"
+              title="Thêm số lượng tối thiểu vào giỏ hàng"
+            >
+              <Plus className="w-5 h-5" />
+            </button>
+          </div>
         </div>
       </div>
     </div>

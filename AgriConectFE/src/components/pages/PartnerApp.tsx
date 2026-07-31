@@ -21,6 +21,7 @@ import {
   fetchForwardContracts,
   fetchMyCreditInfo,
   registerForwardContract,
+  createOrder,
 } from '@/services/partner.service';
 import { CreditManagementView } from '../partner/CreditManagementView';
 import {
@@ -183,6 +184,8 @@ export default function PartnerApp() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [currentPage, setCurrentPage] = useState(1);
+
+
   const [aiInitialPrompt, setAiInitialPrompt] = useState<string>('');
 
   // Toast Feedback State
@@ -256,8 +259,31 @@ export default function PartnerApp() {
     setCartItems([]);
   };
 
-  const handleOrderPlaced = (newOrder: Order) => {
-    setOrders([newOrder, ...orders]);
+  const handleOrderPlaced = async (newOrder: Order) => {
+    // Gọi API để backend biết có đơn hàng mới
+    const payload = {
+      totalVnd: newOrder.totalVnd,
+      paymentMethod: newOrder.paymentMethod === 'credit_30' || newOrder.paymentMethod === 'credit_60' ? 'CREDIT_30' : (newOrder.paymentMethod === 'deposit' ? 'DEPOSIT' : 'BANK'),
+      supplierName: newOrder.supplierName || 'AgriConnect Hub',
+      shippingAddress: 'Kho Tổng TP. Hồ Chí Minh',
+      note: 'Yêu cầu kiểm tra chứng nhận VietGAP',
+      estimatedDelivery: newOrder.estimatedDelivery || '3 ngày tới',
+      items: newOrder.items.map((i: any) => ({
+        productId: i.productId || 1,
+        quantity: i.quantityKg
+      }))
+    };
+    
+    const created = await createOrder(payload as any);
+    if (created) {
+      // Refresh danh sách đơn hàng thực tế
+      const realOrders = await fetchMyOrders();
+      setOrders(realOrders as unknown as Order[]);
+    } else {
+      // Fallback
+      setOrders([newOrder, ...orders]);
+    }
+
     if (newOrder.paymentMethod === 'credit_30' || newOrder.paymentMethod === 'credit_60') {
       setCreditInfo((prev) => {
         const newUsed = prev.usedCreditVnd + newOrder.totalVnd;
@@ -268,9 +294,9 @@ export default function PartnerApp() {
           unpaidOrdersCount: prev.unpaidOrdersCount + 1,
         };
       });
-      showToast(`Đã ghi nhận đơn hàng ${newOrder.id} vào hạn mức tín dụng B2B Thanh toán sau`);
+      showToast(`Đã ghi nhận đơn hàng vào hạn mức tín dụng B2B`);
     } else {
-      showToast(`Khởi tạo thành công đơn hàng sỉ ${newOrder.id}`);
+      showToast(`Khởi tạo thành công đơn hàng sỉ`);
     }
   };
 
@@ -352,7 +378,16 @@ export default function PartnerApp() {
       if (filters.sortBy === 'min-order') return a.minOrderKg - b.minOrderKg;
       return 0; // relevance
     });
-  }, [filters, products]);
+}, [filters, products]);
+
+  const ITEMS_PER_PAGE = 8;
+  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / ITEMS_PER_PAGE));
+  const paginatedProducts = filteredProducts.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filters]);
+
 
   const totalCartCount = cartItems.length;
 
@@ -558,7 +593,7 @@ export default function PartnerApp() {
                 </div>
               ) : viewMode === 'grid' ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {filteredProducts.map((product) => (
+                  {paginatedProducts.map((product) => (
                     <ProductCard
                       key={product.id}
                       product={product}
@@ -566,6 +601,11 @@ export default function PartnerApp() {
                       isFavorite={favorites.includes(product.id)}
                       onToggleFavorite={handleToggleFavorite}
                       onAddToCart={handleAddToCart}
+                        onGroupBuy={(e, p) => {
+                          e.stopPropagation();
+                          setSelectedGroupBuyProduct(p);
+                          setIsGroupBuyJoinModalOpen(true);
+                        }}
                       onSelectProduct={setSelectedProduct}
                         onJoinGroupBuy={(e, p) => { e.stopPropagation(); setSelectedGroupBuyProduct(p); }}
                     />
@@ -573,7 +613,7 @@ export default function PartnerApp() {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {filteredProducts.map((product) => (
+                  {paginatedProducts.map((product) => (
                     <div
                       key={product.id}
                       onClick={() => setSelectedProduct(product)}
@@ -636,64 +676,40 @@ export default function PartnerApp() {
 
               {/* Pagination */}
               <div className="mt-10 flex justify-center items-center gap-3">
-                <button
-                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                  className="w-10 h-10 border border-[#bfcaba] rounded-lg flex items-center justify-center hover:bg-[#ebefe4] transition-colors bg-white text-[#181d16]"
-                  title="Trang trước"
-                >
-                  <ChevronLeft className="w-5 h-5" />
-                </button>
-                <div className="flex gap-1.5 font-bold text-sm">
                   <button
-                    onClick={() => setCurrentPage(1)}
-                    className={`w-10 h-10 rounded-lg ${
-                      currentPage === 1
-                        ? 'bg-[#176a22] text-white shadow-xs'
-                        : 'bg-white border border-[#bfcaba] text-[#181d16] hover:bg-[#ebefe4]'
-                    }`}
+                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                    className="w-10 h-10 border border-[#bfcaba] rounded-lg flex items-center justify-center hover:bg-[#ebefe4] transition-colors bg-white text-[#181d16] disabled:opacity-50 disabled:cursor-not-allowed"
+                    title="Trang trước"
                   >
-                    1
+                    <ChevronLeft className="w-5 h-5" />
                   </button>
+                  <div className="flex gap-1.5 font-bold text-sm">
+                    {Array.from({ length: totalPages }).map((_, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => setCurrentPage(idx + 1)}
+                        className={`w-10 h-10 rounded-lg ${
+                          currentPage === idx + 1
+                            ? 'bg-[#176a22] text-white shadow-xs'
+                            : 'bg-white border border-[#bfcaba] text-[#181d16] hover:bg-[#ebefe4]'
+                        }`}
+                      >
+                        {idx + 1}
+                      </button>
+                    ))}
+                  </div>
                   <button
-                    onClick={() => setCurrentPage(2)}
-                    className={`w-10 h-10 rounded-lg ${
-                      currentPage === 2
-                        ? 'bg-[#176a22] text-white shadow-xs'
-                        : 'bg-white border border-[#bfcaba] text-[#181d16] hover:bg-[#ebefe4]'
-                    }`}
+                    onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={currentPage === totalPages}
+                    className="w-10 h-10 border border-[#bfcaba] rounded-lg flex items-center justify-center hover:bg-[#ebefe4] transition-colors bg-white text-[#181d16] disabled:opacity-50 disabled:cursor-not-allowed"
+                    title="Trang sau"
                   >
-                    2
-                  </button>
-                  <button
-                    onClick={() => setCurrentPage(3)}
-                    className={`w-10 h-10 rounded-lg ${
-                      currentPage === 3
-                        ? 'bg-[#176a22] text-white shadow-xs'
-                        : 'bg-white border border-[#bfcaba] text-[#181d16] hover:bg-[#ebefe4]'
-                    }`}
-                  >
-                    3
-                  </button>
-                  <span className="w-10 h-10 flex items-center justify-center text-[#707a6c]">
-                    ...
-                  </span>
-                  <button
-                    onClick={() => setCurrentPage(12)}
-                    className="w-10 h-10 bg-white border border-[#bfcaba] text-[#181d16] hover:bg-[#ebefe4] rounded-lg"
-                  >
-                    12
+                    <ChevronRight className="w-5 h-5" />
                   </button>
                 </div>
-                <button
-                  onClick={() => setCurrentPage((p) => p + 1)}
-                  className="w-10 h-10 border border-[#bfcaba] rounded-lg flex items-center justify-center hover:bg-[#ebefe4] transition-colors bg-white text-[#181d16]"
-                  title="Trang sau"
-                >
-                  <ChevronRight className="w-5 h-5" />
-                </button>
-              </div>
-            </>
-          )}
+              </>
+            )}
 
           {activeTab === 'groupbuying' && (
             <GroupBuyingView

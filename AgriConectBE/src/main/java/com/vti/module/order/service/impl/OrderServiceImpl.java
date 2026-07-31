@@ -53,9 +53,9 @@ public class OrderServiceImpl implements OrderService {
         Order order = new Order();
         order.setBuyer(buyer);
         order.setOrderCode(generateOrderCode());
-        order.setStatus(OrderStatus.PENDING);
+        order.setStatus(OrderStatus.pending);
         order.setPaymentMethod(request.getPaymentMethod());
-        order.setPaymentStatus(PaymentStatus.UNPAID);
+        order.setPaymentStatus(PaymentStatus.unpaid);
         order.setShippingAddress(request.getShippingAddress());
         order.setNote(request.getNote());
         order.setEstimatedDelivery(request.getEstimatedDelivery());
@@ -124,7 +124,7 @@ public class OrderServiceImpl implements OrderService {
         order = orderRepository.save(order);
         
         // If status is SHIPPING, we make sure a Shipment exists and is READY_FOR_PICKUP
-        if (newStatus == OrderStatus.SHIPPING) {
+        if (newStatus == OrderStatus.shipping) {
             java.util.Optional<Shipment> existingShipment = shipmentRepository.findByOrderId(order.getId());
             if (existingShipment.isEmpty()) {
                 Shipment s = new Shipment();
@@ -168,11 +168,11 @@ public class OrderServiceImpl implements OrderService {
             throw new AppException(ErrorCode.AUTH_UNAUTHORIZED);
         }
 
-        if (order.getStatus() != OrderStatus.PENDING && order.getStatus() != OrderStatus.CONFIRMED) {
+        if (order.getStatus() != OrderStatus.pending && order.getStatus() != OrderStatus.confirmed) {
             throw new AppException(ErrorCode.ORDER_CANNOT_CANCEL);
         }
 
-        order.setStatus(OrderStatus.CANCELLED);
+        order.setStatus(OrderStatus.cancelled);
         order.setCancelledReason(reason);
         order = orderRepository.save(order);
         

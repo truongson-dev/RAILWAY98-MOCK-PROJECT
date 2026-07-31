@@ -37,7 +37,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'farm-management' as TabType, label: 'Quản lý Nông trại', icon: Tractor },
     { id: 'forward-contracts' as TabType, label: 'Hợp Đồng Tương Lai', icon: Handshake },
     { id: 'group-buys' as TabType, label: 'Quản lý Gom Đơn', icon: Users },
-    { id: 'order-tracking' as TabType, label: 'Theo dõi Đơn hàng', icon: Truck },
+    { id: 'orders' as TabType, label: 'Đơn hàng của khách', icon: Truck },
+    { id: 'order-tracking' as TabType, label: 'Đơn hàng đã đặt', icon: Truck },
     { id: 'inventory' as TabType, label: 'Quản lý Kho hàng', icon: Warehouse },
     { id: 'analytics' as TabType, label: 'Báo cáo & Phân tích', icon: BarChart3 },
   ];

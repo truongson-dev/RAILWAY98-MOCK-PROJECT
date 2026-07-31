@@ -37,7 +37,7 @@ public class DashboardServiceImpl implements DashboardService {
         metrics.setTotalPartners(accountRepository.countByRole(UserRole.PARTNER));
         metrics.setTotalSuppliers(accountRepository.countByRole(UserRole.SUPPLIER));
         metrics.setTotalOrders(orderRepository.count());
-        metrics.setPendingOrders(orderRepository.countByStatus(OrderStatus.PENDING));
+        metrics.setPendingOrders(orderRepository.countByStatus(OrderStatus.pending));
         metrics.setPendingKyc(kycProfileRepository.countByStatus(KycStatus.PENDING));
         metrics.setActiveContracts(0); // Mock tạm nếu chưa có Contract module
         metrics.setOpenGroupBuys(0);   // Mock tạm nếu chưa có GroupBuy module
@@ -100,12 +100,12 @@ public class DashboardServiceImpl implements DashboardService {
     @Override
     public OrderStatusSummaryDTO getOrderStatusSummary() {
         OrderStatusSummaryDTO dto = new OrderStatusSummaryDTO();
-        dto.setPending(orderRepository.countByStatus(OrderStatus.PENDING));
-        dto.setProcessing(orderRepository.countByStatus(OrderStatus.PROCESSING));
-        dto.setShipping(orderRepository.countByStatus(OrderStatus.SHIPPING));
-        dto.setDelivered(orderRepository.countByStatus(OrderStatus.DELIVERED));
-        dto.setCompleted(orderRepository.countByStatus(OrderStatus.COMPLETED));
-        dto.setCancelled(orderRepository.countByStatus(OrderStatus.CANCELLED));
+        dto.setPending(orderRepository.countByStatus(OrderStatus.pending));
+        dto.setProcessing(orderRepository.countByStatus(OrderStatus.processing));
+        dto.setShipping(orderRepository.countByStatus(OrderStatus.shipping));
+        dto.setDelivered(orderRepository.countByStatus(OrderStatus.delivered));
+        dto.setCompleted(orderRepository.countByStatus(OrderStatus.completed));
+        dto.setCancelled(orderRepository.countByStatus(OrderStatus.cancelled));
         return dto;
     }
 }

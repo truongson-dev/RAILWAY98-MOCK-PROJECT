@@ -24,8 +24,13 @@ public class SupplierOrderController {
     @PreAuthorize("hasAnyRole('SUPPLIER')")
     public ApiResponse<PageResponse<OrderDTO>> getMyOrders(
             @RequestParam(required = false) OrderStatus status,
+            @RequestParam(required = false) String type,
             Pageable pageable,
             @AuthenticationPrincipal UserPrincipal currentUser) {
+        if ("purchases".equalsIgnoreCase(type)) {
+            return ApiResponse.success(orderService.getMyOrders(currentUser.getId(), status, pageable));
+        }
+        // Tạm thời trả về tất cả đơn hàng hệ thống (seller side)
         return ApiResponse.success(orderService.getOrders(null, status, pageable));
     }
 

@@ -15,7 +15,7 @@ import { UserProfileCVView } from '../shipper/UserProfileCVView';
 import { AgriChatWidget } from '../shipper/AgriChatWidget';
 import { SystemStatusModal } from '../shipper/SystemStatusModal';
 import { AssignOrderModal, AssignableOrder } from '../shipper/AssignOrderModal';
-import { getDriverAvatarByName } from '../shipper/mockData';
+
 import api from '@/lib/axios';
 import { useAuthStore } from '@/store/authStore';
 import { NavigationTab, OrderItem, Vehicle, TransportRoute, NotificationItem } from '../shipper/types';
