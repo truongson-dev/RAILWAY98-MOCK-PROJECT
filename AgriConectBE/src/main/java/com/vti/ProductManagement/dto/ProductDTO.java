@@ -7,8 +7,8 @@ import java.util.List;
 public class ProductDTO {
 
 	private Long id;
-	private String categoryName;
-	private String sellerUsername;
+	private Integer categoryId;
+	private Long sellerId;
 	private String name;
 	private String description;
 	private BigDecimal price;
@@ -31,20 +31,20 @@ public class ProductDTO {
 		this.id = id;
 	}
 
-	public String getCategoryName() {
-		return categoryName;
+	public Integer getCategoryId() {
+		return categoryId;
 	}
 
-	public void setCategoryName(String categoryName) {
-		this.categoryName = categoryName;
+	public void setCategoryId(Integer categoryId) {
+		this.categoryId = categoryId;
 	}
 
-	public String getSellerUsername() {
-		return sellerUsername;
+	public Long getSellerId() {
+		return sellerId;
 	}
 
-	public void setSellerUsername(String sellerUsername) {
-		this.sellerUsername = sellerUsername;
+	public void setSellerId(Long sellerId) {
+		this.sellerId = sellerId;
 	}
 
 	public String getName() {

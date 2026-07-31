@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.vti.AccountManagement.entity.Account;
 
 import jakarta.persistence.CascadeType;
@@ -56,8 +58,10 @@ public class Product {
 	private LocalDateTime updatedAt = LocalDateTime.now();
 
 	@OneToMany(mappedBy = "productId", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JsonManagedReference("product-inventory")
 	private List<ProductImage> imageProducts;
 
+	@JsonIgnore
 	@OneToMany(mappedBy = "productId", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	private List<Inventory> inventories;
 

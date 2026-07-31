@@ -1,5 +1,7 @@
 package com.vti.ProductManagement.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -20,6 +22,7 @@ public class ProductImage {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "product_id", nullable = false)
+	@JsonBackReference("product-inventory")
 	private Product productId;
 
 	@Column(name = "image_url", nullable = false, length = 500)
