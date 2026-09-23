@@ -21,6 +21,10 @@ import { useAuthStore } from '@/store/authStore';
 import { NavigationTab, OrderItem, Vehicle, TransportRoute, NotificationItem } from '../shipper/types';
 import { CheckCircle2, AlertCircle } from 'lucide-react';
 
+const getDriverAvatarByName = (name: string) => {
+  return `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'Tai Xe')}&background=176a22&color=fff`;
+};
+
 export const ShipperDashboard: React.FC = () => {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<NavigationTab>('dashboard');
@@ -38,7 +42,7 @@ export const ShipperDashboard: React.FC = () => {
     }
 
     // Fetch orders that are in SHIPPING status (from suppliers)
-    api.get('/shipper/orders?status=SHIPPING').then((res) => {
+    api.get('/shipper/orders?status=shipping').then((res) => {
       const data = res.data.data?.content || [];
       const mappedOrders = data.map((o: any) => ({
         id: o.id?.toString(),

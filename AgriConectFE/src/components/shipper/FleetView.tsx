@@ -32,6 +32,10 @@ import {
 } from 'lucide-react';
 import { Vehicle, Driver, TransportRoute } from './types';
 
+const getDriverAvatarByName = (name: string) => {
+  return `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'Tai Xe')}&background=176a22&color=fff`;
+};
+
 
 const VIETNAM_PROVINCES = [
   'An Giang', 'Bà Rịa - Vũng Tàu', 'Bắc Giang', 'Bắc Kạn', 'Bạc Liêu', 'Bắc Ninh',

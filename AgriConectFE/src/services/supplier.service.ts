@@ -30,7 +30,7 @@ export interface ProductCreatePayload {
 
 export async function createProduct(payload: ProductCreatePayload): Promise<ApiProduct | null> {
   try {
-    const res = await fetch(`${API_BASE}/api/admin`, {
+    const res = await fetch(`${API_BASE}/api/supplier/products`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

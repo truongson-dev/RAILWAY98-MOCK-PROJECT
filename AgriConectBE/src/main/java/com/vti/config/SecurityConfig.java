@@ -57,7 +57,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 // Cấp quyền công khai cho các endpoints không cần đăng nhập
                 .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
-                .requestMatchers("/api/products", "/api/products/**").permitAll()
+                .requestMatchers("/api/products", "/api/products/**").permitAll()                  .requestMatchers("/api/categories").permitAll()
                 .requestMatchers("/api/group-buys").permitAll()
                 .requestMatchers("/api/forward-contracts").permitAll()
                 .requestMatchers("/api/auth/**").permitAll()

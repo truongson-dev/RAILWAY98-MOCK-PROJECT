@@ -22,12 +22,36 @@ interface InventoryViewProps {
 }
 
 export const InventoryView: React.FC<InventoryViewProps> = ({ 
-  inventory, 
+  inventory: initialInventory, 
   onOpenAddInventoryModal,
   onDeleteInventory 
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLocation, setSelectedLocation] = useState<string>('all');
+  const [inventory, setInventory] = useState<InventoryItem[]>(initialInventory);
+
+  useEffect(() => {
+    // Sync backend batches
+    import('@/lib/axios').then(({ default: api }) => {
+      api.get('/supplier/inventory/batches').then(res => {
+        const beBatches = res.data?.data?.content;
+        if (beBatches && Array.isArray(beBatches)) {
+          // Map backend DTO to frontend format
+          const mapped = beBatches.map((b: any) => ({
+            id: b.id.toString(),
+            batchCode: b.batchCode || `BATCH-${b.id}`,
+            productName: b.productName || 'Sản phẩm',
+            quantityKg: b.quantityKg || 0,
+            unit: 'kg',
+            status: b.status === 'AVAILABLE' ? 'in_stock' : b.status === 'RESERVED' ? 'low_stock' : 'out_of_stock',
+            location: b.warehouseName || 'Kho trung tâm',
+            expiryDate: b.harvestDate || '2027-01-01'
+          }));
+          setInventory(mapped);
+        }
+      }).catch(console.error);
+    });
+  }, []);
   const [currentPage, setCurrentPage] = useState(1);
 
   // Filtered inventory list

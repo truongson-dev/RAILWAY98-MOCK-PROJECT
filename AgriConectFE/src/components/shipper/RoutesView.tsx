@@ -23,6 +23,10 @@ import {
 } from 'lucide-react';
 import { TransportRoute, Vehicle } from './types';
 
+const getDriverAvatarByName = (name: string) => {
+  return `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'Tai Xe')}&background=176a22&color=fff`;
+};
+
 
 interface RoutesViewProps {
   routes: TransportRoute[];

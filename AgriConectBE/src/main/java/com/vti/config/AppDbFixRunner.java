@@ -14,6 +14,12 @@ public class AppDbFixRunner implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
+        System.out.println("====== DB FIX RUNNER: PRINTING ACCOUNTS ======");
+        jdbcTemplate.query("SELECT id, email, role FROM accounts", (rs, rowNum) -> {
+            System.out.println("ID: " + rs.getLong("id") + ", Email: " + rs.getString("email") + ", Role: " + rs.getString("role"));
+            return null;
+        });
+        
         // Fix 1: Đảm bảo tất cả role đều viết HOA
         int updated = jdbcTemplate.update("UPDATE accounts SET role = UPPER(role)");
         System.out.println("====== DB FIX RUNNER: Updated " + updated + " rows in accounts table to UPPER(role) ======");
@@ -33,6 +39,20 @@ public class AppDbFixRunner implements CommandLineRunner {
             System.out.println("====== DB FIX RUNNER: Updated products ENUM successfully! ======");
         } catch (Exception e) {
             System.out.println("====== DB FIX RUNNER ERROR updating products ENUM: " + e.getMessage() + " ======");
+        }
+
+        try {
+            org.springframework.core.io.Resource resource = new org.springframework.core.io.ClassPathResource("db/migration/V4__seed_data.sql");
+            String sql = new String(resource.getInputStream().readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+            String[] statements = sql.split(";");
+            for (String stmt : statements) {
+                if (!stmt.trim().isEmpty()) {
+                    jdbcTemplate.execute(stmt);
+                }
+            }
+            System.out.println("====== DB FIX RUNNER: Executed V4_seed_data.sql successfully! ======");
+        } catch (Exception e) {
+            System.err.println("Failed to execute seed data: " + e.getMessage());
         }
     }
 }

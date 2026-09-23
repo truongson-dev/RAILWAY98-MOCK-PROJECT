@@ -28,6 +28,9 @@ import {
 } from 'lucide-react';
 import { OrderItem, Vehicle } from './types';
 
+const getDriverAvatarByName = (name: string) => {
+  return `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'Tai Xe')}&background=176a22&color=fff`;
+};
 
 interface ShipmentTrackingViewProps {
   orders?: OrderItem[];

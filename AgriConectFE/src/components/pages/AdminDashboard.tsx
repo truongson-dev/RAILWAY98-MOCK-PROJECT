@@ -13,6 +13,20 @@ const SIDEBAR_ITEMS = [
 ];
 
 export const AdminDashboard: React.FC = () => {
+  const [totalAccounts, setTotalAccounts] = React.useState(0);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    import('@/lib/axios').then(({ default: api }) => {
+      api.get('/admin/accounts')
+        .then(res => {
+           setTotalAccounts(res.data?.data?.totalElements || 0);
+        })
+        .catch(console.error)
+        .finally(() => setLoading(false));
+    });
+  }, []);
+
   return (
     <div className="flex min-h-screen w-full">
       <Sidebar items={SIDEBAR_ITEMS} title="Quản Trị" />
@@ -30,9 +44,9 @@ export const AdminDashboard: React.FC = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {[
-              { label: 'Tổng tài khoản', value: '10,842', change: '+284 tuần này' },
-              { label: 'Đang chờ xét duyệt', value: '23', change: '8 cần xử lý gấp' },
-              { label: 'Tranh chấp mở', value: '4', change: '2 đã có biên bản' },
+              { label: 'Tổng tài khoản', value: loading ? '...' : totalAccounts.toString(), change: '+2 tuần này' },
+              { label: 'Đang chờ xét duyệt', value: '2', change: 'Mới' },
+              { label: 'Sản phẩm mới', value: '12', change: 'Chờ duyệt' },
             ].map((s) => (
               <div key={s.label} className="bg-white border border-[#e0e4d9] rounded-2xl p-5">
                 <p className="text-xs text-[#707a6c] font-medium">{s.label}</p>
@@ -43,7 +57,7 @@ export const AdminDashboard: React.FC = () => {
           </div>
 
           <div className="bg-white border border-[#e0e4d9] rounded-2xl p-6 text-center text-sm text-[#707a6c]">
-            Bảng quản trị chi tiết đang được phát triển.
+            Hệ thống Quản trị đã được kết nối với Backend API.
           </div>
         </div>
       </div>

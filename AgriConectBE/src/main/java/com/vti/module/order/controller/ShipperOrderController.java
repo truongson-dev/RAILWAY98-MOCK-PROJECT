@@ -27,4 +27,12 @@ public class ShipperOrderController {
             Pageable pageable) {
         return ApiResponse.success(orderService.getOrders(null, status, pageable));
     }
+
+    @org.springframework.web.bind.annotation.PutMapping("/{id}/status")
+    @PreAuthorize("hasAnyRole('SHIPPER')")
+    public ApiResponse<OrderDTO> updateOrderStatus(
+            @org.springframework.web.bind.annotation.PathVariable Long id,
+            @RequestParam OrderStatus status) {
+        return ApiResponse.success(orderService.updateOrderStatusSupplier(id, status)); // Reuse supplier status update or create specific one
+    }
 }
