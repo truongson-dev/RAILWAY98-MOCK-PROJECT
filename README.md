@@ -64,7 +64,7 @@ Xây dựng một hệ sinh thái thương mại điện tử toàn diện cho n
 
 ## 📂 Cấu trúc thư mục
 
-`	ext
+```text
 RAILWAY98-MOCK-PROJECT/
 ├── AgriConectBE/          # Spring Boot 3.2.5 — Backend REST API
 │   ├── src/main/java/com/vti/
@@ -86,46 +86,46 @@ RAILWAY98-MOCK-PROJECT/
 ├── agriconnect_db.sql     # File Database SQL cấu trúc chuẩn
 ├── .gitignore
 └── README.md
-`
+```
 
 ---
 
 ## ⚙️ Cài đặt
 
 ### 1. Clone project
-`ash
+```bash
 git clone https://github.com/truongson-dev/RAILWAY98-MOCK-PROJECT.git
 cd RAILWAY98-MOCK-PROJECT
-`
+```
 
 ### 2. Cài đặt Backend
-`ash
+```bash
 cd AgriConectBE
 # Khôi phục các thư viện Maven
 ./mvnw clean install
 # Chạy Spring Boot Server
 ./mvnw spring-boot:run
-`
-> **Backend chạy tại:** http://localhost:8080
+```
+> **Backend chạy tại:** `http://localhost:8080`
 
 ### 3. Cài đặt Frontend
 Mở một Terminal khác:
-`ash
+```bash
 cd AgriConectFE
 # Cài đặt thư viện Node.js (Chỉ chạy lần đầu)
 npm install
 # Khởi chạy giao diện
 npm run dev
-`
-> **Frontend chạy tại:** http://localhost:3000
+```
+> **Frontend chạy tại:** `http://localhost:3000`
 
 ---
 
 ## 🔐 Cấu hình
 
-Tạo file (hoặc cấu hình trực tiếp) trong AgriConectBE/src/main/resources/application.properties:
+Tạo file (hoặc cấu hình trực tiếp) trong `AgriConectBE/src/main/resources/application.properties`:
 
-`properties
+```properties
 # Thông tin DB
 spring.datasource.url=jdbc:mysql://localhost:3306/agriconnect_db?useSSL=false&allowPublicKeyRetrieval=true&characterEncoding=UTF-8
 spring.datasource.username=root
@@ -137,7 +137,7 @@ jwt.secret=thisismyverysecureandlongsecretkeyforjwttoken
 # Google OAuth2 Credentials
 spring.security.oauth2.client.registration.google.client-id=YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com
 spring.security.oauth2.client.registration.google.client-secret=YOUR_GOOGLE_CLIENT_SECRET
-`
+```
 
 > ⚠️ **Lưu ý quan trọng:** Không bao giờ commit các thông tin nhạy cảm như password, API key thực tế hoặc JWT secret production lên GitHub. Các key ở trên chỉ dùng cho môi trường Local / MOCK.
 
@@ -150,15 +150,15 @@ Thông tin database để kết nối:
 | Thành phần | Giá trị |
 | :--- | :--- |
 | **Hệ quản trị** | MySQL 8.0+ |
-| **Database name** | griconnect_db |
-| **Port** | 3306 |
-| **File Import (Dữ liệu mẫu)** | griconnect_db.sql (ở thư mục gốc) |
+| **Database name** | `agriconnect_db` |
+| **Port** | `3306` |
+| **File Import (Dữ liệu mẫu)** | `agriconnect_db.sql` (ở thư mục gốc) |
 
 ---
 
 ## 🎯 Hướng Dẫn Kiểm Thử (Dành cho QA)
 
 Để test các luồng đã hoàn thiện, QA cần tự tạo tài khoản:
-1. Mở trang Đăng ký (http://localhost:3000/auth/register), tự điền form và tạo tài khoản (VD: vai trò Nhà cung cấp).
-2. **Duyệt tài khoản:** Mở Database MySQL (griconnect_db), bảng ccounts, đổi cột status của tài khoản vừa tạo thành ACTIVE.
+1. Mở trang Đăng ký (`http://localhost:3000/auth/register`), tự điền form và tạo tài khoản (VD: vai trò Nhà cung cấp).
+2. **Duyệt tài khoản:** Mở Database MySQL (`agriconnect_db`), bảng `accounts`, đổi cột `status` của tài khoản vừa tạo thành `ACTIVE`.
 3. Đăng nhập và bắt đầu sử dụng hệ thống.
