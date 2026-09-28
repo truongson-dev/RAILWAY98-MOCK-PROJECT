@@ -72,7 +72,7 @@ Do mật khẩu được mã hóa bảo mật chuẩn Spring Security (BCrypt), 
 1. Mở trang Đăng ký: http://localhost:3000/auth/register
 2. Tự điền thông tin và **đăng ký mới** các tài khoản test đại diện cho từng Role (Partner, Supplier, Shipper). 
 3. **Mẹo:** Đặt chung mật khẩu là 12345678 cho dễ nhớ.
-4. Đăng ký thành công là có thể lập tức Đăng nhập để sử dụng Dashboard tương ứng.
+4. **Lưu ý quan trọng (Duyệt tài khoản):** Sau khi đăng ký, tài khoản sẽ ở trạng thái chờ duyệt. Bạn cần vào Database (ảng accounts), đổi cột status thành ACTIVE (hoặc dùng tài khoản Admin để duyệt) thì mới có thể đăng nhập thành công vào Dashboard.
 
 ---
 
