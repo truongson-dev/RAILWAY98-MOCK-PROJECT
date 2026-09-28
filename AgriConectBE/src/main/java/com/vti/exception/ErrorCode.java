@@ -40,7 +40,7 @@ public enum ErrorCode {
     AUTH_UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "Bạn cần đăng nhập để thực hiện thao tác này"),
     AUTH_FORBIDDEN(HttpStatus.FORBIDDEN, "Bạn không có quyền thực hiện thao tác này"),
     AUTH_RESET_TOKEN_INVALID(HttpStatus.BAD_REQUEST, "Link đặt lại mật khẩu không hợp lệ hoặc đã hết hạn"),
-    AUTH_OLD_PASSWORD_INCORRECT(HttpStatus.BAD_REQUEST, "Mật khẩu cũ không đúng"),
+    AUTH_OLD_PASSWORD_INCORRECT(HttpStatus.BAD_REQUEST, "Mật khẩu hiện tại không đúng"),
 
     // ─── ACCOUNT ────────────────────────────────────────────────────────────
     ACCOUNT_NOT_FOUND(HttpStatus.NOT_FOUND, "Không tìm thấy tài khoản"),

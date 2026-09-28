@@ -37,4 +37,5 @@ export interface UserProfile {
   verified: boolean;      // Đã được admin xác minh chưa
   province: string;       // Tỉnh/thành phố hoạt động chính
   hasDigitalSignature?: boolean; // Có chữ ký số (USB Token / OTP) không
+  avatar?: string;
 }

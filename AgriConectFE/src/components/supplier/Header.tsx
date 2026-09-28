@@ -1,5 +1,8 @@
-import React from 'react';
-import { Search, SlidersHorizontal, Bell, User, Menu, Bot, Sparkles } from 'lucide-react';
+import React, { useRef, useState } from 'react';
+import { Search, SlidersHorizontal, Bell, User, Menu, Bot, Sparkles, Camera } from 'lucide-react';
+import { useAuthStore } from '@/store/authStore';
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080';
 
 interface HeaderProps {
   searchQuery: string;
@@ -18,6 +21,70 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenMobileSidebar,
   onOpenAiChat
 }) => {
+  const { user, token, updateUser } = useAuthStore();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isUploading, setIsUploading] = useState(false);
+
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!['image/jpeg', 'image/png', 'image/jpg'].includes(file.type)) {
+      alert('Vui lòng chọn ảnh định dạng JPG hoặc PNG');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Kích thước ảnh không được vượt quá 5MB');
+      return;
+    }
+
+    try {
+      setIsUploading(true);
+      const formData = new FormData();
+      formData.append('file', file);
+
+      // 1. Upload ảnh lấy URL
+      const uploadRes = await fetch(${API_BASE}/api/upload/avatar, {
+        method: 'POST',
+        headers: {
+          Authorization: Bearer 
+        },
+        body: formData
+      });
+      
+      if (!uploadRes.ok) throw new Error('Upload ảnh thất bại');
+      const uploadData = await uploadRes.json();
+      const avatarUrl = uploadData.data.url;
+
+      // 2. Cập nhật profile User với ảnh mới
+      const profileRes = await fetch(${API_BASE}/api/user/profile, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: Bearer 
+        },
+        body: JSON.stringify({ avatar: avatarUrl })
+      });
+
+      if (!profileRes.ok) throw new Error('Cập nhật hồ sơ thất bại');
+
+      // 3. Cập nhật giao diện
+      updateUser({ avatar: avatarUrl });
+    } catch (error) {
+      alert('Lỗi cập nhật ảnh đại diện: ' + (error as Error).message);
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const displayName = user?.name || 'Lê Văn Hùng';
+  const roleDisplay = user?.role === 'Supplier' ? 'CHỦ TRANG TRẠI' : 'TÀI KHOẢN';
+
   return (
     <header className="sticky top-0 z-30 bg-[#f7fbf0]/90 backdrop-blur-md px-4 lg:px-8 py-3.5 border-b border-[#e0e4d9] flex items-center justify-between gap-4">
       {/* Left side: Mobile Toggle & Search Bar */}
@@ -54,7 +121,6 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Right side: Notifications, Messages, User Profile */}
       <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-        {/* AI Chat Quick Launcher */}
         {onOpenAiChat && (
           <button
             id="header-ai-chat-btn"
@@ -68,7 +134,6 @@ export const Header: React.FC<HeaderProps> = ({
           </button>
         )}
 
-        {/* Bell Notifications */}
         <button
           id="header-notif-btn"
           onClick={onOpenNotifications}
@@ -87,15 +152,42 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="flex items-center gap-3 pl-1">
           <div className="text-right hidden sm:block">
             <h4 className="text-sm font-semibold text-[#181d16] leading-snug">
-              Lê Văn Hùng
+              {displayName}
             </h4>
             <p className="text-[11px] uppercase tracking-wider font-semibold text-[#5e6958]">
-              CHỦ TRANG TRẠI
+              {roleDisplay}
             </p>
           </div>
-          <div className="w-10 h-10 rounded-full bg-[#358439] text-white flex items-center justify-center font-semibold text-sm shadow-xs border-2 border-white shrink-0">
-            <User size={20} />
+          
+          <div 
+            onClick={handleAvatarClick}
+            className="relative w-10 h-10 rounded-full bg-[#358439] text-white flex items-center justify-center font-semibold text-sm shadow-xs border-2 border-white shrink-0 cursor-pointer group"
+            title="Thay đổi ảnh đại diện"
+          >
+            {user?.avatar ? (
+              <img src={API_BASE + user.avatar} alt="Avatar" className="w-full h-full rounded-full object-cover" />
+            ) : (
+              <User size={20} />
+            )}
+            
+            {/* Overlay Icon for Edit */}
+            <div className="absolute inset-0 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+              <Camera size={16} />
+            </div>
+
+            {isUploading && (
+              <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center">
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              </div>
+            )}
           </div>
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            accept="image/jpeg,image/png,image/jpg"
+            className="hidden"
+          />
         </div>
       </div>
     </header>

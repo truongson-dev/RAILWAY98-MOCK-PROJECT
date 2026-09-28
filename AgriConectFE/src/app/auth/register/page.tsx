@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -88,6 +88,37 @@ export default function RegisterPage() {
   const [otpCode, setOtpCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [countdown, setCountdown] = useState(60);
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (subStep === 'verify' && countdown > 0) {
+      timer = setInterval(() => setCountdown(prev => prev - 1), 1000);
+    }
+    return () => clearInterval(timer);
+  }, [subStep, countdown]);
+
+  const handleResendOtp = async () => {
+    if (countdown > 0) return;
+    try {
+      setLoading(true);
+      const res = await fetch(`${API_BASE}/api/auth/resend-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: registeredEmail }),
+      });
+      if (res.ok) {
+        setCountdown(60);
+        setError('');
+      } else {
+        setError('Không thể gửi lại OTP. Vui lòng thử lại sau.');
+      }
+    } catch (e) {
+      setError('Lỗi kết nối khi gửi lại OTP.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // ─── STATE CHO TỪNG LOẠI HỒ SƠ ──────────────────────────────────────────
   
@@ -394,6 +425,20 @@ export default function RegisterPage() {
                   >
                     {loading ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /> : 'Xác Thực Ngay'}
                   </button>
+                  <div className="text-sm mt-4 text-[#40493d] text-center w-full">
+                    Chưa nhận được mã?{' '}
+                    {countdown > 0 ? (
+                      <span className="font-bold text-[#707a6c]">Gửi lại sau {countdown}s</span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={handleResendOtp}
+                        className="font-bold text-[#176a22] hover:underline cursor-pointer"
+                      >
+                        Gửi lại mã OTP
+                      </button>
+                    )}
+                  </div>
                 </form>
               </div>
 

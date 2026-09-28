@@ -62,7 +62,7 @@ export default function LoginPage() {
       });
 
       if (!res.ok) {
-        throw new Error('Đăng nhập thất bại. Vui lòng kiểm tra lại email/mật khẩu hoặc trạng thái tài khoản.');
+        const err = await res.json(); throw new Error(err.message || 'Đăng nhập thất bại.');
       }
 
       const responseData = await res.json();
@@ -84,6 +84,7 @@ export default function LoginPage() {
         taxId:       authData?.taxId  ?? '',
         role:        feRole,
         verified:    authData?.status === 'ACTIVE',
+          avatar:      authData?.avatar,
         province:    authData?.province ?? '',
       };
 

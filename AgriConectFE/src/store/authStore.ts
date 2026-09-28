@@ -37,6 +37,7 @@ interface AuthState {
 
   /** Alias của clearAuth — dùng trong PartnerApp và các component khác */
   logout: () => void;
+  updateUser: (updates: Partial<UserProfile>) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
