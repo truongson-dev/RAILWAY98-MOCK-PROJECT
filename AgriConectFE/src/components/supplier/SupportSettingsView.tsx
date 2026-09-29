@@ -34,11 +34,11 @@ export const SupportSettingsView: React.FC<SupportSettingsViewProps> = ({ mode }
     }
     try {
       setIsChangingPass(true);
-      const res = await fetch(${API_BASE}/api/auth/change-password, {
+      const res = await fetch(`${API_BASE}/api/auth/change-password`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: Bearer 
+          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({ oldPassword, newPassword, confirmPassword })
       });
