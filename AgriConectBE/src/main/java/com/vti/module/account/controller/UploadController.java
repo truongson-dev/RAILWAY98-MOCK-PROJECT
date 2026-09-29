@@ -23,8 +23,8 @@ public class UploadController {
     @Operation(summary = "Upload ảnh đại diện")
     @PostMapping("/avatar")
     public ResponseEntity<ApiResponse<Map<String, String>>> uploadAvatar(@RequestParam("file") MultipartFile file) {
-        String fileName = fileStorageService.storeFile(file, "avatar");
-        String fileUrl = "/uploads/avatar/" + fileName;
+        // storeFile đã trả về URL đầy đủ (VD: http://localhost:8080/uploads/avatar/xxx.jpg)
+        String fileUrl = fileStorageService.storeFile(file, "avatar");
         
         Map<String, String> response = new HashMap<>();
         response.put("url", fileUrl);
