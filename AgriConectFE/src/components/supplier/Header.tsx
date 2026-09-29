@@ -48,10 +48,10 @@ export const Header: React.FC<HeaderProps> = ({
       formData.append('file', file);
 
       // 1. Upload ảnh lấy URL
-      const uploadRes = await fetch(${API_BASE}/api/upload/avatar, {
+      const uploadRes = await fetch(`${API_BASE}/api/upload/avatar`, {
         method: 'POST',
         headers: {
-          Authorization: Bearer 
+          Authorization: `Bearer ${token}`
         },
         body: formData
       });
@@ -61,11 +61,11 @@ export const Header: React.FC<HeaderProps> = ({
       const avatarUrl = uploadData.data.url;
 
       // 2. Cập nhật profile User với ảnh mới
-      const profileRes = await fetch(${API_BASE}/api/user/profile, {
+      const profileRes = await fetch(`${API_BASE}/api/user/profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: Bearer 
+          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({ avatar: avatarUrl })
       });
