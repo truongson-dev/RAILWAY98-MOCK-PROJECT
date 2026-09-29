@@ -56,6 +56,11 @@ export const useAuthStore = create<AuthState>()(
       // logout là alias của clearAuth để các component dùng tên trực quan hơn
       logout: () =>
         set({ user: null, token: null, isAuthenticated: false }),
+        
+      updateUser: (updates) =>
+        set((state) => ({
+          user: state.user ? { ...state.user, ...updates } : null
+        })),
     }),
     {
       // Key trong localStorage — đổi tên này nếu muốn reset session của tất cả user
