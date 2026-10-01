@@ -25,10 +25,15 @@ function OAuth2CallbackContent() {
         
         setAuth(
           {
-            id: payload.id || 0,
+            id: String(payload.id || 0),
             email: payload.sub || '',
             role: role as any,
-            fullName: payload.fullName || payload.name || payload.sub,
+            name: payload.fullName || payload.name || payload.sub,
+            companyName: '',
+            phone: '',
+            taxId: '',
+            verified: true,
+            province: '',
           },
           token
         );
