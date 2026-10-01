@@ -154,7 +154,7 @@ export default function RegisterPage() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [hasSignature, setHasSignature] = useState(false);
-  const [sigMethod, setSigMethod] = useState<'usb' | 'otp'>('usb');
+  const [sigMethod, setSigMethod] = useState<'usb' | 'otp' | 'smart'>('usb');
   const [agreedTerms, setAgreedTerms] = useState(false);
 
   // ─── XỬ LÝ VẼ CANVAS CHỮ KÝ ──────────────────────────────────────────────
