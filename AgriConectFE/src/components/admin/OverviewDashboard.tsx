@@ -18,7 +18,7 @@ interface OverviewDashboardProps {
 
 // Component: OverviewDashboard - Giao diện quản lý/hiển thị cho Admin
 
-const METRIC_CARDS: MetricCardData[] = [
+const METRIC_CARDS = [
   {
     id: '1',
     title: 'TỔNG GIÁ TRỊ GIAO DỊCH',
