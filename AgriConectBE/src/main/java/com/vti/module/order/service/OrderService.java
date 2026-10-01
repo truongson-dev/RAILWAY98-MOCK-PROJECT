@@ -20,6 +20,9 @@ public interface OrderService {
     // Lấy danh sách đơn hàng của một người mua (Partner)
     PageResponse<OrderDTO> getMyOrders(Long buyerId, OrderStatus status, Pageable pageable);
 
+    // Lấy danh sách đơn hàng của một người bán (Supplier)
+    PageResponse<OrderDTO> getOrdersBySeller(Long sellerId, OrderStatus status, Pageable pageable);
+
     // Cập nhật trạng thái đơn hàng (dành cho Admin/Nhân viên)
     OrderDTO updateOrderStatus(Long id, UpdateOrderStatusRequest request, Long adminId);
     OrderDTO updateOrderStatusSupplier(Long id, OrderStatus newStatus);

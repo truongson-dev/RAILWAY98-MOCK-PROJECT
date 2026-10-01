@@ -115,6 +115,14 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public PageResponse<OrderDTO> getOrdersBySeller(Long sellerId, OrderStatus status, Pageable pageable) {
+        Page<Order> orderPage = orderRepository.searchOrdersBySeller(null, status, sellerId, pageable);
+        Page<OrderDTO> dtoPage = orderPage.map(this::mapToDTO);
+        return PageResponse.of(dtoPage);
+    }
+
+    @Override
     @Transactional
     public OrderDTO updateOrderStatusSupplier(Long id, OrderStatus newStatus) {
         Order order = orderRepository.findById(id)

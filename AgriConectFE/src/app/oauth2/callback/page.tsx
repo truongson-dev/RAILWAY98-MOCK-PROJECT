@@ -27,7 +27,7 @@ function OAuth2CallbackContent() {
           {
             id: payload.id || 0,
             email: payload.sub || '',
-            role: role,
+            role: role as any,
             fullName: payload.fullName || payload.name || payload.sub,
           },
           token

@@ -74,6 +74,7 @@ public class ContractServiceImpl implements ContractService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public EscrowDTO getEscrowById(Long id) {
         return convertToEscrowDTO(escrowRepo.findById(id).orElseThrow(() -> new AppException(ErrorCode.ESCROW_NOT_FOUND)));
     }
@@ -142,6 +143,16 @@ public class ContractServiceImpl implements ContractService {
         Account buyer = accountRepo.findById(partnerId)
                 .orElseThrow(() -> new AppException(ErrorCode.ACCOUNT_NOT_FOUND));
 
+        // Check if EscrowContract already exists for this partner and this forward contract
+        String fwdNoteStr = "Created from Forward Contract: " + fwd.getContractCode();
+        boolean exists = escrowRepo.findAll().stream().anyMatch(e -> 
+                e.getBuyer() != null && e.getBuyer().getId().equals(partnerId) &&
+                e.getNotes() != null && e.getNotes().contains(fwd.getContractCode())
+        );
+        if (exists) {
+            throw new AppException(ErrorCode.CONTRACT_ALREADY_EXISTS);
+        }
+
         EscrowContract contract = new EscrowContract();
         contract.setContractCode("ESC-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
         contract.setBuyer(buyer);
@@ -183,14 +194,55 @@ public class ContractServiceImpl implements ContractService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ForwardContractDTO getForwardContractById(Long id) {
         return convertToForwardDTO(forwardRepo.findById(id).orElseThrow(() -> new AppException(ErrorCode.FORWARD_CONTRACT_NOT_FOUND)));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PageResponse<ForwardContractDTO> getForwardContractsBySupplier(Long supplierId, ContractStatus status, Pageable pageable) {
+        Page<ForwardContract> pageData = forwardRepo.findBySupplierIdAndStatus(supplierId, status, pageable);
+        return PageResponse.of(pageData.map(this::convertToForwardDTO));
+    }
+
+    @Override
+    @Transactional
+    public ForwardContractDTO updateForwardStatusBySupplier(Long id, ContractStatus status, Long supplierId) {
+        ForwardContract contract = forwardRepo.findById(id).orElseThrow(() -> new AppException(ErrorCode.FORWARD_CONTRACT_NOT_FOUND));
+        
+        if (contract.getCreatedBy() == null || !contract.getCreatedBy().getId().equals(supplierId)) {
+            throw new AppException(ErrorCode.AUTH_FORBIDDEN);
+        }
+
+        ContractStatus current = contract.getStatus();
+        if (current == ContractStatus.CANCELLED || current == ContractStatus.COMPLETED) {
+            throw new AppException(ErrorCode.SYSTEM_VALIDATION_ERROR);
+        }
+        
+        if (current == ContractStatus.OPEN && status == ContractStatus.COMPLETED) {
+            throw new AppException(ErrorCode.SYSTEM_VALIDATION_ERROR);
+        }
+
+        contract.setStatus(status);
+        return convertToForwardDTO(forwardRepo.save(contract));
     }
 
     @Override
     @Transactional
     public ForwardContractDTO updateForwardStatus(Long id, ContractStatus status) {
         ForwardContract contract = forwardRepo.findById(id).orElseThrow(() -> new AppException(ErrorCode.FORWARD_CONTRACT_NOT_FOUND));
+        
+        ContractStatus current = contract.getStatus();
+        if (current == ContractStatus.CANCELLED || current == ContractStatus.COMPLETED) {
+            throw new AppException(ErrorCode.SYSTEM_VALIDATION_ERROR);
+        }
+        
+        // Prevent illegal transitions
+        if (current == ContractStatus.OPEN && status == ContractStatus.COMPLETED) {
+            throw new AppException(ErrorCode.SYSTEM_VALIDATION_ERROR);
+        }
+
         contract.setStatus(status);
         return convertToForwardDTO(forwardRepo.save(contract));
     }

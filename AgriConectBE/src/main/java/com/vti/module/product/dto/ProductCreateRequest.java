@@ -3,14 +3,26 @@ package com.vti.module.product.dto;
 import lombok.Data;
 import java.math.BigDecimal;
 import java.util.List;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 
 @Data
 public class ProductCreateRequest {
+    @NotBlank
     private String name;
     private String nameEn;
     private String description;
+    
+    @NotNull
+    @Positive
     private BigDecimal price;
+    
+    @NotBlank
     private String unit;
+    
+    @NotNull
+    @Positive
     private Integer minOrderKg;
     private String location;
     private String harvestDate;

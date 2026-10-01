@@ -82,6 +82,15 @@ public class AccountController {
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 
+    @PutMapping("/api/admin/accounts/{id}/fleet-capacity")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<AccountDTO>> updateFleetCapacity(
+            @PathVariable Long id,
+            @RequestBody java.util.Map<String, Integer> payload) {
+        AccountDTO dto = accountService.updateFleetCapacity(id, payload.get("fleetCapacity"));
+        return ResponseEntity.ok(ApiResponse.success(dto));
+    }
+
     /**
      * API Lấy hồ sơ cá nhân của người dùng đang đăng nhập
      */

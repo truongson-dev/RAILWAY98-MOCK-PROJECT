@@ -34,7 +34,7 @@ public class AdminContractController {
 
     @PostMapping("/escrow")
     public ApiResponse<EscrowDTO> createEscrow(
-            @RequestBody CreateEscrowRequest request,
+            @jakarta.validation.Valid @RequestBody CreateEscrowRequest request,
             @AuthenticationPrincipal UserPrincipal userPrincipal) {
         return ApiResponse.success(contractService.createEscrow(request, userPrincipal.getId()));
     }
@@ -60,7 +60,7 @@ public class AdminContractController {
 
     @PostMapping("/forward")
     public ApiResponse<ForwardContractDTO> createForwardContract(
-            @RequestBody CreateForwardRequest request,
+            @jakarta.validation.Valid @RequestBody CreateForwardRequest request,
             @AuthenticationPrincipal UserPrincipal userPrincipal) {
         return ApiResponse.success(contractService.createForwardContract(request, userPrincipal.getId()));
     }

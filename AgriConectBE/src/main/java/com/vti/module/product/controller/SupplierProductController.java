@@ -34,7 +34,7 @@ public class SupplierProductController {
 
     @PostMapping("/products")
     public ApiResponse<ProductDTO> createProduct(
-            @RequestBody com.vti.module.product.dto.ProductCreateRequest request,
+            @jakarta.validation.Valid @RequestBody com.vti.module.product.dto.ProductCreateRequest request,
             @AuthenticationPrincipal UserPrincipal currentUser) {
         return ApiResponse.success(productService.createProduct(request, currentUser.getId()));
     }
@@ -42,7 +42,7 @@ public class SupplierProductController {
     @PutMapping("/products/{id}")
     public ApiResponse<ProductDTO> updateProduct(
             @PathVariable Long id,
-            @RequestBody com.vti.module.product.dto.ProductUpdateRequest request,
+            @jakarta.validation.Valid @RequestBody com.vti.module.product.dto.ProductUpdateRequest request,
             @AuthenticationPrincipal UserPrincipal currentUser) {
         return ApiResponse.success(productService.updateProduct(id, request, currentUser.getId()));
     }

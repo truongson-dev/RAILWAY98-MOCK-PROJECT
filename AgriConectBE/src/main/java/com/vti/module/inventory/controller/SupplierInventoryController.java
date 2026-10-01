@@ -34,8 +34,9 @@ public class SupplierInventoryController {
             @RequestParam(required = false) Long productId,
             @RequestParam(required = false) Long warehouseId,
             @RequestParam(required = false) BatchStatus status,
-            Pageable pageable) {
-        return ApiResponse.success(inventoryService.getBatches(productId, warehouseId, status, pageable));
+            Pageable pageable,
+            @AuthenticationPrincipal UserPrincipal currentUser) {
+        return ApiResponse.success(inventoryService.getBatchesBySupplier(currentUser.getId(), productId, warehouseId, status, pageable));
     }
 
     @PostMapping("/batches")

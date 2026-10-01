@@ -95,7 +95,7 @@ public class ProductServiceImpl implements ProductService {
                 .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
 
         if (product.getSeller() == null || !product.getSeller().getId().equals(currentUserId)) {
-            throw new AppException(ErrorCode.AUTH_UNAUTHORIZED);
+            throw new AppException(ErrorCode.AUTH_FORBIDDEN);
         }
 
         if (request.getCategoryId() != null) {
@@ -112,7 +112,14 @@ public class ProductServiceImpl implements ProductService {
         if (request.getMinOrderKg() != null) product.setMinOrderKg(request.getMinOrderKg());
         if (request.getLocation() != null) product.setLocation(request.getLocation());
         if (request.getHarvestDate() != null) product.setHarvestDate(request.getHarvestDate());
-        if (request.getStatus() != null) product.setStatus(request.getStatus());
+        if (request.getStatus() != null) {
+            if (request.getStatus() == com.vti.common.enums.ProductStatus.AVAILABLE || 
+                request.getStatus() == com.vti.common.enums.ProductStatus.REJECTED) {
+                // Ignore illegal status updates from Supplier
+            } else {
+                product.setStatus(request.getStatus());
+            }
+        }
 
         return mapToDTO(productRepository.save(product));
     }
@@ -124,7 +131,7 @@ public class ProductServiceImpl implements ProductService {
                 .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
                 
         if (product.getSeller() == null || !product.getSeller().getId().equals(currentUserId)) {
-            throw new AppException(ErrorCode.AUTH_UNAUTHORIZED);
+            throw new AppException(ErrorCode.AUTH_FORBIDDEN);
         }
         
         productRepository.delete(product);

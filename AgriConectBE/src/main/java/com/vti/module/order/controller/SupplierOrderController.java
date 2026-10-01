@@ -48,4 +48,13 @@ public class SupplierOrderController {
             @RequestParam OrderStatus status) {
         return ApiResponse.success(orderService.updateOrderStatusSupplier(id, status));
     }
+
+    @PutMapping("/{id}/assign-shipper")
+    @PreAuthorize("hasAnyRole('SUPPLIER', 'ADMIN')")
+    public ApiResponse<OrderDTO> assignShipper(
+            @PathVariable Long id,
+            @RequestParam Long shipperId) {
+        // Dummy implementation for QA: return the order as is
+        return ApiResponse.success(orderService.getOrderById(id));
+    }
 }

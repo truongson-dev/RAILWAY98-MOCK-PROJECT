@@ -315,6 +315,23 @@ export default function RegisterPage() {
       setRegisteredEmail((body.email as string) || '');
       setSubStep('verify'); // Chuyển sang màn hình xác thực OTP
 
+      // FIX BUG-010: Smart OTP -> Tự động điền mã 123456 và tự verify
+      if (sigMethod === 'smart') {
+        setOtpCode('123456');
+        try {
+          const verifyRes = await fetch(`${API_BASE}/api/auth/verify-email`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: body.email, otpCode: '123456' }),
+          });
+          if (verifyRes.ok) {
+            setSubStep('success');
+          }
+        } catch(e) {
+          console.error(e);
+        }
+      }
+
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Đã xảy ra lỗi hệ thống.');
     } finally {

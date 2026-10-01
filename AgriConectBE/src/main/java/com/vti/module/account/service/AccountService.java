@@ -43,6 +43,7 @@ public interface AccountService {
      * @param id ID tài khoản
      */
     void deleteAccount(Long id);
+    AccountDTO updateFleetCapacity(Long id, Integer fleetCapacity);
 
     /**
      * Lấy hồ sơ tài khoản của người dùng đang đăng nhập.

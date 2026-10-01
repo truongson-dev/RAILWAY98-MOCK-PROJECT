@@ -41,6 +41,7 @@ public enum ErrorCode {
     AUTH_FORBIDDEN(HttpStatus.FORBIDDEN, "Bạn không có quyền thực hiện thao tác này"),
     AUTH_RESET_TOKEN_INVALID(HttpStatus.BAD_REQUEST, "Link đặt lại mật khẩu không hợp lệ hoặc đã hết hạn"),
     AUTH_OLD_PASSWORD_INCORRECT(HttpStatus.BAD_REQUEST, "Mật khẩu hiện tại không đúng"),
+    AUTH_NEW_PASSWORD_SAME_AS_OLD(HttpStatus.BAD_REQUEST, "Mật khẩu mới không được trùng với mật khẩu cũ"),
 
     // ─── ACCOUNT ────────────────────────────────────────────────────────────
     ACCOUNT_NOT_FOUND(HttpStatus.NOT_FOUND, "Không tìm thấy tài khoản"),
@@ -67,6 +68,7 @@ public enum ErrorCode {
 
     // ─── CONTRACT ───────────────────────────────────────────────────────────
     CONTRACT_NOT_FOUND(HttpStatus.NOT_FOUND, "Không tìm thấy hợp đồng"),
+    CONTRACT_ALREADY_EXISTS(HttpStatus.CONFLICT, "Hợp đồng đã tồn tại"),
     ESCROW_NOT_FOUND(HttpStatus.NOT_FOUND, "Không tìm thấy hợp đồng escrow"),
     FORWARD_CONTRACT_NOT_FOUND(HttpStatus.NOT_FOUND, "Không tìm thấy hợp đồng tương lai"),
     SHIPMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "Không tìm thấy thông tin vận chuyển"),

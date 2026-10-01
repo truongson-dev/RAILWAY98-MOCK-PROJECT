@@ -35,7 +35,7 @@ import {
   RefreshCw
 } from 'lucide-react';
 
-import { createProduct, fetchSupplierProducts } from '@/services/supplier.service';
+import { createProduct, fetchSupplierProducts, updateProduct, deleteProduct } from '@/services/supplier.service';
 
 export interface FarmProduct {
   id: string;
@@ -213,9 +213,22 @@ export const FarmManagementView: React.FC<FarmManagementViewProps> = ({
     if (formCategory === 'Rau củ quả sạch') categoryIdToSave = 4;
 
     if (editingProductId) {
-      // UPDATE (Not fully supported by supplier service yet in this plan, but update local state)
-      // TODO: Call update API
-      setProducts(prev => prev.map(p => {
+      const payload = {
+        name: formName,
+        description: formDescription || formName,
+        price: formPriceVnd,
+        unit: 'kg',
+        minOrderKg: 50,
+        location: formPlotName,
+        harvestDate: formHarvestDate,
+        categoryId: categoryIdToSave,
+        imageUrls: [formImageUrl || 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=400&q=80']
+      };
+      
+      const updatedApiProduct = await updateProduct(editingProductId, payload);
+      
+      if (updatedApiProduct) {
+        setProducts(prev => prev.map(p => {
         if (p.id === editingProductId) {
           return {
             ...p,
@@ -249,6 +262,7 @@ export const FarmManagementView: React.FC<FarmManagementViewProps> = ({
 
       if (triggerToast) triggerToast(`Đã cập nhật sản phẩm "${formName}" thành công!`);
       setIsProductModalOpen(false);
+      }
     } else {
       // CREATE
       const payload = {
@@ -305,9 +319,15 @@ export const FarmManagementView: React.FC<FarmManagementViewProps> = ({
   };
 
   // Delete product
-  const handleConfirmDeleteProduct = () => {
+  const handleConfirmDeleteProduct = async () => {
     if (!deletingProduct) return;
     const prodName = deletingProduct.name;
+    const success = await deleteProduct(deletingProduct.id);
+    if (!success) {
+      if (triggerToast) triggerToast(`Lỗi khi xóa sản phẩm "${prodName}"!`);
+      setDeletingProduct(null);
+      return;
+    }
     setProducts(prev => prev.filter(p => p.id !== deletingProduct.id));
     
     // Log
@@ -1003,3 +1023,5 @@ export const FarmManagementView: React.FC<FarmManagementViewProps> = ({
     </div>
   );
 };
+
+export default FarmManagementView;

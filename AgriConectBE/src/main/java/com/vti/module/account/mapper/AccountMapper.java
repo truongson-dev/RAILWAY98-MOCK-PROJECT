@@ -43,6 +43,7 @@ public interface AccountMapper {
             dto.setVehicleType(sh.getVehicleType());
             dto.setLicenseNumber(sh.getLicenseNumber());
             dto.setOperatingArea(sh.getOperatingArea());
+            dto.setFleetCapacity(sh.getFleetCapacity());
         }
     }
 }

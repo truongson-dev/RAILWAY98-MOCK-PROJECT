@@ -19,6 +19,11 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
            "AND (:buyerId IS NULL OR o.buyer.id = :buyerId)")
     org.springframework.data.domain.Page<Order> searchOrders(@Param("keyword") String keyword, @Param("status") OrderStatus status, @Param("buyerId") Long buyerId, org.springframework.data.domain.Pageable pageable);
 
+    @Query("SELECT DISTINCT o FROM Order o JOIN o.items i WHERE (:keyword IS NULL OR o.orderCode LIKE %:keyword%) " +
+           "AND (:status IS NULL OR o.status = :status) " +
+           "AND i.product.seller.id = :sellerId")
+    org.springframework.data.domain.Page<Order> searchOrdersBySeller(@Param("keyword") String keyword, @Param("status") OrderStatus status, @Param("sellerId") Long sellerId, org.springframework.data.domain.Pageable pageable);
+
     @Query("SELECT SUM(o.totalAmount) FROM Order o WHERE o.status = 'COMPLETED'")
     BigDecimal calculateTotalRevenue();
 

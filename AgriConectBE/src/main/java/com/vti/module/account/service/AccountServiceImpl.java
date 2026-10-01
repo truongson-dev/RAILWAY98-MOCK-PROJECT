@@ -68,6 +68,18 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    @Transactional
+    public AccountDTO updateFleetCapacity(Long id, Integer fleetCapacity) {
+        var account = accountRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.ACCOUNT_NOT_FOUND));
+        if (account instanceof com.vti.module.account.entity.Shipper) {
+            ((com.vti.module.account.entity.Shipper) account).setFleetCapacity(fleetCapacity);
+            accountRepository.save(account);
+        }
+        return accountMapper.toDTO(account);
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public AccountDTO getProfile(Long currentUserId) {
         return getById(currentUserId);

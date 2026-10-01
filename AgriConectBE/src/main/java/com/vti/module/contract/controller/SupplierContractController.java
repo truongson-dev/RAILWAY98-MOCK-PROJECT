@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.vti.security.UserPrincipal;
 import com.vti.common.ApiResponse;
 import java.util.Map;
 
@@ -22,9 +23,14 @@ public class SupplierContractController {
     public ResponseEntity<ApiResponse<PageResponse<ForwardContractDTO>>> getSupplierForwardContracts(
             @RequestParam(required = false) Long supplierId,
             Pageable pageable) {
-        // In a real scenario, supplierId should be extracted from SecurityContext (JWT)
-        // For mock project, we use parameter or just return all to demonstrate UI
-        PageResponse<ForwardContractDTO> contracts = contractService.getForwardContracts(null, pageable);
+        // Extract supplierId from SecurityContext
+        Long actualSupplierId = null;
+        try {
+            UserPrincipal currentUser = (UserPrincipal) org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            actualSupplierId = currentUser.getId();
+        } catch (Exception e) {}
+        
+        PageResponse<ForwardContractDTO> contracts = contractService.getForwardContractsBySupplier(actualSupplierId, null, pageable);
         return ResponseEntity.ok(ApiResponse.success(contracts));
     }
 
@@ -45,7 +51,12 @@ public class SupplierContractController {
         
         ForwardContractDTO contract;
         if (status != null) {
-            contract = contractService.updateForwardStatus(id, status);
+            Long actualSupplierId = null;
+            try {
+                UserPrincipal currentUser = (UserPrincipal) org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+                actualSupplierId = currentUser.getId();
+            } catch (Exception e) {}
+            contract = contractService.updateForwardStatusBySupplier(id, status, actualSupplierId);
         } else {
             contract = contractService.getForwardContractById(id);
         }

@@ -3,13 +3,20 @@ package com.vti.module.contract.dto;
 import lombok.Data;
 import java.math.BigDecimal;
 import java.util.List;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 
 @Data
 public class CreateEscrowRequest {
     private Long buyerId;
     private Long sellerId;
     private String productName;
+    @NotNull
+    @Positive
     private BigDecimal quantityTons;
+    
+    @NotNull
+    @Positive
     private BigDecimal totalValueVnd;
     private String notes;
 

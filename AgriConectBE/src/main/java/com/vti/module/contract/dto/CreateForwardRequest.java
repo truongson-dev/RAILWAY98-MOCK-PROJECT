@@ -3,6 +3,11 @@ package com.vti.module.contract.dto;
 import lombok.Data;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 
 @Data
 public class CreateForwardRequest {
@@ -11,8 +16,17 @@ public class CreateForwardRequest {
     private String farmName;
     private String location;
     private LocalDate expectedHarvest;
+    @NotNull
+    @Positive
     private BigDecimal estimatedQuantityKg;
+    
+    @NotNull
+    @Positive
     private BigDecimal contractPriceVnd;
+    
+    @NotNull
+    @Min(0)
+    @Max(100)
     private BigDecimal depositPercent;
     private String imageUrl;
     private String description;

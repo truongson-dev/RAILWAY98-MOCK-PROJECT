@@ -8,11 +8,12 @@ public class DbFixer implements CommandLineRunner {
     public DbFixer(JdbcTemplate jdbcTemplate) { this.jdbcTemplate = jdbcTemplate; }
     @Override
     public void run(String... args) throws Exception {
-        try {
-            jdbcTemplate.execute("DROP TABLE IF EXISTS shipments;");
-            System.out.println("DROPPED SHIPMENTS TABLE SUCCESSFULLY");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        // Bug 032 fix: Do not drop shipments table at every startup!
+        // try {
+        //     jdbcTemplate.execute("DROP TABLE IF EXISTS shipments;");
+        //     System.out.println("DROPPED SHIPMENTS TABLE SUCCESSFULLY");
+        // } catch (Exception e) {
+        //     e.printStackTrace();
+        // }
     }
 }

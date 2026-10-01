@@ -48,6 +48,7 @@ public class AccountDTO {
     private String vehicleType;
     private String licenseNumber;
     private String operatingArea;
+    private Integer fleetCapacity;
     
     // Thuộc tính của ADMIN
     private String department;
@@ -117,6 +118,9 @@ public class AccountDTO {
 
     public String getOperatingArea() { return operatingArea; }
     public void setOperatingArea(String operatingArea) { this.operatingArea = operatingArea; }
+
+    public Integer getFleetCapacity() { return fleetCapacity; }
+    public void setFleetCapacity(Integer fleetCapacity) { this.fleetCapacity = fleetCapacity; }
 
     public String getDepartment() { return department; }
     public void setDepartment(String department) { this.department = department; }

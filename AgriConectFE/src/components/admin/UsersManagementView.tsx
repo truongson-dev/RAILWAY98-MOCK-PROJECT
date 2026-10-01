@@ -103,7 +103,7 @@ export const UsersManagementView: React.FC<UsersManagementViewProps> = ({ subTab
       const body = await res.json();
       const allAccs: AccountDTO[] = body.data?.content ?? [];
       
-      const activeAccs = allAccs.filter(acc => acc.status === 'ACTIVE' || acc.status === 'SUSPENDED');
+      const activeAccs = allAccs.filter(acc => acc.status === 'ACTIVE' || acc.status === 'LOCKED');
 
       // Loại bỏ phần tệp đính kèm khỏi chuỗi text
       const cleanText = (c: string) => c
@@ -146,7 +146,7 @@ export const UsersManagementView: React.FC<UsersManagementViewProps> = ({ subTab
             products: certs.length > 0 ? certs : ['Nông sản sạch'],
             certifications: certs.length > 0 ? certs : [],
             creditLimit: 'Chưa đặt',
-            status: acc.status === 'ACTIVE' ? ('active' as const) : ('suspended' as const),
+            status: acc.status === 'ACTIVE' ? ('active' as const) : acc.status === 'LOCKED' ? ('suspended' as const) : ('pending' as const),
             rating: 5.0,
             totalVolume: 'Đang cập nhật',
           };
@@ -182,7 +182,7 @@ export const UsersManagementView: React.FC<UsersManagementViewProps> = ({ subTab
             // certifications = giấy phép kinh doanh
             certifications: licenseList.length > 0 ? licenseList : [],
             creditLimit: 'Chưa đặt',
-            status: acc.status === 'ACTIVE' ? ('active' as const) : ('suspended' as const),
+            status: acc.status === 'ACTIVE' ? ('active' as const) : acc.status === 'LOCKED' ? ('suspended' as const) : ('pending' as const),
             rating: 5.0,
             totalVolume: 'Đang cập nhật',
           };
@@ -209,8 +209,8 @@ export const UsersManagementView: React.FC<UsersManagementViewProps> = ({ subTab
             region,
             products: [vehicleLabel],
             certifications: licenseList.length > 0 ? licenseList : [],
-            fleetCapacity: 'Đang cập nhật',
-            status: acc.status === 'ACTIVE' ? ('active' as const) : ('suspended' as const),
+            fleetCapacity: (acc as any).fleetCapacity ? `${(acc as any).fleetCapacity} Tấn` : 'Đang cập nhật',
+            status: acc.status === 'ACTIVE' ? ('active' as const) : acc.status === 'LOCKED' ? ('suspended' as const) : ('pending' as const),
             rating: 5.0,
             totalVolume: 'Đang cập nhật',
           };
@@ -439,7 +439,7 @@ export const UsersManagementView: React.FC<UsersManagementViewProps> = ({ subTab
     const nextStatus = updateStatus(currentItem?.status || 'active');
 
     if (!isMock && token) {
-      const beStatus = nextStatus === 'active' ? 'ACTIVE' : 'SUSPENDED';
+      const beStatus = nextStatus === 'active' ? 'ACTIVE' : 'LOCKED';
       try {
         const res = await fetch(`${API_BASE}/api/admin/accounts/${itemId}/status`, {
           method: 'PUT',

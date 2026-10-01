@@ -68,7 +68,7 @@ export const HeroSection: React.FC = () => {
           <div className="relative rounded-[28px] overflow-hidden shadow-xl border border-[#e0e4d9]/80 bg-[#ebefe4]">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="https://images.unsplash.com/photo-1586771107445-d3ca888129ff?auto=format&fit=crop&q=80&w=1200"
+              src="https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&q=80&w=1200"
               alt="AgriConnect B2B Warehouse"
               className="w-full h-[360px] sm:h-[460px] object-cover hover:scale-105 transition-transform duration-700"
             />

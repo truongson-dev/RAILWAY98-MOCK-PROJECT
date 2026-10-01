@@ -62,7 +62,7 @@ import {
 
 export default function PartnerApp() {
   const router = useRouter();
-  const { user, logout } = useAuthStore();
+  const { user, isAuthenticated, logout } = useAuthStore();
   const [isLoading, setIsLoading] = useState(true);
   const [apiError, setApiError] = useState<string | null>(null);
 
@@ -82,6 +82,10 @@ export default function PartnerApp() {
   const [futureContracts, setFutureContracts] = useState<FutureContract[]>([]);
 
   useEffect(() => {
+    if (!isAuthenticated) {
+      router.push('/auth/login?error=unauthorized');
+      return;
+    }
     // ─── Tải toàn bộ dữ liệu từ Backend API ─────────────────────────────────
     const loadData = async () => {
       setIsLoading(true);

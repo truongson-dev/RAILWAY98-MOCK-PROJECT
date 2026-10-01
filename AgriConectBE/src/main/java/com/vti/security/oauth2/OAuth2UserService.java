@@ -53,7 +53,7 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
             account.setEmail(email);
             account.setFullName(oAuth2User.getAttribute("name"));
             account.setRole(UserRole.PARTNER);
-            account.setStatus(AccountStatus.ACTIVE);
+            account.setStatus(AccountStatus.PENDING_APPROVAL);
             account = accountRepository.save(account);
         }
 

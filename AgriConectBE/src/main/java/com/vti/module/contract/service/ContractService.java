@@ -22,4 +22,6 @@ public interface ContractService {
     PageResponse<ForwardContractDTO> getForwardContracts(ContractStatus status, Pageable pageable);
     ForwardContractDTO getForwardContractById(Long id);
     ForwardContractDTO updateForwardStatus(Long id, ContractStatus status);
+    ForwardContractDTO updateForwardStatusBySupplier(Long id, ContractStatus status, Long supplierId);
+    PageResponse<ForwardContractDTO> getForwardContractsBySupplier(Long supplierId, ContractStatus status, Pageable pageable);
 }

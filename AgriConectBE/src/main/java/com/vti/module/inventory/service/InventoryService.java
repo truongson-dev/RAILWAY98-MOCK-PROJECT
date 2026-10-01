@@ -18,6 +18,7 @@ public interface InventoryService {
 
     // Quản lý lô hàng (InventoryBatch)
     PageResponse<InventoryBatchDTO> getBatches(Long productId, Long warehouseId, BatchStatus status, Pageable pageable);
+    PageResponse<InventoryBatchDTO> getBatchesBySupplier(Long supplierId, Long productId, Long warehouseId, BatchStatus status, Pageable pageable);
     InventoryBatchDTO createBatch(CreateBatchRequest request);
     InventoryBatchDTO updateBatchStatus(Long id, BatchStatus status);
 }

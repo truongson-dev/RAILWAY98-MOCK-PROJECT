@@ -20,4 +20,15 @@ public interface InventoryBatchRepository extends JpaRepository<InventoryBatch, 
                                        @Param("warehouseId") Long warehouseId,
                                        @Param("status") BatchStatus status,
                                        Pageable pageable);
+
+    @Query("SELECT b FROM InventoryBatch b WHERE " +
+           "(:productId IS NULL OR b.product.id = :productId) AND " +
+           "(:warehouseId IS NULL OR b.warehouse.id = :warehouseId) AND " +
+           "(:status IS NULL OR b.batchStatus = :status) AND " +
+           "b.product.seller.id = :supplierId")
+    Page<InventoryBatch> filterBatchesBySupplier(@Param("supplierId") Long supplierId,
+                                       @Param("productId") Long productId,
+                                       @Param("warehouseId") Long warehouseId,
+                                       @Param("status") BatchStatus status,
+                                       Pageable pageable);
 }

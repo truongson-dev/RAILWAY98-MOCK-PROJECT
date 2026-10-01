@@ -86,6 +86,13 @@ public class InventoryServiceImpl implements InventoryService {
     }
 
     @Override
+    public PageResponse<InventoryBatchDTO> getBatchesBySupplier(Long supplierId, Long productId, Long warehouseId, BatchStatus status, Pageable pageable) {
+        Page<InventoryBatch> batchPage = batchRepository.filterBatchesBySupplier(supplierId, productId, warehouseId, status, pageable);
+        Page<InventoryBatchDTO> dtoPage = batchPage.map(this::mapToBatchDTO);
+        return PageResponse.of(dtoPage);
+    }
+
+    @Override
     @Transactional
     public InventoryBatchDTO createBatch(CreateBatchRequest request) {
         Product product = productRepository.findById(request.getProductId())

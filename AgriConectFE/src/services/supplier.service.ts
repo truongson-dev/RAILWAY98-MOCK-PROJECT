@@ -50,6 +50,35 @@ export async function createProduct(payload: ProductCreatePayload): Promise<ApiP
   }
 }
 
+export async function updateProduct(id: number | string, payload: ProductCreatePayload): Promise<ApiProduct | null> {
+  try {
+    const res = await fetch(`${API_BASE}/api/supplier/products/${id}`, {
+      method: 'PUT',
+      headers: { ...getAuthHeader(), 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) throw new Error('Update failed');
+    const json = await res.json();
+    return json.data;
+  } catch (err) {
+    console.error('[supplier.service] updateProduct error:', err);
+    return null;
+  }
+}
+
+export async function deleteProduct(id: number | string): Promise<boolean> {
+  try {
+    const res = await fetch(`${API_BASE}/api/supplier/products/${id}`, {
+      method: 'DELETE',
+      headers: getAuthHeader(),
+    });
+    return res.ok;
+  } catch (err) {
+    console.error('[supplier.service] deleteProduct error:', err);
+    return false;
+  }
+}
+
 export async function fetchSupplierProducts(): Promise<ApiProduct[]> {
   try {
     const res = await fetch(`${API_BASE}/api/supplier/products?size=100`, {
